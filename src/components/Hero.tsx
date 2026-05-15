@@ -87,29 +87,36 @@
              transition={{ delay: 0.2 }}
            >
              <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] mb-6 block drop-shadow-sm">
-               StayNjoy • Premium Sanctuary
+               StayNjoy • Tinsukia, Assam
              </span>
            </motion.div>
  
-           <h1 className="text-5xl md:text-8xl font-heading font-extralight text-white mb-8 leading-tight tracking-tight relative">
+           <h1 className="text-6xl md:text-9xl font-heading font-extralight text-white mb-6 leading-tight tracking-tighter relative">
              {/* Text Back Glows */}
-             <span className="absolute inset-0 text-[var(--accent-primary)] blur-[40px] opacity-20 pointer-events-none select-none">Stay N Joy</span>
-             <span className="absolute inset-0 text-amber-400 blur-[60px] opacity-10 pointer-events-none select-none">Stay N Joy</span>
+             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+               <span className="text-[var(--accent-primary)] blur-[40px] opacity-15">Stay N Joy</span>
+               <span className="absolute text-amber-400 blur-[60px] opacity-10">Stay N Joy</span>
+             </div>
              
              <span className="relative z-10 opacity-90">Stay</span> 
              <span className="relative z-10 text-[var(--accent-primary)] font-black mx-4 italic scale-110 inline-block drop-shadow-[0_0_15px_rgba(209,77,126,0.5)]">N</span> 
              <span className="relative z-10 opacity-90">Joy</span>
            </h1>
            
-           <motion.p
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.4 }}
-             className="text-white/80 text-lg md:text-xl mb-12 max-w-xl mx-auto font-light leading-relaxed tracking-wide"
+             className="mb-12"
            >
-             "Hospitality that feels like home" <br/>
-             <span className="text-sm font-bold tracking-[0.2em] text-amber-500/80 uppercase">Experience Excellence</span>
-           </motion.p>
+             <h2 className="text-3xl md:text-6xl font-cinzel italic text-white mb-6 leading-tight drop-shadow-lg opacity-95">
+               An Escape Into <span className="text-[var(--accent-primary)]">Tranquility</span>
+             </h2>
+             <p className="text-white/70 text-sm md:text-lg max-w-xl mx-auto font-light leading-relaxed tracking-wide">
+               Nestled amidst pristine tea gardens & lush wilderness. <br/>
+               <span className="text-[10px] font-bold tracking-[0.3em] text-amber-500/80 uppercase mt-2 block">Hospitality That Feels Like Home</span>
+             </p>
+           </motion.div>
  
            <motion.div
              initial={{ opacity: 0, y: 20 }}
@@ -117,11 +124,11 @@
              transition={{ delay: 0.6 }}
              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
            >
-             <Link href="/rooms" className="btn-primary min-w-[220px] !bg-[var(--accent-primary)] shadow-[0_0_30px_rgba(209,77,126,0.3)] hover:scale-105 active:scale-95">
+             <Link href="/rooms" className="btn-primary min-w-[240px] !bg-[var(--accent-primary)] shadow-[0_0_40px_rgba(209,77,126,0.4)] hover:scale-105 active:scale-95 text-[11px] font-bold tracking-[0.2em] uppercase">
                Reserve Your Stay
              </Link>
-             <Link href="/about" className="btn-outline min-w-[220px] !text-white !border-white/20 hover:!bg-white/10 backdrop-blur-sm">
-               Explore Gallery
+             <Link href="/about" className="btn-outline min-w-[240px] !text-white !border-white/30 hover:!bg-white/10 backdrop-blur-md text-[11px] font-bold tracking-[0.2em] uppercase">
+               Explore More
              </Link>
            </motion.div>
          </motion.div>

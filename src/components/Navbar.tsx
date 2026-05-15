@@ -37,76 +37,74 @@ export default function Navbar() {
       style={{ backgroundColor: getNavBg() }}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        {/* Logo Section */}
-        <div className="flex items-center gap-4">
-          <Logo className="h-12" />
-          <span className="hidden lg:inline-block text-xl font-bold font-heading tracking-tight">
-            Stay<span className="text-[var(--accent-primary)]">N</span>joy
-          </span>
-        </div>
-
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-10">
-          <Link href="/" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Home</Link>
-          <Link href="/rooms" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Rooms</Link>
-          
-          {mounted && !loading && (
-            <>
-              {isAdmin ? (
-                <Link href="/admin" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Admin Panel</Link>
-              ) : user ? (
-                <Link href="/bookings" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">My Bookings</Link>
-              ) : null}
-            </>
-          )}
-
-          <Link href="/about" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">About</Link>
-          <Link href="/contact" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Contact</Link>
-          
-          <div className="flex items-center gap-6 ml-6 border-l border-white/10 pl-6">
-            {mounted && (
-              <button 
-                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="text-[var(--accent-primary)] hover:scale-110 transition-transform"
-                aria-label="Toggle theme"
-              >
-                {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            )}
-            {mounted && !loading && (
-              <>
-                {user ? (
-                  <>
-                    <button 
-                      onClick={() => signOut()}
-                      className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
-                    >
-                      Logout
-                    </button>
-                    {isAdmin ? (
-                      <Link href="/admin?tab=manual" className="btn-primary !py-2 !px-6 !text-[10px]">
-                        Book Now
-                      </Link>
-                    ) : (
-                      <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
-                        Book Now
-                      </Link>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">
-                      Sign In
-                    </Link>
-                    <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
-                      Book Now
-                    </Link>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+         {/* Logo Section */}
+         <div className="flex items-center gap-4">
+           <Logo className="h-10 md:h-12" />
+           <div className="flex flex-col">
+             <span className={`text-xl font-bold font-heading tracking-tighter leading-none ${scrolled ? "text-[var(--foreground)]" : "text-white"}`}>
+               Stay<span className="text-[var(--accent-primary)]">N</span>joy
+             </span>
+             <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 ${scrolled ? "text-[var(--foreground)]" : "text-white"}`}>
+               Resort • Homestay
+             </span>
+           </div>
+         </div>
+ 
+         {/* Desktop Nav - Centered */}
+         <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
+           {["Home", "Rooms", "About", "Contact"].map((item) => (
+             <Link 
+               key={item} 
+               href={item === "Home" ? "/" : `/${item.toLowerCase()}`} 
+               className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:text-[var(--accent-primary)] ${
+                 scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"
+               }`}
+             >
+               {item}
+             </Link>
+           ))}
+           
+           {mounted && !loading && (
+             <>
+               {isAdmin ? (
+                 <Link href="/admin" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>Admin</Link>
+               ) : user ? (
+                 <Link href="/bookings" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>Bookings</Link>
+               ) : null}
+             </>
+           )}
+         </div>
+ 
+         {/* Right Side - CTAs */}
+         <div className="hidden md:flex items-center gap-8">
+           {mounted && (
+             <button 
+               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+               className={`transition-transform hover:scale-110 ${scrolled ? "text-[var(--foreground)]" : "text-white"}`}
+               aria-label="Toggle theme"
+             >
+               {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+             </button>
+           )}
+ 
+           {mounted && !loading && (
+             <div className="flex items-center gap-6">
+               {!user && (
+                 <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>
+                   Sign In
+                 </Link>
+               )}
+               <Link 
+                 href="/rooms" 
+                 className={`btn-primary !py-2.5 !px-8 !text-[9px] !font-black tracking-[0.2em] uppercase shadow-lg hover:scale-105 active:scale-95 transition-all ${
+                   scrolled ? "" : "!bg-white !text-black border-transparent"
+                 }`}
+               >
+                 Book A Stay
+               </Link>
+             </div>
+           )}
+         </div>
 
         {/* Mobile Toggle */}
         <div className="md:hidden flex items-center gap-4">
