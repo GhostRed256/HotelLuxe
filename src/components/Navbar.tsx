@@ -31,8 +31,8 @@ export default function Navbar() {
 
   return (
     <nav 
-      className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
-        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-transparent border-b border-[var(--gold-primary)]/10"
+      className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 backdrop-blur-sm ${
+        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-white/5 dark:bg-black/10 border-b border-[var(--gold-primary)]/10"
       }`}
       style={{ backgroundColor: getNavBg() }}
     >
