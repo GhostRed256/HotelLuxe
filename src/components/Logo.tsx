@@ -93,18 +93,18 @@
          />
        </g>
  
-       {/* Stay'n Joy Typography */}
+       {/* StayNjoy Typography */}
        <g filter="url(#shadow)">
          <text 
            x="200" 
-           y="260" 
+           y="280" 
            textAnchor="middle" 
            className="font-heading italic font-black"
            style={{ 
-             fontSize: "85px", 
+             fontSize: "90px", 
              fill: isDark ? "#E8639A" : "#8B1A4A",
              fontFamily: "var(--font-heading), cursive",
-             letterSpacing: "-2px"
+             letterSpacing: "-4px"
            }}
          >
            Stay
@@ -112,32 +112,17 @@
          
          <text 
            x="200" 
-           y="320" 
-           textAnchor="middle" 
-           className="font-heading"
-           style={{ 
-             fontSize: "60px", 
-             fill: "url(#goldGradient)",
-             fontFamily: "var(--font-heading)",
-             fontWeight: "900"
-           }}
-         >
-           'n
-         </text>
-         
-         <text 
-           x="200" 
-           y="380" 
+           y="350" 
            textAnchor="middle" 
            className="font-heading italic font-black"
            style={{ 
-             fontSize: "85px", 
-             fill: isDark ? "#E8639A" : "#8B1A4A",
+             fontSize: "90px", 
+             fill: "url(#goldGradient)",
              fontFamily: "var(--font-heading), cursive",
-             letterSpacing: "-2px"
+             letterSpacing: "-4px"
            }}
          >
-           Joy
+           Njoy
          </text>
        </g>
      </svg>

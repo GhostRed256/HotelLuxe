@@ -5,6 +5,7 @@ import SuiteBanner from "@/components/SuiteBanner";
 import QuotesMarquee from "@/components/QuotesMarquee";
 import Amenities from "@/components/Amenities";
 import LocationShowcase from "@/components/LocationShowcase";
+import MapSection from "@/components/MapSection";
 import WelcomePopup from "@/components/WelcomePopup";
 import Footer from "@/components/Footer";
 import JaapiDivider from "@/components/JaapiDivider";
@@ -28,6 +29,7 @@ import { serializeFirestoreData } from "@/lib/utils"
        <JaapiDivider />
        <Amenities />
        <LocationShowcase />
+       <MapSection />
        <Footer />
      </>
    );

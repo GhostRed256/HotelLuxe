@@ -12,7 +12,7 @@ const landmarks = [
 
 const highlights = [
   { label: "Founded", value: "Since 2022" },
-  { label: "Hospitality", value: "Assamese Tradition" },
+  { label: "Assamese Soul", value: "Tradition Reimagined" },
   { label: "Properties", value: "3 Locations" },
   { label: "Connectivity", value: "Tinsukia Hub" },
 ]
