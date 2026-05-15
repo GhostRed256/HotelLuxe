@@ -1,4 +1,6 @@
-import { motion } from "framer-motion"
+"use client"
+ 
+ import { motion } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
