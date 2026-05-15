@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@100..900&display=swap');
 
 @import "tailwindcss";
 
@@ -9,9 +9,9 @@
   --color-black-accent: #0A0307;
   
   --font-body: 'DM Sans', sans-serif;
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-script: 'Dancing Script', cursive;
-  --font-cinzel: 'Cormorant Garamond', serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-script: 'Outfit', sans-serif;
+  --font-cinzel: 'Outfit', sans-serif;
 }
 
 :root {
@@ -27,7 +27,7 @@
   --card-bg: rgba(255, 255, 255, 0.75);
   --input-bg: rgba(45, 11, 26, 0.02);
   --input-border: rgba(45, 11, 26, 0.08);
-  --footer-bg: #FDF4F7;
+  --footer-bg: #F8F9FA;
   --footer-text: #1A0811;
   --surface: #FFFFFF;
 }
@@ -359,6 +359,11 @@ h1, h2, h3, h4, h5, h6 {
 .jaapi-motif {
   background-image: radial-gradient(circle at center, transparent 30%, var(--accent-primary) 31%, var(--accent-primary) 33%, transparent 34%);
   background-size: 10px 10px;
+  opacity: 0.05;
+}
+
+.dark .jaapi-motif {
+  opacity: 0.1;
 }
 
 .font-script {

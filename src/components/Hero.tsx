@@ -49,29 +49,24 @@
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
          >
-           <div className="flex flex-col items-center mb-4">
-             <span className="text-[var(--accent-primary)] font-bold tracking-[0.3em] uppercase text-[10px] mb-2 block animate-pulse">
-               অতিথি দেৱো ভৱ • Guest is God
+           <div className="flex flex-col items-center mb-6">
+             <span className="text-[var(--accent-primary)] font-bold tracking-[0.3em] uppercase text-[11px] mb-3 block">
+               StayNjoy Homestay • Tinsukia
              </span>
-             <div className="h-[1px] w-12 bg-[var(--accent-primary)] opacity-40" />
+             <div className="h-[2px] w-16 bg-[var(--accent-primary)]" />
            </div>
-
-           <h1 className="text-6xl md:text-9xl font-script text-[var(--accent-primary)] mb-4 leading-none drop-shadow-[0_5px_15px_rgba(209,77,126,0.3)]">
-             Stay <span className="text-[var(--gold-primary)] italic">N</span> Joy
+ 
+           <h1 className="text-6xl md:text-8xl font-heading font-black text-white mb-6 leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] uppercase tracking-tight">
+             Stay <span className="text-[var(--accent-primary)]">N</span> Joy
            </h1>
-           <p className="text-[10px] font-bold tracking-[0.5em] uppercase opacity-60 mb-8">
-             H O M E S T A Y
-           </p>
            
-           <div className="mb-10">
-             <p className="text-white text-sm md:text-lg font-light italic opacity-90 mb-2">
+           <div className="mb-12">
+             <p className="text-white text-lg md:text-2xl font-medium tracking-wide mb-4 drop-shadow-lg">
                "Hospitality that feels like home"
              </p>
-             <div className="flex justify-center gap-4 text-[9px] font-bold tracking-[0.2em] uppercase text-[var(--gold-primary)]">
+             <div className="flex flex-wrap justify-center gap-6 text-[10px] font-black tracking-[0.2em] uppercase text-[var(--accent-primary)] bg-black/20 backdrop-blur-md py-3 px-8 rounded-full border border-white/10">
                <span>Warm Hospitality</span>
-               <span>•</span>
                <span>Beautiful Ambiance</span>
-               <span>•</span>
                <span>Aesthetic Looks</span>
              </div>
            </div>
@@ -81,10 +76,10 @@
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-           className="text-white/90 text-lg md:text-xl mb-12 max-w-2xl mx-auto font-light leading-relaxed"
+           className="text-white/90 text-lg md:text-xl mb-12 max-w-2xl mx-auto font-normal leading-relaxed drop-shadow-md"
          >
            Stay Amazing, Stay Affordable. <br/>
-           <span className="text-sm opacity-60">Nestled in the lush greenery of Upper Assam.</span>
+           <span className="text-sm opacity-80 italic">Experience the heart of Upper Assam's greenery.</span>
          </motion.p>
  
          <motion.div
@@ -93,22 +88,22 @@
            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
          >
-           <Link href="/rooms" className="btn-primary min-w-[200px] !bg-[var(--accent-primary)]">
+           <Link href="/rooms" className="btn-primary min-w-[220px] !bg-[var(--accent-primary)] shadow-2xl">
              Reserve Your Stay
            </Link>
-           <Link href="/about" className="btn-outline min-w-[200px] !text-white !border-white/30 hover:!bg-white/10">
-             Explore Palace
+           <Link href="/about" className="btn-outline min-w-[220px] !text-white !border-white/40 hover:!bg-white/20 backdrop-blur-sm">
+             Explore Gallery
            </Link>
          </motion.div>
-
-         {/* Assamese Flare - Welcome in Assamese */}
+ 
+         {/* Simple Assamese Greeting */}
          <motion.div 
            initial={{ opacity: 0 }}
-           animate={{ opacity: 0.4 }}
+           animate={{ opacity: 0.8 }}
            transition={{ delay: 1, duration: 2 }}
-           className="mt-16 text-[10px] font-bold tracking-[0.3em] uppercase"
+           className="mt-16 text-[12px] font-bold tracking-[0.3em] uppercase text-white/60"
          >
-           আপোনালৈ স্বাগতম — Welcome to StayNJoy
+           আপোনালৈ স্বাগতম • Welcome
          </motion.div>
        </div>
  

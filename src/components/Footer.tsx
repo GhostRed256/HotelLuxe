@@ -1,9 +1,8 @@
 import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
-import Logo from "./Logo"
  
  export default function Footer() {
    return (
-     <footer className="bg-[var(--footer-bg)] text-[var(--footer-text)] pt-32 pb-12 border-t border-[var(--border-color)] relative overflow-hidden jaapi-motif">
+     <footer className="bg-[var(--footer-bg)] text-[var(--footer-text)] pt-32 pb-12 border-t border-[var(--border-color)] relative overflow-hidden">
        {/* Decorative top gradient */}
        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--accent-primary)]/30 to-transparent" />
        
@@ -12,17 +11,14 @@ import Logo from "./Logo"
            
            {/* Brand Column */}
            <div className="lg:col-span-2">
-             <div className="flex items-center gap-6 mb-8">
-               <Logo className="h-20" />
-               <h2 className="text-6xl md:text-7xl font-script text-[var(--accent-primary)] leading-none">
-                 StayNjoy
-               </h2>
-             </div>
-             <p className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--gold-primary)] mb-8">
-               H O S P I T A L I T Y • T H A T • F E E L S • L I K E • H O M E
+             <h2 className="text-4xl md:text-6xl font-heading font-black tracking-tighter mb-6 uppercase">
+               Stay <span className="text-[var(--accent-primary)]">N</span> Joy
+             </h2>
+             <p className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] mb-8">
+               Hospitality That Feels Like Home
              </p>
-             <p className="opacity-60 font-light text-lg max-w-md leading-relaxed mb-10 italic">
-               "Blending Upper Assam's warm heritage with palatial modern luxury. A sanctuary for the soul in Tinsukia."
+             <p className="opacity-60 font-light text-lg max-w-md leading-relaxed mb-10">
+               Experience the warm heritage of Upper Assam blended with modern comfort. Your sanctuary in the heart of Tinsukia.
              </p>
              <div className="flex gap-6">
                <a 
@@ -44,7 +40,7 @@ import Logo from "./Logo"
  
            {/* Locations Column */}
            <div>
-             <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8">Our Sanctuaries</h4>
+             <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8 text-[var(--accent-primary)]">Our Sanctuaries</h4>
              <ul className="flex flex-col gap-6">
                {[
                  { name: "Chaliha Nagar", desc: "Main Branch" },
@@ -66,10 +62,10 @@ import Logo from "./Logo"
  
            {/* Quick Contact Column */}
            <div>
-             <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8">Reservations</h4>
+             <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8 text-[var(--accent-primary)]">Reservations</h4>
              <div className="flex flex-col gap-10">
                <div className="group">
-                 <span className="block text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--accent-primary)] mb-2">Speak With Us</span>
+                 <span className="block text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 mb-2">Speak With Us</span>
                  <a href="tel:7002475079" className="text-2xl font-black tracking-tighter hover:text-[var(--accent-primary)] transition-colors">
                    +91 70024 75079
                  </a>
@@ -95,7 +91,7 @@ import Logo from "./Logo"
              <span className="w-1 h-1 rounded-full bg-[var(--accent-primary)]/20" />
              <span>Tinsukia, Assam</span>
              <span className="w-1 h-1 rounded-full bg-[var(--accent-primary)]/20" />
-             <span className="text-[var(--accent-primary)]">আপোনালৈ স্বাগতম</span>
+             <span className="text-[var(--accent-primary)] font-bold">আপোনালৈ স্বাগতম</span>
            </div>
            
            <div className="flex gap-10 text-[10px] font-bold tracking-[0.2em] uppercase">
