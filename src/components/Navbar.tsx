@@ -23,16 +23,16 @@ export default function Navbar() {
 
   // Dynamic background color based on scroll and theme
   const getNavBg = () => {
-    if (!scrolled) return "transparent"
-    return resolvedTheme === "dark" 
-      ? "rgba(10, 3, 7, 0.9)" 
-      : "rgba(229, 184, 173, 0.95)" // Premium Rose Gold
+    if (resolvedTheme === "dark") {
+      return scrolled ? "rgba(10, 3, 7, 0.9)" : "transparent"
+    }
+    return "rgba(229, 184, 173, 1)" // Forced Premium Rose Gold (Never White)
   }
 
   return (
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 backdrop-blur-sm ${
-        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-[#E5B8AD]/10 dark:bg-black/10 border-b border-[var(--gold-primary)]/10"
+        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg" : "bg-[#E5B8AD] dark:bg-black/10 border-b border-[var(--gold-primary)]/20"
       }`}
       style={{ backgroundColor: getNavBg() }}
     >
