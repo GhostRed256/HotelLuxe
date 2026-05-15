@@ -2,7 +2,6 @@
  
  import { useTheme } from "next-themes"
  import { useState, useEffect } from "react"
- import Image from "next/image"
  
  export default function Logo({ className = "h-14" }: { className?: string }) {
    const { resolvedTheme } = useTheme()
@@ -10,43 +9,45 @@
  
    useEffect(() => setMounted(true), [])
  
-   if (!mounted) return <div className={className + " w-32 bg-gray-200 animate-pulse rounded-lg"} />
+   if (!mounted) return <div className={className + " w-14 bg-gray-200 animate-pulse rounded-full"} />
  
    const isDark = resolvedTheme === "dark"
-   const isLight = resolvedTheme === "light"
+   const goldPrimary = "#B88F54"
+   const accentPrimary = "#D14D7E"
  
    return (
-     <div 
-       className={`relative flex items-center gap-4 cursor-pointer group ${className}`}
+     <svg 
+       viewBox="0 0 200 200" 
+       className={className + " w-auto cursor-pointer drop-shadow-lg"}
        onClick={() => window.location.href = "/"}
+       xmlns="http://www.w3.org/2000/svg"
      >
-       {/* Ornate Jaapi Mark */}
-       <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
-         <div className="absolute inset-[-4px] rounded-full border border-[var(--gold-primary)] opacity-40 group-hover:scale-110 transition-transform duration-700" />
-         <div className="absolute inset-[-6px] rounded-full border border-dashed border-[var(--gold-primary)]/20 animate-[spin_30s_linear_infinite]" />
-         
-         <div className="relative w-full h-full rounded-full overflow-hidden bg-white p-1 shadow-md border border-[var(--gold-primary)]/30">
-           <Image 
-             src="/jaapi.png" 
-             alt="StayNjoy Mark" 
-             fill 
-             className="object-contain p-0.5"
-           />
-         </div>
-       </div>
+       {/* Ornate Circular Border */}
+       <circle cx="100" cy="100" r="90" fill="none" stroke={goldPrimary} strokeWidth="2" strokeDasharray="4 4" opacity="0.3" />
+       <circle cx="100" cy="100" r="85" fill="none" stroke={goldPrimary} strokeWidth="1" opacity="0.5" />
+       
+       {/* The Iconic Crown */}
+       <path 
+         d="M60 110 L60 80 L80 95 L100 70 L120 95 L140 80 L140 110 Z" 
+         fill={isDark ? accentPrimary : goldPrimary} 
+         stroke={isDark ? "white" : goldPrimary}
+         strokeWidth="2"
+       />
+       <circle cx="60" cy="80" r="4" fill={goldPrimary} />
+       <circle cx="100" cy="70" r="4" fill={goldPrimary} />
+       <circle cx="140" cy="80" r="4" fill={goldPrimary} />
+       
+       {/* Base Plate */}
+       <rect x="60" y="115" width="80" height="10" rx="2" fill={goldPrimary} />
+       
+       {/* Jewels */}
+       <circle cx="80" cy="120" r="2" fill="white" />
+       <circle cx="100" cy="120" r="2" fill={isDark ? accentPrimary : "white"} />
+       <circle cx="120" cy="120" r="2" fill="white" />
  
-       {/* Brand Text */}
-       <div className="flex flex-col">
-         <span className={`text-xl md:text-2xl font-bold font-heading tracking-tighter leading-none ${isDark ? "text-white" : "text-[#1A0811]"}`}>
-           Stay<span className="text-[var(--accent-primary)] mx-0.5 italic">N</span>joy
-         </span>
-         <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 ${isDark ? "text-white" : "text-[#1A0811]"}`}>
-           Resort • Homestay
-         </span>
-       </div>
- 
-       {/* Luxury Accent Flare */}
-       <div className="absolute -top-1 -left-1 w-2 h-2 bg-[var(--gold-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--gold-primary)]" />
-     </div>
+       {/* Luxury Flourishes */}
+       <path d="M40 100 Q10 100 10 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.4" />
+       <path d="M160 100 Q190 100 190 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.4" />
+     </svg>
    )
  }
