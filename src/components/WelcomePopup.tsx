@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
+import Logo from "./Logo"
 
 export default function WelcomePopup() {
   const [isOpen, setIsOpen] = useState(false)
@@ -45,22 +46,13 @@ export default function WelcomePopup() {
               ✕
             </button>
             <div className="mb-6 animate-float flex justify-center">
-              {mounted ? (
-                <img 
-                  src={resolvedTheme === "dark" ? "/logo-dark.png" : "/logo-light.png"} 
-                  alt="StayNjoy Logo" 
-                  className="h-24 w-auto"
-                  style={{ objectFit: "contain" }}
-                />
-              ) : (
-                <div className="h-24"></div>
-              )}
+              <Logo className="h-28" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 gold-gradient-text gold-shimmer">
-              Welcome to StayNjoy
+            <h2 className="text-4xl md:text-5xl font-cinzel font-bold mb-6 gold-gradient-text gold-shimmer tracking-widest leading-tight">
+              Welcome to the Palace
             </h2>
-            <p className="opacity-80 italic text-lg leading-relaxed">
-              Your cozy homestay in Tinsukia. Rooms from ₹1399/night with free WiFi, projector & more!
+            <p className="opacity-90 italic text-xl leading-relaxed font-cinzel tracking-wider text-[var(--gold-primary)]">
+              Experience the royal touch at StayNjoy, Tinsukia's most premium homestay.
             </p>
             <button 
               onClick={() => setIsOpen(false)}

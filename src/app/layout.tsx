@@ -17,6 +17,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
+          <div className="royal-frame" />
           <Navbar />
           <main className="pt-[80px]" style={{ minHeight: "calc(100vh - 160px)" }}>
             {children}

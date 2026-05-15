@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
 import { Menu, X, Moon, Sun } from "lucide-react"
+import Logo from "./Logo"
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -36,22 +37,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo Section */}
         <div className="flex items-center gap-3">
-          <div className="relative group">
-            {mounted ? (
-              <img 
-                src={resolvedTheme === "dark" ? "/logo-dark.png" : "/logo-light.png"} 
-                alt="StayNjoy Logo" 
-                className="h-14 w-auto object-contain cursor-pointer transform transition-all group-hover:scale-105 active:scale-95"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-                onClick={() => window.location.href = "/"}
-              />
-            ) : (
-              <div className="h-14 w-14 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse"></div>
-            )}
-            <div className="absolute -inset-2 bg-[var(--accent-primary)]/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-          </div>
+          <Logo className="h-14" />
           <span className="hidden sm:inline-block text-2xl font-bold font-cinzel">
             Stay-<span className="text-[var(--accent-primary)]">N</span>-Joy
           </span>
