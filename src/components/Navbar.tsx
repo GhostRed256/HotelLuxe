@@ -1,4 +1,4 @@
-"use client"
+"use client" // Forced redeploy for branding sync
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
