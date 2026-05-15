@@ -25,14 +25,14 @@ export default function Navbar() {
   const getNavBg = () => {
     if (!scrolled) return "transparent"
     return resolvedTheme === "dark" 
-      ? "rgba(10, 3, 7, 0.9)" // Match new darker background
-      : "rgba(255, 255, 255, 0.92)"
+      ? "rgba(10, 3, 7, 0.9)" 
+      : "rgba(229, 184, 173, 0.95)" // Premium Rose Gold
   }
 
   return (
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 backdrop-blur-sm ${
-        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-white/5 dark:bg-black/10 border-b border-[var(--gold-primary)]/10"
+        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-[#E5B8AD]/10 dark:bg-black/10 border-b border-[var(--gold-primary)]/10"
       }`}
       style={{ backgroundColor: getNavBg() }}
     >
