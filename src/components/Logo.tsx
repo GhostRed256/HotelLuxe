@@ -2,6 +2,7 @@
  
  import { useTheme } from "next-themes"
  import { useState, useEffect } from "react"
+ import Image from "next/image"
  
  export default function Logo({ className = "h-14" }: { className?: string }) {
    const { resolvedTheme } = useTheme()
@@ -13,41 +14,27 @@
  
    const isDark = resolvedTheme === "dark"
    const goldPrimary = "#B88F54"
-   const accentPrimary = "#D14D7E"
  
    return (
-     <svg 
-       viewBox="0 0 200 200" 
-       className={className + " w-auto cursor-pointer"}
+     <div 
+       className={`relative flex items-center justify-center cursor-pointer group ${className}`}
        onClick={() => window.location.href = "/"}
-       xmlns="http://www.w3.org/2000/svg"
      >
-       {/* Decorative Ornate Circle */}
-       <circle cx="100" cy="100" r="90" fill="none" stroke={goldPrimary} strokeWidth="2" strokeDasharray="4 4" opacity="0.5" />
-       <circle cx="100" cy="100" r="85" fill="none" stroke={goldPrimary} strokeWidth="1" />
+       {/* Ornate Gold Borders around the Jaapi Logo */}
+       <div className="absolute inset-[-4px] rounded-full border border-[var(--gold-primary)] opacity-40 group-hover:scale-110 transition-transform duration-700" />
+       <div className="absolute inset-[-8px] rounded-full border border-dashed border-[var(--gold-primary)]/20 animate-[spin_30s_linear_infinite]" />
        
-       {/* Crown Icon */}
-       <path 
-         d="M60 110 L60 80 L80 95 L100 70 L120 95 L140 80 L140 110 Z" 
-         fill={isDark ? accentPrimary : goldPrimary} 
-         stroke={isDark ? "white" : goldPrimary}
-         strokeWidth="2"
-       />
-       <circle cx="60" cy="80" r="4" fill={goldPrimary} />
-       <circle cx="100" cy="70" r="4" fill={goldPrimary} />
-       <circle cx="140" cy="80" r="4" fill={goldPrimary} />
-       
-       {/* Bottom Plate */}
-       <rect x="60" y="115" width="80" height="10" rx="2" fill={goldPrimary} />
-       
-       {/* Gems */}
-       <circle cx="80" cy="120" r="2" fill="white" />
-       <circle cx="100" cy="120" r="2" fill={isDark ? accentPrimary : "white"} />
-       <circle cx="120" cy="120" r="2" fill="white" />
+       <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-white p-1 shadow-lg border border-[var(--gold-primary)]/30">
+         <Image 
+           src="/jaapi.png" 
+           alt="StayNjoy Logo" 
+           fill 
+           className="object-contain p-0.5"
+         />
+       </div>
  
-       {/* Luxury Accents */}
-       <path d="M40 100 Q10 100 10 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.6" />
-       <path d="M160 100 Q190 100 190 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.6" />
-     </svg>
+       {/* Luxury Flare */}
+       <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--gold-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--gold-primary)]" />
+     </div>
    )
  }
