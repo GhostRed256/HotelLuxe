@@ -110,7 +110,7 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
               transition={{ delay: i * 0.1, duration: 0.8 }}
               className="snap-start flex-shrink-0 w-[85vw] sm:w-[60vw] md:w-[42vw] lg:w-[30vw]"
             >
-              <Link href="/rooms" className="block group">
+              <Link href={`/rooms?suite=${encodeURIComponent(cat.type)}`} className="block group">
                 <div className="relative h-[50vh] md:h-[60vh] rounded-3xl overflow-hidden border border-white/5 bg-black">
                   {/* Background Image */}
                   <img 

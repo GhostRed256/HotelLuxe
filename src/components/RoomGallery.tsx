@@ -1,7 +1,8 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo, useRef } from "react"
+import { useState, useMemo, useRef, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { requestBooking } from "@/app/actions"
 import RoomCard from "./RoomCard"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -10,6 +11,32 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+
+  const displayRooms = rooms.length > 0 ? rooms : []
+
+  // Check if room is booked
+  const isRoomBooked = (roomId: string) => {
+    return bookings?.some(b =>
+      b.roomId === roomId &&
+      new Date(b.checkIn) <= new Date() &&
+      new Date(b.checkOut) >= new Date()
+    )
+  }
+
+  useEffect(() => {
+    const suiteParam = searchParams.get("suite")
+    if (suiteParam && displayRooms.length > 0) {
+      const matchingRoom = displayRooms.find((r: any) => 
+        r.type === suiteParam && !isRoomBooked(r.id)
+      )
+      if (matchingRoom) {
+        // Wait a beat for the page to settle
+        const timer = setTimeout(() => openBookingModal(matchingRoom), 500)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [searchParams, displayRooms])
 
   // Filters
   const [filterType, setFilterType] = useState("ALL")
@@ -24,20 +51,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [checkIn, setCheckIn] = useState("")
   const [checkOut, setCheckOut] = useState("")
 
-  const displayRooms = rooms.length > 0 ? rooms : []
-
   // Unique types and floors for filters
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
   const floors = useMemo(() => [...new Set(displayRooms.map((r: any) => r.floor))].sort(), [displayRooms])
-
-  // Check if room is booked
-  const isRoomBooked = (roomId: string) => {
-    return bookings?.some(b =>
-      b.roomId === roomId &&
-      new Date(b.checkIn) <= new Date() &&
-      new Date(b.checkOut) >= new Date()
-    )
-  }
 
   // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
