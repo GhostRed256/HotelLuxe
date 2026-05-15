@@ -63,11 +63,11 @@
                </div>
              </div>
  
-             <h2 className="text-4xl md:text-6xl font-heading font-black mb-6 tracking-tight leading-none !text-[#1A0811]">
+             <h2 className="text-4xl md:text-6xl font-heading font-black mb-6 tracking-tight leading-none text-[var(--foreground)]">
                Luxury Awaits <span className="text-[var(--accent-primary)]">You</span>
              </h2>
              
-             <p className="font-light text-lg md:text-xl leading-relaxed italic mb-10 !text-[#1A0811]/70">
+             <p className="font-light text-lg md:text-xl leading-relaxed italic mb-10 text-[var(--foreground)]/70">
                Discover the perfect blend of tradition and modern elegance in the heart of Tinsukia.
              </p>
              

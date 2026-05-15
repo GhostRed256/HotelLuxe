@@ -98,7 +98,7 @@
                </span>
              </motion.div>
  
-             <h1 className={`text-7xl md:text-[10rem] font-heading font-extralight mb-8 leading-none tracking-tighter relative transition-colors duration-700 ${isDark ? 'text-white' : 'text-[var(--foreground)]'}`}>
+             <h1 className={`text-7xl md:text-[10rem] font-heading font-extralight mb-8 leading-none tracking-tighter relative transition-colors duration-700 text-[var(--foreground)]`}>
                <span className="relative z-10">Stay</span> 
                <span className="relative z-10 text-[var(--accent-primary)] font-black mx-6 italic scale-110 inline-block">N</span> 
                <span className="relative z-10">Joy</span>
@@ -110,11 +110,11 @@
                transition={{ delay: 0.4 }}
                className="mb-16"
              >
-               <h2 className={`text-4xl md:text-7xl font-cinzel italic mb-8 leading-tight transition-colors duration-700 ${isDark ? 'text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]' : 'text-[var(--foreground)]'}`}>
+               <h2 className={`text-4xl md:text-7xl font-cinzel italic mb-8 leading-tight transition-colors duration-700 text-[var(--foreground)] dark:drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]`}>
                  Where <span className="text-[var(--accent-primary)]">Heritage</span> Meets the Horizon
                </h2>
                <div className="flex flex-col items-center gap-4">
-                 <p className={`text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide transition-colors duration-700 ${isDark ? 'text-white/80 drop-shadow-md' : 'text-[var(--foreground)]/80'}`}>
+                 <p className={`text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide transition-colors duration-700 text-[var(--foreground)] dark:drop-shadow-md`}>
                    Immerse yourself in curated elegance amidst the emerald tea estates of Tinsukia. 
                  </p>
                  <span className="text-[10px] font-bold tracking-[0.4em] text-[var(--gold-primary)] uppercase drop-shadow-sm border-y border-[var(--gold-primary)]/20 py-2">A Legacy of Palatial Warmth</span>
