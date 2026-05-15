@@ -102,7 +102,7 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
               <tr key={b.id} className="border-b border-white/5 group hover:bg-white/5 transition-colors">
                 <td className="p-6">
                   <div className="font-bold text-lg">{b.customerName}</div>
-                  <div className="text-[10px] opacity-40 uppercase tracking-widest">{b.customerEmail}</div>
+                  <div className="text-[10px] opacity-40 tracking-widest">{b.customerEmail}</div>
                 </td>
                 <td className="p-6 font-medium">
                   {b.room.name}

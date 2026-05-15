@@ -20,6 +20,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [bookingFloor, setBookingFloor] = useState("")
   const [bookingRoomId, setBookingRoomId] = useState("")
   const [showBookingModal, setShowBookingModal] = useState(false)
+  
+  const [checkIn, setCheckIn] = useState("")
+  const [checkOut, setCheckOut] = useState("")
 
   const displayRooms = rooms.length > 0 ? rooms : []
 
@@ -61,6 +64,21 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     })
   }, [displayRooms, bookingSuiteType, bookingFloor, bookings])
 
+  const selectedRoomPrice = useMemo(() => {
+    const r = availableRoomsForBooking.find((r: any) => r.id === bookingRoomId)
+    return r ? (Number(r.price) || 0) : 0
+  }, [availableRoomsForBooking, bookingRoomId])
+
+  const computedPrice = useMemo(() => {
+    if (!checkIn || !checkOut || !selectedRoomPrice) return 0
+    const d1 = new Date(checkIn)
+    const d2 = new Date(checkOut)
+    const diffTime = d2.getTime() - d1.getTime()
+    if (diffTime <= 0) return 0
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays * selectedRoomPrice
+  }, [checkIn, checkOut, selectedRoomPrice])
+
   // Floors available based on selected suite type
   const floorsForSelectedType = useMemo(() => {
     const filtered = bookingSuiteType
@@ -79,6 +97,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       setBookingFloor("")
       setBookingRoomId("")
     }
+    setCheckIn("")
+    setCheckOut("")
     setShowBookingModal(true)
     setSuccessMsg("")
   }
@@ -286,63 +306,37 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                     </div>
                   ) : (
                     <form onSubmit={handleBookingSubmit} className="flex flex-col gap-6">
-                      {/* Suite Selection */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Suite Type</label>
-                          <select
-                            className="form-select"
-                            value={bookingSuiteType}
-                            onChange={e => {
-                              setBookingSuiteType(e.target.value)
-                              setBookingRoomId("")
-                            }}
-                          >
-                            <option value="">Any Type</option>
-                            {suiteTypes.map((t: any) => <option key={t} value={t}>{t}</option>)}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Floor</label>
-                          <select
-                            className="form-select"
-                            value={bookingFloor}
-                            onChange={e => {
-                              setBookingFloor(e.target.value)
-                              setBookingRoomId("")
-                            }}
-                          >
-                            <option value="">Any Floor</option>
-                            {floorsForSelectedType.map((f: any) => (
-                              <option key={f} value={String(f)}>Floor {f}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Specific Room */}
+                      {/* Simplified Single Room Selection */}
                       <div>
-                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Room</label>
+                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Suite</label>
                         <select
                           className="form-select"
                           value={bookingRoomId}
                           onChange={e => setBookingRoomId(e.target.value)}
                           required
                         >
-                          <option value="">— Choose a room —</option>
-                          {availableRoomsForBooking.map((r: any) => (
-                            <option key={r.id} value={r.id}>
-                              {r.name} — Floor {r.floor} — ₹{r.price}/night
-                            </option>
-                          ))}
+                          <option value="">— Choose an available suite —</option>
+                          {suiteTypes.map((type: any) => {
+                            const roomsOfType = availableRoomsForBooking.filter((r: any) => r.type === type);
+                            if (roomsOfType.length === 0) return null;
+                            return (
+                              <optgroup key={type} label={type}>
+                                {roomsOfType.map((r: any) => (
+                                  <option key={r.id} value={r.id}>
+                                    {r.name} (Floor {r.floor}) — ₹{r.price}/night
+                                  </option>
+                                ))}
+                              </optgroup>
+                            );
+                          })}
                         </select>
                         {availableRoomsForBooking.length === 0 && (
                           <p className="text-rose-400 text-[10px] mt-2 font-bold uppercase tracking-widest">
-                            No rooms available for selected criteria.
+                            No suites currently available.
                           </p>
                         )}
                       </div>
+
 
                       <div className="h-[1px] bg-white/5" />
 
@@ -360,18 +354,40 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check In</label>
-                          <input type="date" name="checkIn" required className="form-input" />
+                          <input 
+                            type="date" 
+                            name="checkIn" 
+                            required 
+                            className="form-input" 
+                            value={checkIn}
+                            onChange={e => setCheckIn(e.target.value)}
+                          />
                         </div>
                         <div>
                           <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check Out</label>
-                          <input type="date" name="checkOut" required className="form-input" />
+                          <input 
+                            type="date" 
+                            name="checkOut" 
+                            required 
+                            className="form-input" 
+                            value={checkOut}
+                            min={checkIn}
+                            onChange={e => setCheckOut(e.target.value)}
+                          />
                         </div>
                       </div>
+
+                      {computedPrice > 0 && (
+                        <div className="mt-4 p-4 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded-xl text-center animate-in fade-in zoom-in duration-300">
+                          <span className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 block mb-1">Estimated Total</span>
+                          <span className="text-2xl font-black text-[var(--accent-primary)]">₹{computedPrice.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
 
                       <button
                         type="submit"
                         disabled={isSubmitting || !bookingRoomId}
-                        className="btn-primary !py-4 shadow-none hover:shadow-2xl disabled:opacity-30"
+                        className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2"
                       >
                         {isSubmitting ? "Processing..." : "Confirm Reservation"}
                       </button>

@@ -4,6 +4,55 @@ import { useState, useRef } from "react"
 import { uploadRoomImages, removeRoomImage, updateBookingStatus } from "@/app/admin/actions"
 import { ImagePlus, Eye, XCircle, CheckCircle, ChevronDown, ChevronUp, Trash2, Upload, Loader2 } from "lucide-react"
 
+const compressImage = async (file: File): Promise<File> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.7
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], bookings?: any[] }) {
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -36,7 +85,14 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
     setUploadStatus("Uploading...")
     
     const formData = new FormData()
-    data.files.forEach(f => formData.append("images", f))
+    setUploadStatus("Compressing images...")
+    
+    for (const f of data.files) {
+      const compressed = await compressImage(f)
+      formData.append("images", compressed)
+    }
+    
+    setUploadStatus("Uploading...")
     
     const result = await uploadRoomImages(roomId, formData)
     
@@ -226,7 +282,7 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
                         <div key={b.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-white/5 bg-white/[0.02] gap-4">
                           <div>
                             <span className="font-bold text-sm">{b.customerName}</span>
-                            <span className="block text-[9px] opacity-40 uppercase tracking-widest">{b.customerEmail}</span>
+                            <span className="block text-[9px] opacity-40 tracking-widest">{b.customerEmail}</span>
                           </div>
                           
                           <div className="flex flex-wrap items-center gap-4">

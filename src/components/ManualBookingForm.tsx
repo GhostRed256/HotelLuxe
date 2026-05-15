@@ -14,8 +14,6 @@ interface Room {
 }
 
 export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
-  const [selectedLocation, setSelectedLocation] = useState("")
-  const [selectedType, setSelectedType] = useState("")
   const [selectedRoomId, setSelectedRoomId] = useState("")
   const [customerName, setCustomerName] = useState("")
   const [customerEmail, setCustomerEmail] = useState("")
@@ -23,32 +21,31 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
   const [checkOut, setCheckOut] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Unique locations from rooms
-  const locations = useMemo(() => [...new Set(rooms.map(r => r.location))].sort(), [rooms])
+  // Group rooms by Location + Type for the single dropdown
+  const groupedRooms = useMemo(() => {
+    const groups: { [key: string]: Room[] } = {}
+    rooms.forEach(r => {
+      const key = `${r.location} — ${r.type}`
+      if (!groups[key]) groups[key] = []
+      groups[key].push(r)
+    })
+    return groups
+  }, [rooms])
 
-  // Filter types based on location
-  const availableTypes = useMemo(() => {
-    if (!selectedLocation) return []
-    return [...new Set(rooms.filter(r => r.location === selectedLocation).map(r => r.type))].sort()
-  }, [selectedLocation, rooms])
+  const selectedRoomPrice = useMemo(() => {
+    const r = rooms.find((r) => r.id === selectedRoomId)
+    return r ? (Number(r.price) || 0) : 0
+  }, [rooms, selectedRoomId])
 
-  // Filter rooms based on type and location
-  const availableRooms = useMemo(() => {
-    if (!selectedLocation || !selectedType) return []
-    return rooms.filter(r => r.location === selectedLocation && r.type === selectedType)
-  }, [selectedLocation, selectedType, rooms])
-
-  // Reset dependent selections
-  const handleLocationChange = (loc: string) => {
-    setSelectedLocation(loc)
-    setSelectedType("")
-    setSelectedRoomId("")
-  }
-
-  const handleTypeChange = (type: string) => {
-    setSelectedType(type)
-    setSelectedRoomId("")
-  }
+  const computedPrice = useMemo(() => {
+    if (!checkIn || !checkOut || !selectedRoomPrice) return 0
+    const d1 = new Date(checkIn)
+    const d2 = new Date(checkOut)
+    const diffTime = d2.getTime() - d1.getTime()
+    if (diffTime <= 0) return 0
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays * selectedRoomPrice
+  }, [checkIn, checkOut, selectedRoomPrice])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,8 +65,6 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
     if (result?.success) {
       alert("Booking created successfully!")
       // Reset form
-      setSelectedLocation("")
-      setSelectedType("")
       setSelectedRoomId("")
       setCustomerName("")
       setCustomerEmail("")
@@ -85,65 +80,29 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
       <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Manual <span className="text-[var(--accent-primary)]">Intake</span></h2>
       
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-        {/* Step 1: Location */}
+        {/* Simplified Room Selection */}
         <div>
-          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">1. Target Location</label>
+          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Suite Designation</label>
           <div className="relative">
             <select
               className="form-select w-full"
-              value={selectedLocation}
-              onChange={(e) => handleLocationChange(e.target.value)}
+              value={selectedRoomId}
+              onChange={(e) => setSelectedRoomId(e.target.value)}
+              required
             >
-              <option value="">Select Location</option>
-              {locations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
+              <option value="">— Select a Suite —</option>
+              {Object.entries(groupedRooms).map(([groupName, groupRooms]) => (
+                <optgroup key={groupName} label={groupName}>
+                  {groupRooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      {room.name} — Floor {room.floor} (₹{room.price})
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
-            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
           </div>
         </div>
-
-        {/* Step 2: Room Type (Filtered) */}
-        {selectedLocation && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">2. Category Selection</label>
-            <div className="relative">
-              <select
-                className="form-select w-full"
-                value={selectedType}
-                onChange={(e) => handleTypeChange(e.target.value)}
-              >
-                <option value="">Select Category</option>
-                {availableTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 3: Specific Room (Filtered) */}
-        {selectedType && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">3. Suite Designation</label>
-            <div className="relative">
-              <select
-                className="form-select w-full"
-                value={selectedRoomId}
-                onChange={(e) => setSelectedRoomId(e.target.value)}
-              >
-                <option value="">Select Suite</option>
-                {availableRooms.map(room => (
-                  <option key={room.id} value={room.id}>
-                    {room.name} — {room.floor} (₹{room.price})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Customer Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/5 pt-10">
@@ -186,16 +145,24 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
               type="date" 
               required 
               value={checkOut}
+              min={checkIn}
               onChange={(e) => setCheckOut(e.target.value)}
               className="form-input" 
             />
           </div>
         </div>
 
+        {computedPrice > 0 && (
+          <div className="mt-8 mb-6 p-4 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded-xl text-center animate-in fade-in zoom-in duration-300">
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 block mb-1">Total Stay Value</span>
+            <span className="text-2xl font-black text-[var(--accent-primary)]">₹{computedPrice.toLocaleString('en-IN')}</span>
+          </div>
+        )}
+
         <button 
           type="submit" 
           disabled={isSubmitting || !selectedRoomId}
-          className="btn-primary !py-5 shadow-none hover:shadow-2xl"
+          className="btn-primary w-full !py-5 shadow-none hover:shadow-2xl mt-4"
         >
           {isSubmitting ? "Processing..." : "Authorize Royal Booking"}
         </button>
