@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap');
 
 @import "tailwindcss";
 
@@ -9,8 +9,8 @@
   --color-black-accent: #1A0811;
   
   --font-body: 'Montserrat', sans-serif;
-  --font-heading: 'Montserrat', sans-serif;
-  --font-cinzel: 'Montserrat', sans-serif;
+  --font-heading: 'Cinzel', serif;
+  --font-cinzel: 'Cinzel', serif;
 }
 
 :root {
@@ -22,10 +22,10 @@
   --gold-primary: #B88F54;
   --gold-dark: #96713F;
   --gold-light: #F5EDE3;
-  --border-color: rgba(184, 143, 84, 0.25);
-  --card-bg: rgba(255, 255, 255, 0.92);
-  --input-bg: rgba(45, 11, 26, 0.04);
-  --input-border: rgba(45, 11, 26, 0.15);
+  --border-color: rgba(184, 143, 84, 0.2);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --input-bg: rgba(45, 11, 26, 0.03);
+  --input-border: rgba(45, 11, 26, 0.1);
   --surface: #FFFFFF;
 }
 

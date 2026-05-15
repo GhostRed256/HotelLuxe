@@ -2,90 +2,106 @@
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { useAuth } from "@/lib/auth-context"
-import { Moon, Sun, Menu, User } from "lucide-react"
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { Menu, X, Moon, Sun } from "lucide-react"
 
 export default function Navbar() {
-  const { theme, setTheme, resolvedTheme } = useTheme()
-  const { user, isAdmin, signOut } = useAuth()
-  const [mounted, setMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
-    <motion.nav 
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="border-b border-[var(--border-color)]" 
+    <nav 
+      className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
+        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-transparent"
+      }`}
       style={{ 
-        position: "sticky", 
-        top: 0, 
-        zIndex: 100, 
-        backgroundColor: "var(--background)",
-        padding: "1rem 2rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center"
+        backgroundColor: scrolled 
+          ? (resolvedTheme === 'dark' ? "rgba(26, 8, 17, 0.85)" : "rgba(255, 255, 255, 0.92)") 
+          : "transparent"
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-        <Link href="/" className="flex items-center gap-2">
-          {mounted && (
-            <img 
-              src={resolvedTheme === "dark" ? "/logo-dark.png" : "/logo-light.png"} 
-              alt="StayNjoy Logo" 
-              className="h-10 w-auto"
-              style={{ objectFit: "contain" }}
-            />
-          )}
+      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+        {/* Logo Section */}
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            {mounted ? (
+              <img 
+                src={resolvedTheme === "dark" ? "/logo-dark.png" : "/logo-light.png"} 
+                alt="StayNjoy Logo" 
+                className="h-12 w-auto object-contain cursor-pointer transform transition-transform group-hover:scale-105"
+                onClick={() => window.location.href = "/"}
+              />
+            ) : (
+              <div className="h-12 w-12 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse"></div>
+            )}
+            <div className="absolute -inset-2 bg-[var(--accent-primary)]/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+          </div>
           <span style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.5px", fontFamily: "var(--font-heading)" }} className="hidden sm:inline-block">
             Stay-<span style={{ color: "var(--accent-primary)" }}>N</span>-Joy
           </span>
-        </Link>
-        <div style={{ display: "none" }} className="desktop-nav">
-          <Link href="/rooms" className="nav-link" style={{ fontWeight: 500 }}>Rooms</Link>
-          <Link href="/about" className="nav-link" style={{ fontWeight: 500 }}>About</Link>
-          <Link href="/contact" className="nav-link" style={{ fontWeight: 500 }}>Contact</Link>
+        </div>
+
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-10">
+          <Link href="/" className="nav-link text-sm font-semibold tracking-wider uppercase">Home</Link>
+          <Link href="/rooms" className="nav-link text-sm font-semibold tracking-wider uppercase">Rooms</Link>
+          <Link href="/about" className="nav-link text-sm font-semibold tracking-wider uppercase">About</Link>
+          <Link href="/contact" className="nav-link text-sm font-semibold tracking-wider uppercase">Contact</Link>
+          
+          <div className="flex items-center gap-4 ml-4">
+            {mounted && (
+              <button 
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[var(--accent-primary)]"
+                aria-label="Toggle theme"
+              >
+                {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            )}
+            <Link href="/login" className="btn-primary text-[10px] px-6 py-2">
+              Sign In
+            </Link>
+          </div>
+        </div>
+
+        {/* Mobile Toggle */}
+        <div className="md:hidden flex items-center gap-4">
+          {mounted && (
+            <button 
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 text-[var(--accent-primary)]"
+            >
+              {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          )}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-[var(--accent-primary)]"
+          >
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        {mounted && (
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            style={{ background: "transparent", padding: "8px", borderRadius: "50%", cursor: "pointer", border: "none" }}
-            aria-label="Toggle Dark Mode"
-          >
-            {resolvedTheme === "dark" ? <Sun size={20} color="var(--accent-primary)" /> : <Moon size={20} color="var(--foreground)" />}
-          </motion.button>
-        )}
-
-        {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            {isAdmin && (
-              <Link href="/admin" className="nav-link" style={{ fontWeight: 600, color: "var(--accent-primary)" }}>Dashboard</Link>
-            )}
-            <button className="btn-outline" onClick={() => signOut()} style={{ padding: "8px 16px" }}>Sign Out</button>
-          </div>
-        ) : (
-          <Link href="/login" className="btn-primary" style={{ padding: "8px 16px" }}>Sign In</Link>
-        )}
-      </div>
-
-      <style jsx>{`
-        @media (min-width: 768px) {
-          .desktop-nav {
-            display: flex !important;
-            gap: 2rem;
-          }
-        }
-      `}</style>
-    </motion.nav>
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden glass-panel rounded-none border-x-0 border-t absolute top-full w-full py-8 flex flex-col items-center gap-6 animate-in slide-in-from-top duration-300">
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Home</Link>
+          <Link href="/rooms" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Rooms</Link>
+          <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">About</Link>
+          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Contact</Link>
+          <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary w-2/3">Sign In</Link>
+        </div>
+      )}
+    </nav>
   )
 }
