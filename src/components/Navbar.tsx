@@ -6,7 +6,6 @@ import { useState, useEffect } from "react"
 import { Menu, X, Moon, Sun } from "lucide-react"
 import Logo from "./Logo"
 import { useAuth } from "@/lib/auth-context"
-import { logoutAdmin } from "@/app/admin/actions"
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -72,7 +71,7 @@ export default function Navbar() {
                       Admin Panel
                     </Link>
                     <button 
-                      onClick={() => logoutAdmin()}
+                      onClick={() => signOut()}
                       className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
                     >
                       Logout
@@ -121,7 +120,7 @@ export default function Navbar() {
           {isAdmin ? (
             <button 
               onClick={() => {
-                logoutAdmin()
+                signOut()
                 setMobileMenuOpen(false)
               }} 
               className="btn-outline w-2/3 border-rose-500/50 text-rose-500"

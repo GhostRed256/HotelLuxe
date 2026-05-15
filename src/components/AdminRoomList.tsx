@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { uploadRoomImages, removeRoomImage, updateBookingStatus } from "@/app/admin/actions"
 import { ImagePlus, Eye, XCircle, CheckCircle, ChevronDown, ChevronUp, Trash2, Upload, Loader2 } from "lucide-react"
 
@@ -59,6 +60,8 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
   const [previewFiles, setPreviewFiles] = useState<{ [roomId: string]: { files: File[], previews: string[] } }>({})
   const [uploadStatus, setUploadStatus] = useState<string>("")
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const handleFilesSelected = (roomId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -94,32 +97,48 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
     
     setUploadStatus("Uploading...")
     
-    const result = await uploadRoomImages(roomId, formData)
-    
-    if (result?.success) {
-      setUploadStatus(`✓ ${result.count} image(s) uploaded successfully!`)
-    } else {
-      setUploadStatus("✕ Upload failed. Try again.")
-    }
-    
-    data.previews.forEach(URL.revokeObjectURL)
-    setPreviewFiles(prev => { const n = { ...prev }; delete n[roomId]; return n })
-    if (fileInputRefs.current[roomId]) fileInputRefs.current[roomId]!.value = ""
-    setUploadingId(null)
-    
-    setTimeout(() => setUploadStatus(""), 3000)
+    startTransition(async () => {
+      const result = await uploadRoomImages(roomId, formData)
+      
+      if (result?.success) {
+        setUploadStatus(`✓ ${result.count} image(s) uploaded successfully!`)
+        router.refresh()
+      } else {
+        setUploadStatus("✕ Upload failed. Try again.")
+      }
+      
+      data.previews.forEach(URL.revokeObjectURL)
+      setPreviewFiles(prev => { const n = { ...prev }; delete n[roomId]; return n })
+      if (fileInputRefs.current[roomId]) fileInputRefs.current[roomId]!.value = ""
+      setUploadingId(null)
+      
+      setTimeout(() => setUploadStatus(""), 3000)
+    })
   }
 
   const handleRemoveImage = async (roomId: string, idx: number) => {
     if (window.confirm("Remove this image?")) {
-      await removeRoomImage(roomId, idx)
+      startTransition(async () => {
+        await removeRoomImage(roomId, idx)
+        router.refresh()
+      })
     }
   }
 
   const handleCancelBooking = async (bookingId: string) => {
     if (window.confirm("Cancel this approved booking? The guest will be notified via email.")) {
-      await updateBookingStatus(bookingId, "REJECTED")
+      startTransition(async () => {
+        await updateBookingStatus(bookingId, "REJECTED")
+        router.refresh()
+      })
     }
+  }
+
+  const handleApproveBooking = async (bookingId: string) => {
+    startTransition(async () => {
+      await updateBookingStatus(bookingId, "APPROVED")
+      router.refresh()
+    })
   }
 
   return (
@@ -308,8 +327,9 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
                             )}
                             {b.status === 'PENDING' && (
                               <button 
-                                onClick={(e) => { e.stopPropagation(); updateBookingStatus(b.id, 'APPROVED'); }}
-                                className="flex items-center gap-2 text-emerald-500 hover:text-emerald-400 text-[10px] font-bold uppercase tracking-widest transition-colors"
+                                onClick={(e) => { e.stopPropagation(); handleApproveBooking(b.id); }}
+                                disabled={isPending}
+                                className="flex items-center gap-2 text-emerald-500 hover:text-emerald-400 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
                               >
                                 <CheckCircle size={14} /> Approve
                               </button>

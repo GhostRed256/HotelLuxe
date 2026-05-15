@@ -1,12 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { updateBookingStatus } from "./actions"
 
 export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("ALL")
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
+    startTransition(async () => {
+      await updateBookingStatus(id, status)
+      router.refresh()
+    })
+  }
 
   const handleExportCSV = () => {
     const headers = ["ID", "Customer Name", "Customer Email", "Room", "Check In", "Check Out", "Status"]
@@ -123,14 +133,16 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
                   {b.status === 'PENDING' ? (
                     <div className="flex gap-4 justify-end">
                       <button 
-                        onClick={() => updateBookingStatus(b.id, 'APPROVED')}
-                        className="text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-colors"
+                        onClick={() => handleAction(b.id, 'APPROVED')}
+                        disabled={isPending}
+                        className="text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50"
                       >
                         Authorize
                       </button>
                       <button 
-                        onClick={() => updateBookingStatus(b.id, 'REJECTED')}
-                        className="text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-colors"
+                        onClick={() => handleAction(b.id, 'REJECTED')}
+                        disabled={isPending}
+                        className="text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50"
                       >
                         Decline
                       </button>
