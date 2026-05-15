@@ -77,13 +77,18 @@ export async function sendBookingEmail({
 
   if (resend) {
     try {
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "GhostRed256@gmail.com";
       const data = await resend.emails.send({
-        from: 'StayNjoy Palace <onboarding@resend.dev>', // Use onboarding@resend.dev for unverified domains
+        from: 'onboarding@resend.dev',
         to: Array.isArray(to) ? to : [to],
+        cc: [adminEmail], // CC the admin to verify delivery
         subject: subject,
         html: emailHtml,
       });
-      console.log(`Email successfully sent via Resend to ${to}. ID: ${data.data?.id}`);
+      console.log(`Email request sent to Resend for ${to}. ID: ${data.data?.id}`);
+      if (data.error) {
+        console.error("Resend API returned an error:", data.error);
+      }
     } catch (error: any) {
       console.error("Resend Email Error:", error?.message || error);
       if (error?.response) console.error("Resend Response Error:", error.response.data);

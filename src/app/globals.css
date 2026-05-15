@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@400..700&display=swap');
 
 @import "tailwindcss";
 
@@ -10,6 +10,7 @@
   
   --font-body: 'DM Sans', sans-serif;
   --font-heading: 'Cormorant Garamond', serif;
+  --font-script: 'Dancing Script', cursive;
   --font-cinzel: 'Cormorant Garamond', serif;
 }
 
@@ -344,5 +345,19 @@ h1, h2, h3, h4, h5, h6 {
 .couple-theme .glass-panel {
   border-color: rgba(209, 77, 126, 0.3);
   box-shadow: 0 4px 24px -8px rgba(209, 77, 126, 0.15);
+}
+
+/* --- Assamese flares --- */
+.gamosa-border {
+  border-image: repeating-linear-gradient(45deg, #D14D7E, #D14D7E 10px, transparent 10px, transparent 20px) 20;
+}
+
+.jaapi-motif {
+  background-image: radial-gradient(circle at center, transparent 30%, var(--accent-primary) 31%, var(--accent-primary) 33%, transparent 34%);
+  background-size: 10px 10px;
+}
+
+.font-script {
+  font-family: var(--font-script);
 }
 
