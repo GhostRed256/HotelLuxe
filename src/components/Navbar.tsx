@@ -29,8 +29,6 @@ export default function Navbar() {
       : "rgba(255, 255, 255, 0.92)"
   }
 
-  const isLight = resolvedTheme === "light"
-
   return (
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
@@ -43,10 +41,10 @@ export default function Navbar() {
          <div className="flex items-center gap-4">
            <Logo className="h-10 md:h-12" />
            <div className="flex flex-col">
-             <span className={`text-xl font-bold font-heading tracking-tighter leading-none drop-shadow-md ${scrolled || isLight ? "text-[var(--foreground)]" : "text-white"}`}>
+             <span className={`text-xl font-bold font-heading tracking-tighter leading-none drop-shadow-sm ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
                Stay<span className="text-[var(--accent-primary)]">N</span>joy
              </span>
-             <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 drop-shadow-sm ${scrolled || isLight ? "text-[var(--foreground)]" : "text-white"}`}>
+             <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
                Resort • Homestay
              </span>
            </div>
@@ -58,8 +56,8 @@ export default function Navbar() {
              <Link 
                key={item} 
                href={item === "Home" ? "/" : `/${item.toLowerCase()}`} 
-               className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:text-[var(--accent-primary)] drop-shadow-sm ${
-                 scrolled || isLight ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"
+               className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${
+                 scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-[#1A0811]/70 hover:text-[var(--accent-primary)] dark:text-white/70 dark:hover:text-white"
                }`}
              >
                {item}
@@ -69,9 +67,9 @@ export default function Navbar() {
            {mounted && !loading && (
              <>
                {isAdmin ? (
-                 <Link href="/admin" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled || isLight ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>Admin</Link>
+                 <Link href="/admin" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-[#1A0811]/70 hover:text-[var(--accent-primary)] dark:text-white/70 dark:hover:text-white"}`}>Admin</Link>
                ) : user ? (
-                 <Link href="/bookings" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled || isLight ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>Bookings</Link>
+                 <Link href="/bookings" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-[#1A0811]/70 hover:text-[var(--accent-primary)] dark:text-white/70 dark:hover:text-white"}`}>Bookings</Link>
                ) : null}
              </>
            )}
@@ -82,7 +80,7 @@ export default function Navbar() {
            {mounted && (
              <button 
                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-               className={`transition-transform hover:scale-110 drop-shadow-sm ${scrolled || isLight ? "text-[var(--foreground)]" : "text-white"}`}
+               className={`transition-transform hover:scale-110 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}
                aria-label="Toggle theme"
              >
                {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -92,14 +90,14 @@ export default function Navbar() {
            {mounted && !loading && (
              <div className="flex items-center gap-6">
                {!user && (
-                 <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled || isLight ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-white/70 hover:text-white"}`}>
+                 <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)]/70 hover:text-[var(--accent-primary)]" : "text-[#1A0811]/70 hover:text-[var(--accent-primary)] dark:text-white/70 dark:hover:text-white"}`}>
                    Sign In
                  </Link>
                )}
                <Link 
                  href="/rooms" 
                  className={`btn-primary !py-2.5 !px-8 !text-[9px] !font-black tracking-[0.2em] uppercase shadow-xl hover:scale-105 active:scale-95 transition-all ${
-                   scrolled ? "" : isLight ? "!bg-[var(--accent-primary)] !text-white border-transparent" : "!bg-white !text-black border-transparent"
+                   scrolled ? "" : "dark:!bg-white dark:!text-black !bg-[var(--accent-primary)] !text-white border-transparent"
                  }`}
                >
                  Book A Stay
