@@ -19,7 +19,7 @@ export default function MapSection() {
           </motion.div>
           
           <h2 className="text-4xl md:text-7xl font-heading font-black tracking-tighter mb-6">
-            Finding <span className="text-[var(--accent-primary)]">Your Sanctuary</span>
+            Finding <span className="text-[var(--gold-primary)]">Your</span> <span className="text-[var(--accent-primary)]">Sanctuary</span>
           </h2>
           <p className="opacity-50 font-light text-lg max-w-2xl mx-auto italic">
             Located in the vibrant heart of Tinsukia, where the tea estates meet the sky. 
