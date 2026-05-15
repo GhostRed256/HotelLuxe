@@ -47,6 +47,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-10">
           <Link href="/" className="nav-link text-sm font-semibold tracking-wider uppercase">Home</Link>
           <Link href="/rooms" className="nav-link text-sm font-semibold tracking-wider uppercase">Rooms</Link>
+          <Link href="/bookings" className="nav-link text-sm font-semibold tracking-wider uppercase">My Bookings</Link>
           <Link href="/about" className="nav-link text-sm font-semibold tracking-wider uppercase">About</Link>
           <Link href="/contact" className="nav-link text-sm font-semibold tracking-wider uppercase">Contact</Link>
           
@@ -90,6 +91,7 @@ export default function Navbar() {
         <div className="md:hidden absolute top-full w-full py-8 flex flex-col items-center gap-6 animate-in slide-in-from-top duration-300 bg-[var(--background)] border-b border-[var(--border-color)]">
           <Link href="/" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Home</Link>
           <Link href="/rooms" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Rooms</Link>
+          <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">My Bookings</Link>
           <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">About</Link>
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Contact</Link>
           <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary w-2/3">Sign In</Link>

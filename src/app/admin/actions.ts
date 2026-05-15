@@ -3,6 +3,7 @@
 import { db } from "@/lib/firebase-admin"
 import { revalidatePath } from "next/cache"
 import { writeFile, mkdir } from "fs/promises"
+import { sendBookingEmail } from "@/lib/email"
 import path from "path"
 import fs from "fs"
 
@@ -106,15 +107,72 @@ export async function addEmailForReports(formData: FormData) {
 }
 
 export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED") {
+  const bookingDoc = await db.collection("bookings").doc(bookingId).get()
+  if (!bookingDoc.exists) return
+  const booking = bookingDoc.data()!
+  
+  // Get room details for the email
+  const roomDoc = await db.collection("rooms").doc(booking.roomId).get()
+  const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite" }
+
   await db.collection("bookings").doc(bookingId).update({
     status,
     updatedAt: new Date()
   })
 
-  // Simulated Email Notification to Customer
-  console.log(`Email sent to customer: Your booking is now ${status}`)
+  // 1. Notify Customer
+  await sendBookingEmail({
+    to: booking.customerEmail,
+    subject: `Your Royal Stay is ${status === 'APPROVED' ? 'Confirmed' : 'Cancelled'}`,
+    customerName: booking.customerName,
+    roomName: room.name,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    status: status,
+    price: room.price
+  })
+
+  // 2. Notify Owner (Multiple emails as requested)
+  const ownerEmails = ["owner1@staynjoy.com", "manager@staynjoy.com"] // Customize as needed
+  await sendBookingEmail({
+    to: ownerEmails,
+    subject: `[ADMIN ALERT] Booking ${status}: ${booking.customerName}`,
+    customerName: booking.customerName,
+    roomName: room.name,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    status: status
+  })
 
   revalidatePath("/admin")
   revalidatePath("/")
   revalidatePath("/rooms")
+}
+
+export async function createManualBooking(formData: FormData) {
+  const roomId = formData.get("roomId") as string
+  const customerName = formData.get("customerName") as string
+  const customerEmail = formData.get("customerEmail") as string
+  const checkIn = formData.get("checkIn") as string
+  const checkOut = formData.get("checkOut") as string
+
+  try {
+    const docRef = await db.collection("bookings").add({
+      roomId,
+      customerName,
+      customerEmail,
+      checkIn,
+      checkOut,
+      status: "APPROVED", // Manual bookings by admin are auto-approved
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+
+    // Revalidate and notify
+    await updateBookingStatus(docRef.id, "APPROVED")
+
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }
