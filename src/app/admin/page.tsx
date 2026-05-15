@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/firebase-admin"
 import AdminDashboardClient from "./AdminDashboardClient"
 import { serializeFirestoreData } from "@/lib/utils"
+import { Suspense } from "react"
 
 export default async function AdminDashboard() {
   const session = await getAdminSession()
@@ -32,5 +33,9 @@ export default async function AdminDashboard() {
     }
   })
 
-  return <AdminDashboardClient rooms={rooms} bookings={bookings} />
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Palace Control...</div>}>
+      <AdminDashboardClient rooms={rooms} bookings={bookings} />
+    </Suspense>
+  )
 }

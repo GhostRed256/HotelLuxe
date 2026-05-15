@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { addRoom } from "./actions"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
@@ -8,8 +9,17 @@ import AdminBookingsTable from "./AdminBookingsTable"
 import { Plus, X, Calendar, Home } from "lucide-react"
 
 export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[], bookings: any[] }) {
+  const searchParams = useSearchParams()
+  const initialTab = (searchParams.get("tab") as "bookings" | "manual" | "rooms") || "bookings"
   const [showAddRoom, setShowAddRoom] = useState(false)
-  const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "rooms">("bookings")
+  const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "rooms">(initialTab)
+
+  useEffect(() => {
+    const tab = searchParams.get("tab")
+    if (tab === "manual" || tab === "bookings" || tab === "rooms") {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-12 min-h-screen bg-[var(--background)]">

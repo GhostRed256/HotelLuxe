@@ -5,11 +5,13 @@ import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
 import { Menu, X, Moon, Sun } from "lucide-react"
 import Logo from "./Logo"
+import { useAuth } from "@/lib/auth-context"
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const { user, isAdmin, loading } = useAuth()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -61,9 +63,24 @@ export default function Navbar() {
                 {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             )}
-            <Link href="/login" className="btn-primary !py-2 !px-6 !text-[10px]">
-              Book Now
-            </Link>
+            {mounted && !loading && (
+              <>
+                {isAdmin ? (
+                  <>
+                    <Link href="/admin" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">
+                      Admin Panel
+                    </Link>
+                    <Link href="/admin?tab=manual" className="btn-primary !py-2 !px-6 !text-[10px]">
+                      Book Now
+                    </Link>
+                  </>
+                ) : (
+                  <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
+                    Book Now
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         </div>
 
