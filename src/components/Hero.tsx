@@ -117,7 +117,7 @@
                  <p className={`text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide transition-colors duration-700 ${isDark ? 'text-white/80 drop-shadow-md' : 'text-[var(--foreground)]/80'}`}>
                    Immerse yourself in curated elegance amidst the emerald tea estates of Tinsukia. 
                  </p>
-                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-500 uppercase">A Legacy of Palatial Warmth</span>
+                 <span className="text-[10px] font-bold tracking-[0.4em] text-[var(--gold-primary)] uppercase drop-shadow-sm border-y border-[var(--gold-primary)]/20 py-2">A Legacy of Palatial Warmth</span>
                </div>
              </motion.div>
  
@@ -130,7 +130,7 @@
                <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.3)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase border-none">
                  Reserve Your Stay
                </Link>
-               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-white/20 hover:!bg-white/10' : '!text-[var(--foreground)] !border-[var(--border-color)] hover:!bg-[var(--accent-primary)]/5'}`}>
+               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/10' : '!text-[var(--foreground)] !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/5'}`}>
                  Explore More
                </Link>
              </motion.div>
@@ -142,9 +142,13 @@
            initial={{ opacity: 0 }}
            animate={{ opacity: 1 }}
            transition={{ delay: 1, duration: 2 }}
-           className="mt-24 text-[12px] font-bold tracking-[0.5em] uppercase text-[var(--accent-primary)]"
+           className="mt-24 flex items-center justify-center gap-6"
          >
-           আপোনালৈ স্বাগতম • Welcome
+           <div className="w-12 h-[1px] bg-[var(--gold-primary)] opacity-30" />
+           <span className="text-[12px] font-bold tracking-[0.5em] uppercase text-[var(--gold-primary)]">
+             আপোনালৈ স্বাগতম • Welcome
+           </span>
+           <div className="w-12 h-[1px] bg-[var(--gold-primary)] opacity-30" />
          </motion.div>
        </div>
  
