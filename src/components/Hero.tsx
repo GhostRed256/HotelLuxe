@@ -87,7 +87,7 @@
                transition={{ delay: 0.2 }}
              >
                <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block drop-shadow-lg">
-                 StayNjoy • Tinsukia, Assam
+                 StayNjoy • The Soul of Upper Assam
                </span>
              </motion.div>
  
@@ -109,13 +109,13 @@
                className="mb-16"
              >
                <h2 className="text-4xl md:text-7xl font-cinzel italic text-white mb-8 leading-tight drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
-                 An Escape Into <span className="text-[var(--accent-primary)]">Tranquility</span>
+                 Where <span className="text-[var(--accent-primary)]">Heritage</span> Meets the Horizon
                </h2>
                <div className="flex flex-col items-center gap-4">
                  <p className="text-white/80 text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide drop-shadow-md">
-                   Nestled amidst pristine tea gardens & lush wilderness.
+                   Immerse yourself in curated elegance amidst the emerald tea estates of Tinsukia. 
                  </p>
-                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-400 uppercase drop-shadow-lg">Hospitality That Feels Like Home</span>
+                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-400 uppercase drop-shadow-lg">A Legacy of Palatial Warmth</span>
                </div>
              </motion.div>
  

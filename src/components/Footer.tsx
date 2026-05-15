@@ -15,10 +15,10 @@ import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
                Stay <span className="text-[var(--accent-primary)]">N</span> Joy
              </h2>
              <p className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] mb-8">
-               Hospitality That Feels Like Home
+               A Legacy of Palatial Warmth
              </p>
              <p className="opacity-60 font-light text-lg max-w-md leading-relaxed mb-10">
-               Experience the warm heritage of Upper Assam blended with modern comfort. Your sanctuary in the heart of Tinsukia.
+               Discover curated living amidst the emerald tea estates of Upper Assam. A soulful sanctuary designed for the modern traveler.
              </p>
              <div className="flex gap-6">
                <a 
