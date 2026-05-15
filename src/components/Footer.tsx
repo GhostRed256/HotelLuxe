@@ -1,4 +1,5 @@
 import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
+import Logo from "./Logo"
  
  export default function Footer() {
    return (
@@ -11,9 +12,9 @@ import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
            
            {/* Brand Column */}
            <div className="lg:col-span-2">
-             <h2 className="text-4xl md:text-6xl font-heading font-black tracking-tighter mb-6 uppercase">
-               Stay <span className="text-[var(--accent-primary)]">N</span> Joy
-             </h2>
+             <div className="mb-8">
+               <Logo className="h-24 md:h-32 -ml-4" />
+             </div>
              <p className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] mb-8">
                A Legacy of Palatial Warmth
              </p>

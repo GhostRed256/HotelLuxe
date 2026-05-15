@@ -9,45 +9,137 @@
  
    useEffect(() => setMounted(true), [])
  
-   if (!mounted) return <div className={className + " w-14 bg-gray-200 animate-pulse rounded-full"} />
+   if (!mounted) return <div className={className + " aspect-square bg-gray-200 animate-pulse rounded-full"} />
  
    const isDark = resolvedTheme === "dark"
    const goldPrimary = "#B88F54"
-   const accentPrimary = "#D14D7E"
+   const goldDark = "#96713F"
+   const accentPrimary = "#D14D7E" // Plum/Pink accent
+   const plumDark = "#1A0811"
  
    return (
      <svg 
-       viewBox="0 0 200 200" 
-       className={className + " w-auto cursor-pointer drop-shadow-lg"}
+       viewBox="0 0 400 400" 
+       className={className + " w-auto cursor-pointer drop-shadow-2xl transition-transform hover:scale-105"}
        onClick={() => window.location.href = "/"}
        xmlns="http://www.w3.org/2000/svg"
      >
-       {/* Ornate Circular Border */}
-       <circle cx="100" cy="100" r="90" fill="none" stroke={goldPrimary} strokeWidth="2" strokeDasharray="4 4" opacity="0.3" />
-       <circle cx="100" cy="100" r="85" fill="none" stroke={goldPrimary} strokeWidth="1" opacity="0.5" />
-       
-       {/* The Iconic Crown */}
-       <path 
-         d="M60 110 L60 80 L80 95 L100 70 L120 95 L140 80 L140 110 Z" 
-         fill={isDark ? accentPrimary : goldPrimary} 
-         stroke={isDark ? "white" : goldPrimary}
-         strokeWidth="2"
-       />
-       <circle cx="60" cy="80" r="4" fill={goldPrimary} />
-       <circle cx="100" cy="70" r="4" fill={goldPrimary} />
-       <circle cx="140" cy="80" r="4" fill={goldPrimary} />
-       
-       {/* Base Plate */}
-       <rect x="60" y="115" width="80" height="10" rx="2" fill={goldPrimary} />
-       
-       {/* Jewels */}
-       <circle cx="80" cy="120" r="2" fill="white" />
-       <circle cx="100" cy="120" r="2" fill={isDark ? accentPrimary : "white"} />
-       <circle cx="120" cy="120" r="2" fill="white" />
+       <defs>
+         <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+           <stop offset="0%" style={{ stopColor: goldDark, stopOpacity: 1 }} />
+           <stop offset="20%" style={{ stopColor: goldPrimary, stopOpacity: 1 }} />
+           <stop offset="40%" style={{ stopColor: "#FFF", stopOpacity: 1 }} />
+           <stop offset="60%" style={{ stopColor: goldPrimary, stopOpacity: 1 }} />
+           <stop offset="100%" style={{ stopColor: goldDark, stopOpacity: 1 }} />
+         </linearGradient>
+         
+         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+           <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+           <feOffset dx="2" dy="2" result="offsetblur" />
+           <feComponentTransfer>
+             <feFuncA type="linear" slope="0.5" />
+           </feComponentTransfer>
+           <feMerge>
+             <feMergeNode />
+             <feMergeNode in="SourceGraphic" />
+           </feMerge>
+         </filter>
+       </defs>
  
-       {/* Luxury Flourishes */}
-       <path d="M40 100 Q10 100 10 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.4" />
-       <path d="M160 100 Q190 100 190 70" fill="none" stroke={goldPrimary} strokeWidth="2" opacity="0.4" />
+       {/* Background Disc for contrast in dark mode if needed */}
+       <circle cx="200" cy="200" r="190" fill={isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.8)"} />
+ 
+       {/* Double Gold Circular Borders */}
+       <circle 
+         cx="200" 
+         cy="200" 
+         r="185" 
+         fill="none" 
+         stroke="url(#goldGradient)" 
+         strokeWidth="8" 
+       />
+       <circle 
+         cx="200" 
+         cy="200" 
+         r="170" 
+         fill="none" 
+         stroke="url(#goldGradient)" 
+         strokeWidth="3" 
+         opacity="0.6"
+       />
+       
+       {/* Minimalist House Icon */}
+       <g transform="translate(160, 80) scale(0.8)">
+         <path 
+           d="M10 50 L50 10 L90 50 L90 90 L10 90 Z" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           strokeWidth="8" 
+           strokeLinecap="round"
+           strokeLinejoin="round"
+         />
+         <path 
+           d="M65 25 L65 15 L75 15 L75 35" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           strokeWidth="6" 
+           strokeLinecap="round"
+         />
+         <rect 
+           x="35" y="60" width="30" height="30" 
+           fill="none" 
+           stroke="url(#goldGradient)" 
+           strokeWidth="6"
+         />
+       </g>
+ 
+       {/* Stay'n Joy Typography */}
+       <g filter="url(#shadow)">
+         <text 
+           x="200" 
+           y="260" 
+           textAnchor="middle" 
+           className="font-heading italic font-black"
+           style={{ 
+             fontSize: "85px", 
+             fill: isDark ? "#E8639A" : "#8B1A4A",
+             fontFamily: "var(--font-heading), cursive",
+             letterSpacing: "-2px"
+           }}
+         >
+           Stay
+         </text>
+         
+         <text 
+           x="200" 
+           y="320" 
+           textAnchor="middle" 
+           className="font-heading"
+           style={{ 
+             fontSize: "60px", 
+             fill: "url(#goldGradient)",
+             fontFamily: "var(--font-heading)",
+             fontWeight: "900"
+           }}
+         >
+           'n
+         </text>
+         
+         <text 
+           x="200" 
+           y="380" 
+           textAnchor="middle" 
+           className="font-heading italic font-black"
+           style={{ 
+             fontSize: "85px", 
+             fill: isDark ? "#E8639A" : "#8B1A4A",
+             fontFamily: "var(--font-heading), cursive",
+             letterSpacing: "-2px"
+           }}
+         >
+           Joy
+         </text>
+       </g>
      </svg>
    )
  }

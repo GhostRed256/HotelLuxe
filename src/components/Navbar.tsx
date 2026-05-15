@@ -39,15 +39,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
          {/* Logo Section */}
          <div className="flex items-center gap-4">
-           <Logo className="h-10 md:h-12" />
-           <div className="flex flex-col">
-             <span className={`text-xl font-bold font-heading tracking-tighter leading-none drop-shadow-sm ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
-               Stay<span className="text-[var(--accent-primary)]">N</span>joy
-             </span>
-             <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
-               Resort • Homestay
-             </span>
-           </div>
+           <Logo className="h-16 md:h-20" />
          </div>
  
          {/* Desktop Nav - Centered */}
