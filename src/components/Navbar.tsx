@@ -11,7 +11,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const { user, isAdmin, loading } = useAuth()
+  const { user, isAdmin, loading, signOut } = useAuth()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
