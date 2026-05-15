@@ -1,9 +1,9 @@
 <div align="center">
 
-# 🏨 LuxeStays: Premium Hotel Booking Platform
+# 🏨 Stay-N-Joy: Premium Hotel Booking Platform
 
 <p align="center">
-  <em>A meticulous, royal-themed Next.js architecture redefining digital hospitality.</em>
+  <em>A meticulous, royal-themed Next.js architecture redefining digital hospitality in Tinsukia.</em>
 </p>
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -23,9 +23,9 @@
 
 ---
 
-## ✨ The Luxe Experience
+## ✨ The Stay-N-Joy Experience
 
-LuxeStays isn't just a booking platform—it's a digital reflection of premium hospitality. From the typography to the buttery-smooth page transitions, every pixel has been engineered to provide an opulent user experience.
+Stay-N-Joy isn't just a booking platform—it's a digital reflection of premium hospitality. From the typography to the buttery-smooth page transitions, every pixel has been engineered to provide an opulent user experience.
 
 | Feature | Description |
 |---------|-------------|
@@ -110,7 +110,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application!
 ## 📁 Project Architecture
 
 ```text
-HotelLuxe/
+Stay-N-Joy/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── admin/             # Protected Dashboard & CSV Export Logic
@@ -129,7 +129,7 @@ HotelLuxe/
 
 ## 🚢 Deployment (Vercel)
 
-LuxeStays is fully optimized for edge/serverless deployment on Vercel.
+Stay-N-Joy is fully optimized for edge/serverless deployment on Vercel.
 
 1. Push your code to GitHub.
 2. Import the repository into your [Vercel Dashboard](https://vercel.com/new).
