@@ -45,20 +45,20 @@ export default function WelcomePopup() {
             >
               ✕
             </button>
-            <div className="mb-6 animate-float flex justify-center">
-              <Logo className="h-28" />
+            <div className="mb-8 flex justify-center">
+              <Logo className="h-24" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-cinzel font-bold mb-6 gold-gradient-text gold-shimmer tracking-widest leading-tight">
-              Welcome to the Palace
+            <h2 className="text-4xl md:text-6xl font-heading font-black mb-6 tracking-tight leading-none">
+              Luxury Awaits <span className="text-[var(--accent-primary)]">You</span>
             </h2>
-            <p className="opacity-90 italic text-xl leading-relaxed font-cinzel tracking-wider text-[var(--gold-primary)]">
-              Experience the royal touch at StayNjoy, Tinsukia's most premium homestay.
+            <p className="opacity-70 font-light text-lg md:text-xl leading-relaxed italic mb-10">
+              Discover the perfect blend of tradition and modern elegance in the heart of Tinsukia.
             </p>
             <button 
               onClick={() => setIsOpen(false)}
-              className="mt-8 btn-primary text-sm px-10 py-3"
+              className="btn-primary w-full shadow-none hover:shadow-2xl"
             >
-              Explore Rooms
+              Enter the Experience
             </button>
           </motion.div>
         </motion.div>

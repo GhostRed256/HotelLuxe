@@ -12,126 +12,139 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
   const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "rooms">("bookings")
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 palace-bg min-h-screen">
+    <div className="max-w-7xl mx-auto p-4 md:p-12 min-h-screen bg-[var(--background)]">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold font-cinzel text-[var(--accent-primary)] mb-2">
-            Palace <span className="text-[var(--gold-primary)]">Admin</span>
+          <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-2">
+            Palace <span className="text-[var(--accent-primary)]">Control</span>
           </h1>
-          <p className="opacity-70 italic">Manage your royal domain and guest experiences.</p>
+          <p className="opacity-50 font-light italic text-lg">Curating the royal experience for every guest.</p>
         </div>
         <div className="flex gap-4">
           <button 
             onClick={() => setShowAddRoom(!showAddRoom)}
-            className={`btn-primary flex items-center gap-2 ${showAddRoom ? 'bg-red-600' : ''}`}
+            className="btn-primary !px-8"
           >
             {showAddRoom ? <X size={18} /> : <Plus size={18} />}
-            {showAddRoom ? 'Cancel' : 'Add New Room'}
+            <span className="ml-2">{showAddRoom ? 'Cancel' : 'New Suite'}</span>
           </button>
-          <a href="/api/admin/export" download className="btn-outline flex items-center gap-2">
-            Export Data
-          </a>
         </div>
       </div>
 
       {/* Conditionally Show Add Room Form */}
       {showAddRoom && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-          <div className="glass-panel p-8 w-full max-w-2xl relative animate-in fade-in zoom-in duration-300">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[100] flex items-center justify-center p-4">
+          <div className="glass-panel p-10 w-full max-w-2xl relative animate-in fade-in zoom-in duration-500 border-white/10">
             <button 
               onClick={() => setShowAddRoom(false)}
-              className="absolute top-4 right-4 text-[var(--accent-primary)] hover:scale-110 transition-transform"
+              className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"
             >
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-6 font-cinzel gold-shimmer">Establish New Suite</h2>
-            <form action={async (fd) => { await addRoom(fd); setShowAddRoom(false); }} className="flex flex-col gap-4">
-              <input type="text" name="name" placeholder="Room Name" required className="form-input" />
-              <textarea name="description" placeholder="Description" required className="form-input min-h-[100px]" />
+            <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Establish <span className="text-[var(--accent-primary)]">Suite</span></h2>
+            <form action={async (fd) => { await addRoom(fd); setShowAddRoom(false); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Name</label>
+                <input type="text" name="name" placeholder="E.g. Royal Rose" required className="form-input" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Description</label>
+                <textarea name="description" placeholder="What makes this stay unique?" required className="form-input min-h-[100px]" />
+              </div>
               
-              <div className="flex gap-4">
-                <input type="number" name="price" placeholder="Price (₹)" required className="form-input w-full" />
-                <input type="text" name="floor" placeholder="Floor (e.g. 1st, Top, Left)" required className="form-input w-full" />
+              <div>
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Price (₹)</label>
+                <input type="number" name="price" placeholder="1999" required className="form-input" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Floor / Level</label>
+                <input type="text" name="floor" placeholder="Ground Level" required className="form-input" />
               </div>
 
-              <div className="flex gap-4">
-                <select name="location" className="form-select w-full" required>
+              <div>
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Location</label>
+                <select name="location" className="form-select" required>
                   <option value="Chaliha Nagar">Chaliha Nagar</option>
                   <option value="Bordoloi Nagar (Near Lake)">Bordoloi Nagar (Near Lake)</option>
                   <option value="Bordoloi Nagar (Near Income Tax Office)">Bordoloi Nagar (Near Income Tax Office)</option>
                 </select>
               </div>
-
-              <div className="flex gap-4">
-                <select name="type" className="form-select w-full">
+              <div>
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Suite Category</label>
+                <select name="type" className="form-select">
                   <option value="Cozy Pink Room">Cozy Pink Room</option>
                   <option value="Deluxe Room">Deluxe Room</option>
                   <option value="Premium 1BHK Suite">Premium 1BHK Suite</option>
                   <option value="2BHK House">2BHK House</option>
-                  <option value="1RK">1RK</option>
+                  <option value="1BHK">1BHK</option>
                 </select>
-                <input type="text" name="roomNumber" placeholder="Number" required className="form-input w-full" />
               </div>
 
-              <label className="form-label mt-2">Suite Images (0-10)</label>
-              <input type="file" name="images" multiple accept="image/*" className="form-input" />
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-4 block">Visual Assets (Max 10)</label>
+                <input type="file" name="images" multiple accept="image/*" className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-primary)] file:text-white hover:file:bg-[var(--accent-primary)]/80 cursor-pointer" />
+              </div>
               
-              <button type="submit" className="btn-primary mt-4">Confirm New Suite</button>
+              <button type="submit" className="md:col-span-2 btn-primary !py-4 mt-4 shadow-none hover:shadow-2xl">Confirm Establishment</button>
             </form>
           </div>
         </div>
       )}
 
       {/* Tabs Selection */}
-      <div className="flex gap-2 mb-8 border-b border-black/10 dark:border-white/10 pb-4">
-        <button 
-          onClick={() => setActiveTab("bookings")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-t-lg transition-all font-cinzel tracking-widest uppercase text-xs
-            ${activeTab === "bookings" ? 'bg-[var(--accent-primary)] text-white' : 'opacity-60 hover:opacity-100'}`}
-        >
-          <Calendar size={16} /> Guest Bookings
-        </button>
-        <button 
-          onClick={() => setActiveTab("manual")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-t-lg transition-all font-cinzel tracking-widest uppercase text-xs
-            ${activeTab === "manual" ? 'bg-[var(--gold-primary)] text-white' : 'opacity-60 hover:opacity-100'}`}
-        >
-          <Plus size={16} /> New Booking
-        </button>
-        <button 
-          onClick={() => setActiveTab("rooms")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-t-lg transition-all font-cinzel tracking-widest uppercase text-xs
-            ${activeTab === "rooms" ? 'bg-[var(--accent-primary)] text-white' : 'opacity-60 hover:opacity-100'}`}
-        >
-          <Home size={16} /> Manage Suites
-        </button>
+      <div className="flex flex-wrap gap-4 mb-12 backdrop-blur-md bg-white/5 p-2 rounded-2xl border border-white/5 w-fit">
+        {[
+          { id: "bookings", label: "Guest Registry", icon: Calendar },
+          { id: "manual", label: "Manual Intake", icon: Plus },
+          { id: "rooms", label: "Suite Inventory", icon: Home },
+        ].map((tab) => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-3 px-8 py-3 rounded-xl transition-all font-bold tracking-[0.1em] uppercase text-[10px]
+              ${activeTab === tab.id ? 'bg-[var(--accent-primary)] text-white shadow-xl' : 'opacity-40 hover:opacity-100 hover:bg-white/5'}`}
+          >
+            <tab.icon size={14} /> {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="animate-in fade-in duration-500">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">
         {activeTab === "bookings" && (
-          <div className="glass-panel p-8">
-            <h2 className="text-2xl font-bold mb-6 font-cinzel text-[var(--accent-primary)]">Current Guest List</h2>
+          <div className="glass-panel p-10 border-white/5">
+            <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Registry <span className="text-[var(--accent-primary)]">Insights</span></h2>
             <AdminBookingsTable bookings={bookings} />
           </div>
         )}
 
         {activeTab === "manual" && (
-          <ManualBookingForm rooms={rooms} />
+          <div className="animate-in fade-in duration-500">
+            <ManualBookingForm rooms={rooms} />
+          </div>
         )}
 
         {activeTab === "rooms" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="glass-panel p-8">
-              <h2 className="text-2xl font-bold mb-6 font-cinzel">Active Suites</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2 glass-panel p-10 border-white/5">
+              <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Active <span className="text-[var(--accent-primary)]">Inventory</span></h2>
               <AdminRoomList rooms={rooms} bookings={bookings} />
             </div>
-            <div className="glass-panel p-8">
-               <h2 className="text-2xl font-bold mb-4 font-cinzel">Management Tips</h2>
-               <ul className="list-disc pl-6 opacity-80 flex flex-col gap-3 italic">
-                 <li>Ensure all "Pending" requests are addressed within 24 hours.</li>
-                 <li>Manual bookings automatically send confirmation emails to guests.</li>
-                 <li>You can update room images (up to 10) in the "Active Suites" list.</li>
+            <div className="glass-panel p-10 border-white/5 bg-gradient-to-br from-white/5 to-transparent">
+               <h2 className="text-xl font-heading font-bold mb-6">Manager Notes</h2>
+               <ul className="space-y-6">
+                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">1</div>
+                   <p className="text-sm font-light italic leading-relaxed">Respond to pending requests within 12h for maximum royalty points.</p>
+                 </li>
+                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">2</div>
+                   <p className="text-sm font-light italic leading-relaxed">Manual bookings trigger immediate confirmation protocols.</p>
+                 </li>
+                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">3</div>
+                   <p className="text-sm font-light italic leading-relaxed">Maintain high resolution assets for the best suite presentation.</p>
+                 </li>
                </ul>
             </div>
           </div>

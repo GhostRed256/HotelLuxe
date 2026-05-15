@@ -26,20 +26,32 @@ export async function requestBooking(formData: FormData) {
       updatedAt: new Date()
     })
     
-    // Notify Owner
-    const ownerEmails = ["owner1@staynjoy.com", "manager@staynjoy.com"]
+    // Notify Customer
     await sendBookingEmail({
-      to: ownerEmails,
-      subject: `[NEW REQUEST] ${name} wants to book ${room.name}`,
+      to: email,
+      subject: `Your Palace Reservation Request: ${room.name}`,
       customerName: name,
       roomName: room.name,
       checkIn: checkIn,
       checkOut: checkOut,
       status: "PENDING"
-    })
+    });
+
+    // Notify Owners
+    const ownerEmails = ["GhostRed256@gmail.com"]; // User specified earlier or common owner email
+    await sendBookingEmail({
+      to: ownerEmails,
+      subject: `[ACTION REQUIRED] New Request from ${name}`,
+      customerName: name,
+      roomName: room.name,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      status: "PENDING_OWNER_REVIEW"
+    });
 
     revalidatePath("/rooms")
     revalidatePath("/admin")
+    revalidatePath("/bookings")
     return { success: true }
   } catch (error) {
     console.error(error)

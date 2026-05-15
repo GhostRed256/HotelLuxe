@@ -2,10 +2,15 @@
 
 import { db } from "@/lib/firebase-admin"
 import { revalidatePath } from "next/cache"
-import { writeFile, mkdir } from "fs/promises"
 import { sendBookingEmail } from "@/lib/email"
-import path from "path"
-import fs from "fs"
+
+// Convert file to base64 data URI for Firestore storage
+async function fileToDataUri(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const base64 = buffer.toString('base64')
+  const mimeType = file.type || 'image/jpeg'
+  return `data:${mimeType};base64,${base64}`
+}
 
 export async function addRoom(formData: FormData) {
   const name = formData.get("name") as string
@@ -19,21 +24,14 @@ export async function addRoom(formData: FormData) {
   const files = formData.getAll("images") as File[]
   const uploadedImages: string[] = []
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "rooms")
-  if (!fs.existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true })
-  }
-
   for (const file of files) {
     if (file.size === 0) continue
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`
-    const filepath = path.join(uploadDir, filename)
+    if (file.size > 5 * 1024 * 1024) continue // Skip files > 5MB
     try {
-      await writeFile(filepath, buffer)
-      uploadedImages.push(`/uploads/rooms/${filename}`)
+      const dataUri = await fileToDataUri(file)
+      uploadedImages.push(dataUri)
     } catch(e) {
-      console.error("Failed to write file", e)
+      console.error("Failed to process image", e)
     }
   }
 
@@ -45,7 +43,7 @@ export async function addRoom(formData: FormData) {
     type, 
     roomNumber,
     location,
-    images: uploadedImages, // Store as array
+    images: uploadedImages,
     createdAt: new Date(),
     updatedAt: new Date()
   })
@@ -55,18 +53,11 @@ export async function addRoom(formData: FormData) {
   revalidatePath("/rooms")
 }
 
-export async function deleteRoom(roomId: string) {
-  await db.collection("rooms").doc(roomId).delete()
-  revalidatePath("/admin")
-  revalidatePath("/")
-  revalidatePath("/rooms")
-}
-
 export async function uploadRoomImages(roomId: string, formData: FormData) {
   const files = formData.getAll("images") as File[]
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   
-  if (!roomDoc.exists) return
+  if (!roomDoc.exists) return { success: false, error: "Room not found" }
   const room = roomDoc.data()!
 
   let currentImages: string[] = []
@@ -76,29 +67,53 @@ export async function uploadRoomImages(roomId: string, formData: FormData) {
     currentImages = []
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "rooms")
-  if (!fs.existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true })
-  }
-
+  const newImages: string[] = []
   for (const file of files) {
     if (file.size === 0) continue
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`
-    const filepath = path.join(uploadDir, filename)
+    if (file.size > 5 * 1024 * 1024) continue // Skip files > 5MB
     try {
-      await writeFile(filepath, buffer)
-      currentImages.push(`/uploads/rooms/${filename}`)
-    } catch(e) {}
+      const dataUri = await fileToDataUri(file)
+      newImages.push(dataUri)
+    } catch(e) {
+      console.error("Failed to process image", e)
+    }
   }
 
+  const allImages = [...currentImages, ...newImages]
+
   await db.collection("rooms").doc(roomId).update({
-    images: currentImages, // Store as array
+    images: allImages,
     updatedAt: new Date()
   })
   
   revalidatePath("/admin")
   revalidatePath("/rooms")
+  revalidatePath("/")
+  return { success: true, count: newImages.length }
+}
+
+export async function removeRoomImage(roomId: string, imageIndex: number) {
+  const roomDoc = await db.collection("rooms").doc(roomId).get()
+  if (!roomDoc.exists) return
+  const room = roomDoc.data()!
+  
+  let images: string[] = []
+  try {
+    images = typeof room.images === 'string' ? JSON.parse(room.images) : (room.images || [])
+  } catch(e) {
+    images = []
+  }
+
+  images.splice(imageIndex, 1)
+
+  await db.collection("rooms").doc(roomId).update({
+    images,
+    updatedAt: new Date()
+  })
+
+  revalidatePath("/admin")
+  revalidatePath("/rooms")
+  revalidatePath("/")
 }
 
 export async function addEmailForReports(formData: FormData) {
@@ -111,7 +126,6 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
   if (!bookingDoc.exists) return
   const booking = bookingDoc.data()!
   
-  // Get room details for the email
   const roomDoc = await db.collection("rooms").doc(booking.roomId).get()
   const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite" }
 
@@ -120,7 +134,6 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
     updatedAt: new Date()
   })
 
-  // 1. Notify Customer
   await sendBookingEmail({
     to: booking.customerEmail,
     subject: `Your Royal Stay is ${status === 'APPROVED' ? 'Confirmed' : 'Cancelled'}`,
@@ -132,8 +145,7 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
     price: room.price
   })
 
-  // 2. Notify Owner (Multiple emails as requested)
-  const ownerEmails = ["owner1@staynjoy.com", "manager@staynjoy.com"] // Customize as needed
+  const ownerEmails = ["GhostRed256@gmail.com"]
   await sendBookingEmail({
     to: ownerEmails,
     subject: `[ADMIN ALERT] Booking ${status}: ${booking.customerName}`,
@@ -163,12 +175,11 @@ export async function createManualBooking(formData: FormData) {
       customerEmail,
       checkIn,
       checkOut,
-      status: "APPROVED", // Manual bookings by admin are auto-approved
+      status: "APPROVED",
       createdAt: new Date(),
       updatedAt: new Date()
     })
 
-    // Revalidate and notify
     await updateBookingStatus(docRef.id, "APPROVED")
 
     return { success: true }

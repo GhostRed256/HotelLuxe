@@ -26,64 +26,30 @@ export default function SuiteShowcase({ rooms }: SuiteShowcaseProps) {
   }).filter(Boolean)
 
   return (
-    <section id="gallery" className="py-24 px-8 palace-bg min-h-screen relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[var(--accent-primary)]/10 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[var(--accent-primary)]/10 to-transparent pointer-events-none" />
+    <section id="gallery" className="py-24 px-8 relative overflow-hidden bg-[var(--background)]">
+      {/* Immersive Background Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale" 
+           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
       
-      {/* Floating decorative particles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-[var(--accent-primary)] opacity-10 text-4xl"
-            style={{
-              left: `${15 + i * 15}%`,
-              top: `${10 + (i % 3) * 30}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 10, -10, 0],
-              opacity: [0.05, 0.15, 0.05],
-            }}
-            transition={{
-              duration: 6 + i,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.8,
-            }}
-          >
-            {i % 3 === 0 ? "✦" : i % 3 === 1 ? "❖" : "✧"}
-          </motion.div>
-        ))}
-      </div>
-
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-20 relative">
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--accent-primary)] to-transparent opacity-50"
-          />
+        <div className="text-center mb-20">
           <motion.h2 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-cinzel font-bold mb-6 gold-gradient-text drop-shadow-lg inline-block bg-[var(--background)] px-8 relative z-10"
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight"
           >
-            Our Rooms
+            Curated <span className="text-[var(--accent-primary)]">Collections</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="opacity-80 max-w-3xl mx-auto text-lg md:text-xl italic"
+            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="opacity-70 max-w-3xl mx-auto text-lg md:text-xl font-light italic"
           >
-            From cozy rooms to full houses — find the perfect stay for every occasion.
+            Handpicked stays designed for ultimate comfort and tranquility in Tinsukia.
           </motion.p>
         </div>
 

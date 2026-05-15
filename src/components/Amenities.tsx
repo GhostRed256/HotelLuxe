@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Wifi, Car, Clock, Utensils, Wind, Cctv, Zap, Brush, PawPrint, Droplets, MonitorPlay, Sofa, Heart, Music } from "lucide-react"
 
 const amenitiesList = [
@@ -19,62 +20,66 @@ const amenitiesList = [
 
 export default function Amenities() {
   return (
-    <section className="py-16 px-4" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10 flex items-center justify-center gap-4">
-          <div className="h-[1px] bg-[var(--gold-primary)] w-16 opacity-50"></div>
-          <h2 className="text-2xl tracking-widest font-cinzel uppercase" style={{ color: "var(--gold-primary)" }}>
-            Premium Amenities
-          </h2>
-          <div className="h-[1px] bg-[var(--gold-primary)] w-16 opacity-50"></div>
+    <section className="py-24 px-8 relative overflow-hidden bg-[var(--background)]">
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-7xl font-heading font-black mb-4 tracking-tight"
+          >
+            Exceptional <span className="text-[var(--accent-primary)]">Services</span>
+          </motion.h2>
+          <p className="opacity-60 font-light italic text-lg">Every detail curated for your royalty.</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-16">
           {amenitiesList.map((item, idx) => (
-            <div 
+            <motion.div 
               key={idx} 
-              className="flex flex-col items-center justify-center text-center p-4 rounded-xl transition-all duration-300 hover:scale-105"
-              style={{ 
-                border: "1px solid var(--gold-primary)", 
-                backgroundColor: "rgba(184, 143, 84, 0.05)"
-              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+              className="glass-panel p-8 flex flex-col items-center text-center hover:bg-white/10 transition-all border-white/5"
             >
-              <div className="mb-3" style={{ color: "var(--gold-primary)" }}>
+              <div className="mb-4 text-[var(--accent-primary)] drop-shadow-lg">
                 {item.icon}
               </div>
-              <p className="text-xs font-semibold tracking-wider uppercase whitespace-pre-line leading-tight">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 whitespace-pre-line leading-relaxed">
                 {item.text}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-8 flex flex-col md:flex-row gap-4">
-          <div 
-            className="flex-1 flex items-center p-4 rounded-xl"
-            style={{ border: "1px solid var(--gold-primary)", backgroundColor: "rgba(184, 143, 84, 0.05)" }}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="glass-panel p-10 flex items-center gap-8 border-l-4 border-l-[var(--accent-primary)]"
           >
-            <div className="mr-4" style={{ color: "var(--accent-primary)" }}>
-              <Heart size={40} />
+            <div className="text-[var(--accent-primary)]">
+              <Heart size={48} strokeWidth={1} />
             </div>
             <div>
-              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1 text-sm md:text-base">Couple Friendly</h3>
-              <p className="text-xs md:text-sm opacity-90 text-[var(--foreground-secondary)]">A Comfortable & Safe Stay for Couples</p>
+              <h3 className="text-2xl font-heading font-bold mb-2">Couple Haven</h3>
+              <p className="text-sm font-light opacity-60">Discrete, safe, and curated for moments of intimacy.</p>
             </div>
-          </div>
+          </motion.div>
           
-          <div 
-            className="flex-1 flex items-center p-4 rounded-xl glass-panel"
-            style={{ border: "1px solid var(--gold-primary)", backgroundColor: "var(--input-bg)" }}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="glass-panel p-10 flex items-center gap-8 border-l-4 border-l-[var(--gold-primary)]"
           >
-            <div className="mr-4" style={{ color: "var(--accent-primary)" }}>
-              <Music size={36} />
+            <div className="text-[var(--gold-primary)]">
+              <Music size={48} strokeWidth={1} />
             </div>
             <div>
-              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1 text-sm md:text-base">Party Friendly</h3>
-              <p className="text-xs md:text-sm opacity-90 text-[var(--foreground-secondary)]">Celebrate Moments, Create Memories</p>
+              <h3 className="text-2xl font-heading font-bold mb-2">Celebration Suite</h3>
+              <p className="text-sm font-light opacity-60">Perfectly equipped for your grand milestones and joyous parties.</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

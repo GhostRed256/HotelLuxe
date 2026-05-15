@@ -9,16 +9,12 @@ export default function QuotesMarquee() {
   ];
 
   return (
-    <div className="w-full bg-[var(--surface)] py-3 overflow-hidden border-y border-[var(--gold-primary)]/30 relative">
-      {/* Gradients to fade edges */}
-      <div className="absolute top-0 left-0 w-24 h-full bg-gradient-to-r from-[var(--surface)] to-transparent z-10 pointer-events-none" />
-      <div className="absolute top-0 right-0 w-24 h-full bg-gradient-to-l from-[var(--surface)] to-transparent z-10 pointer-events-none" />
-      
+    <div className="w-full bg-[var(--background)] py-4 overflow-hidden border-y border-white/5 relative">
       <div className="animate-marquee flex whitespace-nowrap">
         {[...quotes, ...quotes, ...quotes].map((quote, idx) => (
-          <span key={idx} className="mx-8 font-cinzel text-[var(--foreground)] font-bold tracking-[0.2em] text-xs md:text-sm flex items-center group">
-            <span className="text-xl mr-8 text-[var(--accent-primary)] opacity-50 group-hover:opacity-100 transition-opacity">✦</span>
-            <span className="hover:text-[var(--accent-primary)] transition-colors cursor-default">{quote}</span>
+          <span key={idx} className="mx-12 font-body text-[var(--foreground)] font-medium tracking-[0.1em] text-xs flex items-center group opacity-50 hover:opacity-100 transition-opacity">
+            <span className="text-sm mr-4 text-[var(--accent-primary)]">✧</span>
+            {quote}
           </span>
         ))}
       </div>

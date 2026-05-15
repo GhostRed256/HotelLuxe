@@ -50,26 +50,26 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
   })
 
   return (
-    <div className="glass-panel overflow-x-auto p-6">
-      <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
-        <div className="flex gap-4 flex-wrap">
+    <div className="overflow-x-auto">
+      <div className="flex flex-col md:flex-row justify-between mb-10 gap-6">
+        <div className="flex flex-wrap gap-4">
           <input 
             type="text" 
-            placeholder="Search customer..." 
+            placeholder="Search Registry..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="p-2 rounded border border-black/10 dark:border-white/10 bg-transparent"
+            className="form-input !py-3 !px-6 !w-64"
           />
           <input 
             type="date" 
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="p-2 rounded border border-black/10 dark:border-white/10 bg-transparent"
+            className="form-input !py-3 !px-6 !w-auto"
           />
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 rounded border border-black/10 dark:border-white/10 bg-transparent"
+            className="form-select !py-3 !px-6 !w-auto"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
@@ -77,62 +77,66 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
             <option value="REJECTED">Rejected</option>
           </select>
         </div>
-        <button onClick={handleExportCSV} className="btn-outline whitespace-nowrap">
-          Export to CSV
+        <button onClick={handleExportCSV} className="btn-outline !py-3 !px-8 text-[10px] uppercase tracking-widest font-bold">
+          Download CSV
         </button>
       </div>
 
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-black/10 dark:border-white/10 text-left">
-            <th className="p-4">Customer</th>
-            <th className="p-4">Room</th>
-            <th className="p-4">Dates</th>
-            <th className="p-4">Status</th>
-            <th className="p-4">Actions</th>
+          <tr className="border-b border-white/5 text-left text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
+            <th className="p-6">Guest Profile</th>
+            <th className="p-6">Suite Selection</th>
+            <th className="p-6">Duration</th>
+            <th className="p-6 text-center">Protocol Status</th>
+            <th className="p-6 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm font-light">
           {filteredBookings.length === 0 ? (
             <tr>
-              <td colSpan={5} className="p-8 text-center opacity-50">No bookings found.</td>
+              <td colSpan={5} className="p-20 text-center opacity-40 italic">No records found in the registry.</td>
             </tr>
           ) : (
             filteredBookings.map((b) => (
-              <tr key={b.id} className="border-b border-black/5 dark:border-white/5">
-                <td className="p-4">
-                  <div className="font-semibold">{b.customerName}</div>
-                  <div className="text-sm opacity-70">{b.customerEmail}</div>
+              <tr key={b.id} className="border-b border-white/5 group hover:bg-white/5 transition-colors">
+                <td className="p-6">
+                  <div className="font-bold text-lg">{b.customerName}</div>
+                  <div className="text-[10px] opacity-40 uppercase tracking-widest">{b.customerEmail}</div>
                 </td>
-                <td className="p-4">{b.room.name}</td>
-                <td className="p-4 text-sm">
-                  {new Date(b.checkIn).toLocaleDateString()} - {new Date(b.checkOut).toLocaleDateString()}
+                <td className="p-6 font-medium">
+                  {b.room.name}
                 </td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    b.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' :
-                    b.status === 'APPROVED' ? 'bg-green-500/20 text-green-700 dark:text-green-400' :
-                    'bg-red-500/20 text-red-700 dark:text-red-400'
+                <td className="p-6 opacity-60">
+                  {new Date(b.checkIn).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })} — {new Date(b.checkOut).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </td>
+                <td className="p-6 text-center">
+                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase ${
+                    b.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                    b.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                    'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                   }`}>
                     {b.status}
                   </span>
                 </td>
-                <td className="p-4 flex gap-2">
-                  {b.status === 'PENDING' && (
-                    <>
+                <td className="p-6 text-right">
+                  {b.status === 'PENDING' ? (
+                    <div className="flex gap-4 justify-end">
                       <button 
                         onClick={() => updateBookingStatus(b.id, 'APPROVED')}
-                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:opacity-80"
+                        className="text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-colors"
                       >
-                        Approve
+                        Authorize
                       </button>
                       <button 
                         onClick={() => updateBookingStatus(b.id, 'REJECTED')}
-                        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:opacity-80"
+                        className="text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-colors"
                       >
-                        Reject
+                        Decline
                       </button>
-                    </>
+                    </div>
+                  ) : (
+                    <span className="opacity-20 text-[10px] font-bold uppercase tracking-widest">Closed Case</span>
                   )}
                 </td>
               </tr>

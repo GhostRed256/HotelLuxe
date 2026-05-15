@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { motion } from "framer-motion"
 import { createManualBooking } from "@/app/admin/actions"
 
 interface Room {
@@ -80,87 +81,74 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
   }
 
   return (
-    <div className="glass-panel p-8">
-      <h2 className="text-2xl font-bold mb-6 font-cinzel gold-shimmer">New Royal Booking</h2>
+    <div className="glass-panel p-10 border-white/5">
+      <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Manual <span className="text-[var(--accent-primary)]">Intake</span></h2>
       
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         {/* Step 1: Location */}
         <div>
-          <label className="form-label">Select Location</label>
-          <div className="flex flex-wrap gap-3">
-            {locations.map(loc => (
-              <label key={loc} className={`px-4 py-2 rounded-full border cursor-pointer transition-all text-xs font-bold tracking-wider uppercase
-                ${selectedLocation === loc 
-                  ? 'bg-[var(--accent-primary)] border-[var(--accent-primary)] text-white shadow-[0_0_15px_var(--accent-primary)]' 
-                  : 'bg-transparent border-black/10 dark:border-white/10 opacity-60 hover:opacity-100'}`}>
-                <input 
-                  type="radio" 
-                  name="location" 
-                  className="hidden" 
-                  checked={selectedLocation === loc}
-                  onChange={() => handleLocationChange(loc)}
-                />
-                {loc}
-              </label>
-            ))}
+          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">1. Target Location</label>
+          <div className="relative">
+            <select
+              className="form-select w-full"
+              value={selectedLocation}
+              onChange={(e) => handleLocationChange(e.target.value)}
+            >
+              <option value="">Select Location</option>
+              {locations.map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
           </div>
         </div>
 
         {/* Step 2: Room Type (Filtered) */}
         {selectedLocation && (
-          <div className="animate-in fade-in slide-in-from-top-2">
-            <label className="form-label">Room Type at {selectedLocation}</label>
-            <div className="flex flex-wrap gap-3">
-              {availableTypes.map(type => (
-                <label key={type} className={`px-4 py-2 rounded-full border cursor-pointer transition-all text-xs font-bold tracking-wider uppercase
-                  ${selectedType === type 
-                    ? 'bg-[var(--gold-primary)] border-[var(--gold-primary)] text-white shadow-[0_0_15px_var(--gold-primary)]' 
-                    : 'bg-transparent border-black/10 dark:border-white/10 opacity-60 hover:opacity-100'}`}>
-                  <input 
-                    type="radio" 
-                    name="type" 
-                    className="hidden" 
-                    checked={selectedType === type}
-                    onChange={() => handleTypeChange(type)}
-                  />
-                  {type}
-                </label>
-              ))}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">2. Category Selection</label>
+            <div className="relative">
+              <select
+                className="form-select w-full"
+                value={selectedType}
+                onChange={(e) => handleTypeChange(e.target.value)}
+              >
+                <option value="">Select Category</option>
+                {availableTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Step 3: Specific Room (Filtered) */}
         {selectedType && (
-          <div className="animate-in fade-in slide-in-from-top-2">
-            <label className="form-label">Select Suite Number / Floor</label>
-            <div className="flex flex-wrap gap-3">
-              {availableRooms.map(room => (
-                <label key={room.id} className={`px-4 py-2 rounded-lg border cursor-pointer transition-all text-sm
-                  ${selectedRoomId === room.id 
-                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 ring-2 ring-[var(--accent-primary)]' 
-                    : 'border-black/10 dark:border-white/10 hover:border-[var(--accent-primary)]/50'}`}>
-                  <input 
-                    type="radio" 
-                    name="roomId" 
-                    className="hidden" 
-                    checked={selectedRoomId === room.id}
-                    onChange={() => setSelectedRoomId(room.id)}
-                  />
-                  <div className="font-bold">{room.name}</div>
-                  <div className="text-[10px] opacity-70 uppercase tracking-tighter">
-                    {room.floor} • ₹{room.price}
-                  </div>
-                </label>
-              ))}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">3. Suite Designation</label>
+            <div className="relative">
+              <select
+                className="form-select w-full"
+                value={selectedRoomId}
+                onChange={(e) => setSelectedRoomId(e.target.value)}
+              >
+                <option value="">Select Suite</option>
+                {availableRooms.map(room => (
+                  <option key={room.id} value={room.id}>
+                    {room.name} — {room.floor} (₹{room.price})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Customer Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/5 pt-10">
           <div>
-            <label className="form-label">Customer Name</label>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Guest Name</label>
             <input 
               type="text" 
               required 
@@ -171,7 +159,7 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
             />
           </div>
           <div>
-            <label className="form-label">Customer Email</label>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Guest Email</label>
             <input 
               type="email" 
               required 
@@ -181,11 +169,9 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
               placeholder="email@example.com"
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
           <div>
-            <label className="form-label">Check-In Date</label>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Arrival</label>
             <input 
               type="date" 
               required 
@@ -195,7 +181,7 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
             />
           </div>
           <div>
-            <label className="form-label">Check-Out Date</label>
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Departure</label>
             <input 
               type="date" 
               required 
@@ -209,9 +195,9 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
         <button 
           type="submit" 
           disabled={isSubmitting || !selectedRoomId}
-          className="btn-primary mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary !py-5 shadow-none hover:shadow-2xl"
         >
-          {isSubmitting ? "Confirming..." : "Confirm Royal Booking"}
+          {isSubmitting ? "Processing..." : "Authorize Royal Booking"}
         </button>
       </form>
     </div>

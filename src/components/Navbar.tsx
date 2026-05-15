@@ -36,33 +36,33 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo Section */}
-        <div className="flex items-center gap-3">
-          <Logo className="h-14" />
-          <span className="hidden sm:inline-block text-2xl font-bold font-cinzel">
-            Stay-<span className="text-[var(--accent-primary)]">N</span>-Joy
+        <div className="flex items-center gap-4">
+          <Logo className="h-12" />
+          <span className="hidden lg:inline-block text-xl font-bold font-heading tracking-tight">
+            Stay<span className="text-[var(--accent-primary)]">N</span>joy
           </span>
         </div>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10">
-          <Link href="/" className="nav-link text-sm font-semibold tracking-wider uppercase">Home</Link>
-          <Link href="/rooms" className="nav-link text-sm font-semibold tracking-wider uppercase">Rooms</Link>
-          <Link href="/bookings" className="nav-link text-sm font-semibold tracking-wider uppercase">My Bookings</Link>
-          <Link href="/about" className="nav-link text-sm font-semibold tracking-wider uppercase">About</Link>
-          <Link href="/contact" className="nav-link text-sm font-semibold tracking-wider uppercase">Contact</Link>
+          <Link href="/" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Home</Link>
+          <Link href="/rooms" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Rooms</Link>
+          <Link href="/bookings" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">My Bookings</Link>
+          <Link href="/about" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">About</Link>
+          <Link href="/contact" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Contact</Link>
           
-          <div className="flex items-center gap-4 ml-4">
+          <div className="flex items-center gap-6 ml-6 border-l border-white/10 pl-6">
             {mounted && (
               <button 
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[var(--accent-primary)]"
+                className="text-[var(--accent-primary)] hover:scale-110 transition-transform"
                 aria-label="Toggle theme"
               >
-                {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             )}
-            <Link href="/login" className="btn-primary text-[10px] px-6 py-2">
-              Sign In
+            <Link href="/login" className="btn-primary !py-2 !px-6 !text-[10px]">
+              Book Now
             </Link>
           </div>
         </div>

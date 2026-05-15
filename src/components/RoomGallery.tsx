@@ -1,14 +1,15 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { requestBooking } from "@/app/actions"
 import RoomCard from "./RoomCard"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any[], bookings?: any[] }) {
-  const [selectedRoom, setSelectedRoom] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Filters
   const [filterType, setFilterType] = useState("ALL")
@@ -26,27 +27,37 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
   const floors = useMemo(() => [...new Set(displayRooms.map((r: any) => r.floor))].sort(), [displayRooms])
 
-  // Filtered rooms for display
+  // Check if room is booked
+  const isRoomBooked = (roomId: string) => {
+    return bookings?.some(b =>
+      b.roomId === roomId &&
+      new Date(b.checkIn) <= new Date() &&
+      new Date(b.checkOut) >= new Date()
+    )
+  }
+
+  // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
-    return displayRooms.filter((r: any) => {
+    const filtered = displayRooms.filter((r: any) => {
       if (filterType !== "ALL" && r.type !== filterType) return false
       if (filterFloor !== "ALL" && String(r.floor) !== filterFloor) return false
       return true
     })
-  }, [displayRooms, filterType, filterFloor])
+    
+    // Sort: available rooms first
+    return filtered.sort((a: any, b: any) => {
+      const aBooked = isRoomBooked(a.id) ? 1 : 0
+      const bBooked = isRoomBooked(b.id) ? 1 : 0
+      return aBooked - bBooked
+    })
+  }, [displayRooms, filterType, filterFloor, bookings])
 
   // Rooms available for booking modal selection
   const availableRoomsForBooking = useMemo(() => {
     return displayRooms.filter((r: any) => {
       if (bookingSuiteType && r.type !== bookingSuiteType) return false
       if (bookingFloor && String(r.floor) !== bookingFloor) return false
-      // Check if currently booked
-      const isBooked = bookings?.some(b =>
-        b.roomId === r.id &&
-        new Date(b.checkIn) <= new Date() &&
-        new Date(b.checkOut) >= new Date()
-      )
-      return !isBooked
+      return !isRoomBooked(r.id)
     })
   }, [displayRooms, bookingSuiteType, bookingFloor, bookings])
 
@@ -80,97 +91,157 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     formData.append("roomId", bookingRoomId)
     await requestBooking(formData)
     setIsSubmitting(false)
-    setSuccessMsg("Reservation requested successfully! We will email you the confirmation shortly.")
+    setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
     setTimeout(() => {
       setShowBookingModal(false)
       setSuccessMsg("")
     }, 3500)
   }
 
-  return (
-    <section id="gallery" className="py-24 px-8 palace-bg min-h-screen relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[var(--accent-primary)]/10 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[var(--accent-primary)]/10 to-transparent pointer-events-none" />
+  const scroll = (dir: "left" | "right") => {
+    if (scrollRef.current) {
+      const w = scrollRef.current.clientWidth * 0.6
+      scrollRef.current.scrollBy({ left: dir === "left" ? -w : w, behavior: "smooth" })
+    }
+  }
 
+  // Split into available and booked
+  const availableRooms = filteredRooms.filter((r: any) => !isRoomBooked(r.id))
+  const bookedRooms = filteredRooms.filter((r: any) => isRoomBooked(r.id))
+
+  return (
+    <section className="py-24 px-8 relative overflow-hidden bg-[var(--background)]">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16 relative">
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
+        <div className="text-center mb-16">
+          <motion.h2 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--accent-primary)] to-transparent opacity-40"
-          />
-          <h2 className="text-5xl md:text-7xl font-cinzel font-bold mb-6 gold-gradient-text drop-shadow-lg inline-block bg-[var(--background)] px-8 relative z-10">
-            Our Suites
-          </h2>
-          <p className="max-w-3xl mx-auto text-lg md:text-xl italic" style={{ color: 'var(--foreground-secondary)' }}>
-            Experience comfort and joy. Each suite is designed for your perfect stay.
-          </p>
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight"
+          >
+            Find Your <span className="text-[var(--accent-primary)]">Haven</span>
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-3xl mx-auto text-lg md:text-xl font-light italic opacity-70"
+          >
+            Available suites shown first. Scroll to explore.
+          </motion.p>
         </div>
 
         {/* Filters + Book Now */}
-        <div className="flex flex-wrap gap-4 items-center justify-between mb-12">
-          <div className="flex flex-wrap gap-3 items-center">
-            <select
-              value={filterType}
-              onChange={e => setFilterType(e.target.value)}
-              className="form-select"
-              style={{ width: 'auto', minWidth: '180px' }}
-            >
-              <option value="ALL">All Suite Types</option>
-              {suiteTypes.map((t: any) => <option key={t} value={t}>{t}</option>)}
-            </select>
+        <div className="flex flex-wrap gap-6 items-center justify-between mb-12 backdrop-blur-md bg-white/5 p-6 rounded-3xl border border-white/10 shadow-2xl">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="relative">
+              <select
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
+                className="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full px-6 py-3 text-sm font-semibold tracking-wide appearance-none cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors pr-12"
+              >
+                <option value="ALL">All Suite Types</option>
+                {suiteTypes.map((t: any) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
+            </div>
 
-            <select
-              value={filterFloor}
-              onChange={e => setFilterFloor(e.target.value)}
-              className="form-select"
-              style={{ width: 'auto', minWidth: '140px' }}
-            >
-              <option value="ALL">All Floors</option>
-              {floors.map((f: any) => <option key={f} value={String(f)}>Floor {f}</option>)}
-            </select>
+            <div className="relative">
+              <select
+                value={filterFloor}
+                onChange={e => setFilterFloor(e.target.value)}
+                className="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full px-6 py-3 text-sm font-semibold tracking-wide appearance-none cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors pr-12"
+              >
+                <option value="ALL">All Floors</option>
+                {floors.map((f: any) => <option key={f} value={String(f)}>Floor {f}</option>)}
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
+            </div>
           </div>
 
           <button onClick={() => openBookingModal()} className="btn-primary">
-            Reserve a Suite
+            Quick Reserve
           </button>
         </div>
 
-        {/* Room Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredRooms.map((room: any) => {
-            const isCurrentlyBooked = bookings?.some(b =>
-              b.roomId === room.id &&
-              new Date(b.checkIn) <= new Date() &&
-              new Date(b.checkOut) >= new Date()
-            );
+        {/* Available Rooms — Horizontal Scroll */}
+        {availableRooms.length > 0 && (
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-heading font-bold">Available <span className="text-emerald-500">Now</span></h3>
+                <p className="text-sm opacity-40 font-light italic mt-1">{availableRooms.length} suite{availableRooms.length !== 1 ? 's' : ''} ready for booking</p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => scroll("left")} className="p-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                  <ChevronLeft size={18} />
+                </button>
+                <button onClick={() => scroll("right")} className="p-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
 
-            return (
-              <motion.div
-                key={room.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.6 }}
-                className="transform transition-all duration-400 hover:-translate-y-3 z-10 hover:z-20"
-              >
-                <RoomCard
-                  room={room}
-                  onBook={() => openBookingModal(room)}
-                  isBooked={isCurrentlyBooked}
-                />
-              </motion.div>
-            )
-          })}
-        </div>
+            <div 
+              ref={scrollRef}
+              className="flex gap-8 overflow-x-auto pb-6 snap-x snap-mandatory"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {availableRooms.map((room: any, i: number) => (
+                <motion.div
+                  key={room.id}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.6 }}
+                  className="snap-start flex-shrink-0 w-[85vw] sm:w-[60vw] md:w-[38vw] lg:w-[28vw]"
+                >
+                  <RoomCard
+                    room={room}
+                    onBook={() => openBookingModal(room)}
+                    isBooked={false}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Booked Rooms — Shown After */}
+        {bookedRooms.length > 0 && (
+          <div>
+            <div className="mb-8">
+              <h3 className="text-2xl font-heading font-bold opacity-40">Currently <span className="text-rose-400">Reserved</span></h3>
+              <p className="text-sm opacity-20 font-light italic mt-1">These suites are occupied and will become available soon.</p>
+            </div>
+            
+            <div className="flex gap-8 overflow-x-auto pb-6 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {bookedRooms.map((room: any, i: number) => (
+                <motion.div
+                  key={room.id}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.6 }}
+                  className="snap-start flex-shrink-0 w-[85vw] sm:w-[60vw] md:w-[38vw] lg:w-[28vw] opacity-50"
+                >
+                  <RoomCard
+                    room={room}
+                    onBook={() => openBookingModal(room)}
+                    isBooked={true}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {filteredRooms.length === 0 && (
-          <div className="text-center py-20" style={{ color: 'var(--foreground-secondary)' }}>
-            <p className="text-xl italic">No suites match your current filters.</p>
+          <div className="text-center py-20 opacity-40">
+            <p className="text-xl italic font-light">No suites match your current filters.</p>
           </div>
         )}
 
@@ -182,8 +253,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowBookingModal(false)}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl"
             >
               <motion.div
                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -191,48 +261,35 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 exit={{ scale: 0.95, opacity: 0, y: 20 }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 onClick={e => e.stopPropagation()}
-                className="glass-panel relative w-full max-w-lg overflow-hidden"
-                style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border-color)' }}
+                className="glass-panel relative w-full max-w-lg overflow-hidden border-white/10"
               >
-                {/* Header bar */}
-                <div style={{
-                  background: 'linear-gradient(135deg, #A83860, #D14D7E)',
-                  padding: '1.5rem 2rem',
-                }}>
-                  <h3 className="text-2xl font-cinzel font-bold text-white tracking-wide">
-                    Reserve Your Suite
+                {/* Header */}
+                <div className="p-8 pb-0">
+                  <h3 className="text-3xl font-heading font-black tracking-tight mb-1">
+                    Reserve <span className="text-[var(--accent-primary)]">Suite</span>
                   </h3>
-                  <p className="text-white/70 text-sm mt-1" style={{ fontFamily: 'var(--font-body)' }}>
-                    Select your preferences and complete the reservation
-                  </p>
+                  <p className="text-sm opacity-40 font-light">Select preferences and complete your request.</p>
                 </div>
 
                 <button
                   onClick={() => setShowBookingModal(false)}
-                  className="absolute top-4 right-5 text-white/60 hover:text-white text-xl transition-colors"
-                  style={{ lineHeight: 1 }}
+                  className="absolute top-6 right-6 text-white/30 hover:text-white text-xl transition-colors"
                 >
                   ✕
                 </button>
 
-                <div style={{ padding: '1.75rem 2rem 2rem' }}>
+                <div className="p-8">
                   {successMsg ? (
-                    <div style={{
-                      background: 'rgba(34, 139, 34, 0.1)',
-                      border: '1px solid rgba(34, 139, 34, 0.3)',
-                      borderRadius: '0.5rem',
-                      padding: '1.5rem',
-                      textAlign: 'center',
-                    }}>
-                      <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>✓</span>
-                      <p style={{ color: '#1a6b1a', fontWeight: 600 }}>{successMsg}</p>
+                    <div className="text-center py-10">
+                      <span className="text-5xl block mb-4">✓</span>
+                      <p className="text-emerald-500 font-bold text-lg">{successMsg}</p>
                     </div>
                   ) : (
-                    <form onSubmit={handleBookingSubmit} className="flex flex-col gap-5">
+                    <form onSubmit={handleBookingSubmit} className="flex flex-col gap-6">
                       {/* Suite Selection */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="form-label">Suite Type</label>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Suite Type</label>
                           <select
                             className="form-select"
                             value={bookingSuiteType}
@@ -247,7 +304,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                         </div>
 
                         <div>
-                          <label className="form-label">Floor</label>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Floor</label>
                           <select
                             className="form-select"
                             value={bookingFloor}
@@ -266,7 +323,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
                       {/* Specific Room */}
                       <div>
-                        <label className="form-label">Select Room</label>
+                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Room</label>
                         <select
                           className="form-select"
                           value={bookingRoomId}
@@ -281,34 +338,32 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                           ))}
                         </select>
                         {availableRoomsForBooking.length === 0 && (
-                          <p style={{ color: '#a05050', fontSize: '0.85rem', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                            No rooms available for the selected criteria.
+                          <p className="text-rose-400 text-[10px] mt-2 font-bold uppercase tracking-widest">
+                            No rooms available for selected criteria.
                           </p>
                         )}
                       </div>
 
-                      <div className="ornate-divider" style={{ margin: '0.5rem 0' }}>
-                        <span style={{ fontSize: '0.8rem' }}>✦</span>
-                      </div>
+                      <div className="h-[1px] bg-white/5" />
 
                       {/* Guest Info */}
                       <div>
-                        <label className="form-label">Full Name</label>
+                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Full Name</label>
                         <input type="text" name="customerName" required className="form-input" placeholder="Your full name" />
                       </div>
 
                       <div>
-                        <label className="form-label">Email Address</label>
+                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email Address</label>
                         <input type="email" name="customerEmail" required className="form-input" placeholder="your@email.com" />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="form-label">Check In</label>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check In</label>
                           <input type="date" name="checkIn" required className="form-input" />
                         </div>
                         <div>
-                          <label className="form-label">Check Out</label>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check Out</label>
                           <input type="date" name="checkOut" required className="form-input" />
                         </div>
                       </div>
@@ -316,15 +371,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                       <button
                         type="submit"
                         disabled={isSubmitting || !bookingRoomId}
-                        className="btn-primary mt-2"
-                        style={{
-                          padding: '1rem 2rem',
-                          fontSize: '0.9rem',
-                          opacity: (!bookingRoomId || isSubmitting) ? 0.5 : 1,
-                          cursor: (!bookingRoomId || isSubmitting) ? 'not-allowed' : 'pointer',
-                        }}
+                        className="btn-primary !py-4 shadow-none hover:shadow-2xl disabled:opacity-30"
                       >
-                        {isSubmitting ? "Securing Reservation..." : "Confirm Reservation"}
+                        {isSubmitting ? "Processing..." : "Confirm Reservation"}
                       </button>
                     </form>
                   )}
