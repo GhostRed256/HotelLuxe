@@ -1,0 +1,380 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-plum-primary: #2D0B1A;
+  --color-pink-accent: #D14D7E;
+  --color-gold-harvest: #B88F54;
+  --color-black-accent: #1A0811;
+  
+  --font-body: 'Montserrat', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-cinzel: 'Montserrat', sans-serif;
+}
+
+:root {
+  --background: #FFF9FB;
+  --foreground: #2D0B1A;
+  --foreground-secondary: #6B4F5B;
+  --accent-primary: #D14D7E;
+  --accent-dark: #A83860;
+  --gold-primary: #B88F54;
+  --gold-dark: #96713F;
+  --gold-light: #F5EDE3;
+  --border-color: rgba(184, 143, 84, 0.25);
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --input-bg: rgba(45, 11, 26, 0.04);
+  --input-border: rgba(45, 11, 26, 0.15);
+  --surface: #FFFFFF;
+}
+
+[data-theme='dark'] {
+  --background: #1A0811;
+  --foreground: #FFFFFF;
+  --foreground-secondary: #B88F54;
+  --accent-primary: #D14D7E;
+  --accent-dark: #E8639A;
+  --gold-primary: #B88F54;
+  --gold-dark: #D4A866;
+  --gold-light: #2D0B1A;
+  --border-color: rgba(209, 77, 126, 0.25);
+  --card-bg: rgba(45, 11, 26, 0.85);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --surface: #2D0B1A;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+p, span, li, label, a {
+  color: var(--foreground);
+}
+
+.palace-bg {
+  background-image: radial-gradient(var(--gold-light) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-color: var(--background);
+}
+
+[data-theme='dark'] .palace-bg {
+  background-image: radial-gradient(rgba(209, 77, 126, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-color: #120610;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary), var(--gold-primary), var(--accent-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* --- Clean Glass Panel --- */
+.glass-panel {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px -8px rgba(45, 11, 26, 0.08);
+  transition: box-shadow 0.4s ease;
+}
+
+[data-theme='dark'] .glass-panel {
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Nav Links --- */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--accent-primary);
+  transform-origin: bottom right;
+  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.nav-link:hover {
+  color: var(--accent-primary);
+}
+
+/* --- Buttons --- */
+.btn-primary {
+  display: inline-block;
+  background: linear-gradient(135deg, #A83860, #D14D7E);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 25px rgba(209, 77, 126, 0.5);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.btn-primary:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.btn-outline {
+  display: inline-block;
+  background: transparent;
+  color: var(--accent-primary);
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid var(--accent-primary);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-outline:hover {
+  background: var(--accent-primary);
+  color: #fff;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 4px 15px rgba(209, 77, 126, 0.3);
+}
+
+.btn-outline:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* --- Clean Ornate Border --- */
+.ornate-border {
+  position: relative;
+  border: 1px solid var(--border-color);
+}
+
+.ornate-border::before, .ornate-border::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--accent-primary);
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.ornate-border::before {
+  top: -4px;
+  left: -4px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.ornate-border::after {
+  bottom: -4px;
+  right: -4px;
+  border-left: none;
+  border-top: none;
+}
+
+.ornate-border:hover::before, .ornate-border:hover::after {
+  width: 20px;
+  height: 20px;
+  opacity: 1;
+}
+
+/* --- Shimmering Gradient --- */
+@keyframes goldShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary) 0%,
+    var(--gold-primary) 25%,
+    var(--accent-primary) 50%,
+    var(--gold-primary) 75%,
+    var(--accent-primary) 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: goldShimmer 4s linear infinite;
+}
+
+/* --- Ornate Divider --- */
+.ornate-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--gold-primary);
+  margin: 2rem 0;
+}
+
+.ornate-divider::before,
+.ornate-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0 1rem;
+}
+
+.ornate-divider span {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--gold-primary);
+}
+
+/* --- Marquee --- */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: fit-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* --- Float --- */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* --- Form Inputs --- */
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(209, 77, 126, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--foreground-secondary);
+  opacity: 0.6;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D14D7E' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.form-select:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(209, 77, 126, 0.1);
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* --- Couple Suite Romantic Theme --- */
+.couple-theme {
+  --accent-primary: #D14D7E;
+  --accent-dark: #A83860;
+  --border-color: rgba(209, 77, 126, 0.3);
+}
+
+.couple-theme .glass-panel {
+  border-color: rgba(209, 77, 126, 0.3);
+  box-shadow: 0 4px 24px -8px rgba(209, 77, 126, 0.15);
+}
+
+.couple-theme.ornate-border {
+  border-color: rgba(209, 77, 126, 0.3);
+}
+
+.couple-theme.ornate-border::before,
+.couple-theme.ornate-border::after {
+  border-color: #D14D7E;
+}
+
+.couple-theme .gold-gradient-text {
+  background: linear-gradient(135deg, #A83860, #D14D7E, #A83860);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
