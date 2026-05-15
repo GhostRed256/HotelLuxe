@@ -27,6 +27,8 @@
   --card-bg: rgba(255, 255, 255, 0.75);
   --input-bg: rgba(45, 11, 26, 0.02);
   --input-border: rgba(45, 11, 26, 0.08);
+  --footer-bg: #FDF4F7;
+  --footer-text: #1A0811;
   --surface: #FFFFFF;
 }
 
@@ -43,6 +45,8 @@
   --card-bg: rgba(10, 3, 7, 0.7);
   --input-bg: rgba(255, 255, 255, 0.03);
   --input-border: rgba(255, 255, 255, 0.06);
+  --footer-bg: #1A0811;
+  --footer-text: #FFFFFF;
   --surface: #050203;
 }
 
