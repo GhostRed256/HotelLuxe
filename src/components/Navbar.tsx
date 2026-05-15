@@ -41,11 +41,14 @@ export default function Navbar() {
               <img 
                 src={resolvedTheme === "dark" ? "/logo-dark.png" : "/logo-light.png"} 
                 alt="StayNjoy Logo" 
-                className="h-12 w-auto object-contain cursor-pointer transform transition-transform group-hover:scale-105"
+                className="h-14 w-auto object-contain cursor-pointer transform transition-all group-hover:scale-105 active:scale-95"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
                 onClick={() => window.location.href = "/"}
               />
             ) : (
-              <div className="h-12 w-12 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse"></div>
+              <div className="h-14 w-14 bg-gray-200 dark:bg-gray-800 rounded-full animate-pulse"></div>
             )}
             <div className="absolute -inset-2 bg-[var(--accent-primary)]/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
           </div>

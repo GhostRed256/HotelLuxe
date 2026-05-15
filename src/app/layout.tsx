@@ -18,7 +18,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Navbar />
-          <main style={{ minHeight: "calc(100vh - 160px)" }}>
+          <main className="pt-[80px]" style={{ minHeight: "calc(100vh - 160px)" }}>
             {children}
           </main>
         </Providers>

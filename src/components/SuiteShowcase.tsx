@@ -18,8 +18,8 @@ export default function SuiteShowcase({ rooms }: SuiteShowcaseProps) {
       // Count how many floors this type is available on
       const floorsForType = [...new Set(rooms.filter((r: any) => r.type === type).map((r: any) => r.floor))].sort()
       const availableFloors = floorsForType.length > 1 
-        ? `Floors ${floorsForType.join(", ")}` 
-        : `Floor ${floorsForType[0]}`
+        ? `Lvl ${floorsForType.join(", ")}` 
+        : `Lvl ${floorsForType[0]}`
       return { ...match, availableFloors }
     }
     return null
@@ -117,9 +117,6 @@ export default function SuiteShowcase({ rooms }: SuiteShowcaseProps) {
           <div className="ornate-divider mb-8">
             <span>✦</span>
           </div>
-          <p className="italic opacity-70 text-lg mb-6">
-            30 exquisite rooms across 3 floors — find the one that awaits you.
-          </p>
           <Link href="/rooms" className="btn-primary text-lg px-12 py-4 inline-block">
             View All Rooms &amp; Book Now
           </Link>
