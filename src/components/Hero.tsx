@@ -93,7 +93,7 @@
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.2 }}
              >
-               <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block">
+               <span className={`font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block ${isDark ? 'text-[var(--accent-primary)]' : '!text-[#1A0811]'}`}>
                  StayNjoy • The Soul of Upper Assam
                </span>
              </motion.div>
@@ -156,7 +156,7 @@
        <motion.div 
          animate={{ y: [0, 10, 0] }}
          transition={{ duration: 2, repeat: Infinity }}
-         className={`absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold tracking-[0.5em] uppercase z-10 ${isDark ? 'text-white/30' : 'text-[var(--foreground)]/30'}`}
+         className={`absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold tracking-[0.5em] uppercase z-10 ${isDark ? 'text-white/30' : '!text-[#1A0811]'}`}
        >
          Scroll
        </motion.div>
