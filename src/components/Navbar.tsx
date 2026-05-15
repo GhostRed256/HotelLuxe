@@ -49,7 +49,17 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-10">
           <Link href="/" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Home</Link>
           <Link href="/rooms" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Rooms</Link>
-          <Link href="/bookings" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">My Bookings</Link>
+          
+          {mounted && !loading && (
+            <>
+              {isAdmin ? (
+                <Link href="/admin" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Admin Panel</Link>
+              ) : user ? (
+                <Link href="/bookings" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">My Bookings</Link>
+              ) : null}
+            </>
+          )}
+
           <Link href="/about" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">About</Link>
           <Link href="/contact" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">Contact</Link>
           
@@ -65,25 +75,33 @@ export default function Navbar() {
             )}
             {mounted && !loading && (
               <>
-                {isAdmin ? (
+                {user ? (
                   <>
-                    <Link href="/admin" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">
-                      Admin Panel
-                    </Link>
                     <button 
                       onClick={() => signOut()}
                       className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
                     >
                       Logout
                     </button>
-                    <Link href="/admin?tab=manual" className="btn-primary !py-2 !px-6 !text-[10px]">
+                    {isAdmin ? (
+                      <Link href="/admin?tab=manual" className="btn-primary !py-2 !px-6 !text-[10px]">
+                        Book Now
+                      </Link>
+                    ) : (
+                      <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
+                        Book Now
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">
+                      Sign In
+                    </Link>
+                    <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
                       Book Now
                     </Link>
                   </>
-                ) : (
-                  <Link href="/rooms" className="btn-primary !py-2 !px-6 !text-[10px]">
-                    Book Now
-                  </Link>
                 )}
               </>
             )}
@@ -114,10 +132,21 @@ export default function Navbar() {
         <div className="md:hidden absolute top-full w-full py-8 flex flex-col items-center gap-6 animate-in slide-in-from-top duration-300 bg-[var(--background)] border-b border-[var(--border-color)]">
           <Link href="/" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Home</Link>
           <Link href="/rooms" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Rooms</Link>
-          <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">My Bookings</Link>
+          
+          {mounted && !loading && (
+            <>
+              {isAdmin ? (
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Admin Panel</Link>
+              ) : user ? (
+                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">My Bookings</Link>
+              ) : null}
+            </>
+          )}
+
           <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">About</Link>
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Contact</Link>
-          {isAdmin ? (
+          
+          {user ? (
             <button 
               onClick={() => {
                 signOut()

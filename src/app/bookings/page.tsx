@@ -1,24 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Search, Loader2, CheckCircle, Clock, XCircle } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 export default function MyBookingsPage() {
   const [email, setEmail] = useState("")
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const { user } = useAuth()
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-    
+  useEffect(() => {
+    if (user?.email && !searched) {
+      setEmail(user.email)
+      performSearch(user.email)
+    }
+  }, [user])
+
+  const performSearch = async (targetEmail: string) => {
     setIsLoading(true)
     setSearched(true)
-    
     try {
-      const res = await fetch(`/api/bookings?email=${encodeURIComponent(email)}`)
+      const res = await fetch(`/api/bookings?email=${encodeURIComponent(targetEmail)}`)
       const data = await res.json()
       setBookings(data)
     } catch (err) {
@@ -26,6 +31,12 @@ export default function MyBookingsPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    performSearch(email)
   }
 
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })

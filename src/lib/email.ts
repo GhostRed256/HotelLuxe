@@ -77,15 +77,16 @@ export async function sendBookingEmail({
 
   if (resend) {
     try {
-      await resend.emails.send({
-        from: 'StayNjoy Palace <bookings@resend.dev>', // Update with your verified domain
+      const data = await resend.emails.send({
+        from: 'StayNjoy Palace <onboarding@resend.dev>', // Use onboarding@resend.dev for unverified domains
         to: Array.isArray(to) ? to : [to],
         subject: subject,
         html: emailHtml,
       });
-      console.log(`Email successfully sent via Resend to ${to}`);
-    } catch (error) {
-      console.error("Resend Email Error:", error);
+      console.log(`Email successfully sent via Resend to ${to}. ID: ${data.data?.id}`);
+    } catch (error: any) {
+      console.error("Resend Email Error:", error?.message || error);
+      if (error?.response) console.error("Resend Response Error:", error.response.data);
     }
   } else {
     console.warn("RESEND_API_KEY not found. Email logged to console below:");
