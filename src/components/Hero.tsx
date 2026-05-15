@@ -65,7 +65,7 @@
              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
              style={{ 
-               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.75'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.75'})), url(${images[index]})`,
+               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'})), url(${images[index]})`,
                backgroundAttachment: 'fixed'
              }}
            />
