@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { Menu, X, Moon, Sun } from "lucide-react"
 import Logo from "./Logo"
 import { useAuth } from "@/lib/auth-context"
+import { logoutAdmin } from "@/app/admin/actions"
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -70,6 +71,12 @@ export default function Navbar() {
                     <Link href="/admin" className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase opacity-80 hover:opacity-100">
                       Admin Panel
                     </Link>
+                    <button 
+                      onClick={() => logoutAdmin()}
+                      className="nav-link text-[11px] font-bold tracking-[0.2em] uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
+                    >
+                      Logout
+                    </button>
                     <Link href="/admin?tab=manual" className="btn-primary !py-2 !px-6 !text-[10px]">
                       Book Now
                     </Link>
@@ -111,7 +118,19 @@ export default function Navbar() {
           <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">My Bookings</Link>
           <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">About</Link>
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Contact</Link>
-          <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary w-2/3">Sign In</Link>
+          {isAdmin ? (
+            <button 
+              onClick={() => {
+                logoutAdmin()
+                setMobileMenuOpen(false)
+              }} 
+              className="btn-outline w-2/3 border-rose-500/50 text-rose-500"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary w-2/3">Sign In</Link>
+          )}
         </div>
       )}
     </nav>

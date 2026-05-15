@@ -3,6 +3,29 @@
 import { db } from "@/lib/firebase-admin"
 import { revalidatePath } from "next/cache"
 import { sendBookingEmail } from "@/lib/email"
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+
+async function validateAdminSession() {
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get("admin_session")
+  
+  if (!sessionCookie) throw new Error("Unauthorized: No session found")
+  
+  try {
+    const session = JSON.parse(sessionCookie.value)
+    if (!session.isAdmin) throw new Error("Unauthorized: Not an admin")
+    return session
+  } catch (e) {
+    throw new Error("Unauthorized: Invalid session")
+  }
+}
+
+export async function logoutAdmin() {
+  const cookieStore = await cookies()
+  cookieStore.delete("admin_session")
+  redirect("/login")
+}
 
 // Convert file to base64 data URI for Firestore storage
 async function fileToDataUri(file: File): Promise<string> {
@@ -13,6 +36,7 @@ async function fileToDataUri(file: File): Promise<string> {
 }
 
 export async function addRoom(formData: FormData) {
+  await validateAdminSession()
   const name = formData.get("name") as string
   const description = formData.get("description") as string
   const price = parseFloat(formData.get("price") as string)
@@ -54,6 +78,7 @@ export async function addRoom(formData: FormData) {
 }
 
 export async function uploadRoomImages(roomId: string, formData: FormData) {
+  await validateAdminSession()
   const files = formData.getAll("images") as File[]
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   
@@ -93,6 +118,7 @@ export async function uploadRoomImages(roomId: string, formData: FormData) {
 }
 
 export async function removeRoomImage(roomId: string, imageIndex: number) {
+  await validateAdminSession()
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   if (!roomDoc.exists) return
   const room = roomDoc.data()!
@@ -117,11 +143,13 @@ export async function removeRoomImage(roomId: string, imageIndex: number) {
 }
 
 export async function addEmailForReports(formData: FormData) {
+  await validateAdminSession()
   const email = formData.get("email") as string
   console.log(`Email ${email} registered for weekly/monthly booking reports.`)
 }
 
 export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED") {
+  await validateAdminSession()
   const bookingDoc = await db.collection("bookings").doc(bookingId).get()
   if (!bookingDoc.exists) return
   const booking = bookingDoc.data()!
@@ -162,6 +190,7 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
 }
 
 export async function createManualBooking(formData: FormData) {
+  await validateAdminSession()
   const roomId = formData.get("roomId") as string
   const customerName = formData.get("customerName") as string
   const customerEmail = formData.get("customerEmail") as string
