@@ -41,7 +41,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 py-6 rounded-xl" style={{ border: "1px solid var(--gold-primary)", backgroundColor: "rgba(184, 143, 84, 0.05)" }}>
           <a href="https://www.instagram.com/stayn_joy_tinsukia" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Camera size={32} style={{ color: "var(--accent-primary)" }} />
-            <span className="text-lg tracking-wider" style={{ color: "var(--gold-light)" }}>@stayn_joy_tinsukia</span>
+            <span className="text-lg tracking-wider" style={{ color: "var(--gold-primary)" }}>@stayn_joy_tinsukia</span>
           </a>
           
           <div className="w-[1px] h-12 bg-[var(--gold-primary)] opacity-50 hidden md:block"></div>
@@ -52,10 +52,10 @@ export default function Footer() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm tracking-widest uppercase mb-1" style={{ color: "var(--accent-primary)" }}>Contact</span>
-              <div className="flex flex-col font-mono text-sm tracking-wider" style={{ color: "var(--gold-light)" }}>
-                <a href="tel:7002475079" className="hover:text-[var(--gold-primary)]">7002475079</a>
-                <a href="tel:8133819414" className="hover:text-[var(--gold-primary)]">8133819414</a>
-                <a href="tel:9181042005" className="hover:text-[var(--gold-primary)]">9181042005</a>
+              <div className="flex flex-col font-mono text-sm tracking-wider" style={{ color: "var(--gold-primary)" }}>
+                <a href="tel:7002475079" className="hover:text-white">7002475079</a>
+                <a href="tel:8133819414" className="hover:text-white">8133819414</a>
+                <a href="tel:9181042005" className="hover:text-white">9181042005</a>
               </div>
             </div>
           </div>
