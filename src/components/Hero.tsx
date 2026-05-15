@@ -57,7 +57,7 @@
              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
              style={{ 
-               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${images[index]})`,
+               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${images[index]})`,
                backgroundAttachment: 'fixed'
              }}
            />
@@ -66,79 +66,81 @@
  
        <Particles />
  
-       {/* Immersive Overlay */}
-       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[var(--background)] pointer-events-none z-[1]" />
+       {/* Immersive Overlays */}
+       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[var(--background)] pointer-events-none z-[1]" />
+       <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-[1]" />
  
-       <div className="max-w-4xl mx-auto text-center z-10">
-         {/* Glass UI Container */}
+       <div className="max-w-6xl mx-auto text-center z-10">
          <motion.div
-           initial={{ opacity: 0, scale: 0.9, y: 50 }}
-           animate={{ opacity: 1, scale: 1, y: 0 }}
-           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-           className="glass-panel border-white/10 bg-white/5 backdrop-blur-[12px] p-12 md:p-20 relative overflow-hidden group shadow-[0_32px_120px_-20px_rgba(0,0,0,0.5)]"
+           initial={{ opacity: 0, y: 50 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+           className="relative"
          >
-           {/* Inner Glows */}
-           <div className="absolute -top-24 -left-24 w-48 h-48 bg-[var(--accent-primary)]/20 blur-[100px] rounded-full" />
-           <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/10 blur-[100px] rounded-full" />
-
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.2 }}
-           >
-             <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] mb-6 block drop-shadow-sm">
-               StayNjoy • Tinsukia, Assam
-             </span>
-           </motion.div>
+           {/* Sophisticated Glows behind text (No box) */}
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-black/20 blur-[120px] rounded-full pointer-events-none z-0" />
  
-           <h1 className="text-6xl md:text-9xl font-heading font-extralight text-white mb-6 leading-tight tracking-tighter relative">
-             {/* Text Back Glows */}
-             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-               <span className="text-[var(--accent-primary)] blur-[40px] opacity-15">Stay N Joy</span>
-               <span className="absolute text-amber-400 blur-[60px] opacity-10">Stay N Joy</span>
-             </div>
+           <div className="relative z-10">
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.2 }}
+             >
+               <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block drop-shadow-lg">
+                 StayNjoy • Tinsukia, Assam
+               </span>
+             </motion.div>
+ 
+             <h1 className="text-7xl md:text-[11rem] font-heading font-extralight text-white mb-8 leading-none tracking-tighter relative">
+               {/* Text Back Glows */}
+               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+                 <span className="text-[var(--accent-primary)] blur-[60px] opacity-20">Stay N Joy</span>
+               </div>
+               
+               <span className="relative z-10">Stay</span> 
+               <span className="relative z-10 text-[var(--accent-primary)] font-black mx-6 italic scale-110 inline-block drop-shadow-[0_0_20px_rgba(209,77,126,0.6)]">N</span> 
+               <span className="relative z-10">Joy</span>
+             </h1>
              
-             <span className="relative z-10 opacity-90">Stay</span> 
-             <span className="relative z-10 text-[var(--accent-primary)] font-black mx-4 italic scale-110 inline-block drop-shadow-[0_0_15px_rgba(209,77,126,0.5)]">N</span> 
-             <span className="relative z-10 opacity-90">Joy</span>
-           </h1>
-           
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.4 }}
-             className="mb-12"
-           >
-             <h2 className="text-3xl md:text-6xl font-cinzel italic text-white mb-6 leading-tight drop-shadow-lg opacity-95">
-               An Escape Into <span className="text-[var(--accent-primary)]">Tranquility</span>
-             </h2>
-             <p className="text-white/70 text-sm md:text-lg max-w-xl mx-auto font-light leading-relaxed tracking-wide">
-               Nestled amidst pristine tea gardens & lush wilderness. <br/>
-               <span className="text-[10px] font-bold tracking-[0.3em] text-amber-500/80 uppercase mt-2 block">Hospitality That Feels Like Home</span>
-             </p>
-           </motion.div>
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.4 }}
+               className="mb-16"
+             >
+               <h2 className="text-4xl md:text-7xl font-cinzel italic text-white mb-8 leading-tight drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                 An Escape Into <span className="text-[var(--accent-primary)]">Tranquility</span>
+               </h2>
+               <div className="flex flex-col items-center gap-4">
+                 <p className="text-white/80 text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide drop-shadow-md">
+                   Nestled amidst pristine tea gardens & lush wilderness.
+                 </p>
+                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-400 uppercase drop-shadow-lg">Hospitality That Feels Like Home</span>
+               </div>
+             </motion.div>
  
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.6 }}
-             className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-           >
-             <Link href="/rooms" className="btn-primary min-w-[240px] !bg-[var(--accent-primary)] shadow-[0_0_40px_rgba(209,77,126,0.4)] hover:scale-105 active:scale-95 text-[11px] font-bold tracking-[0.2em] uppercase">
-               Reserve Your Stay
-             </Link>
-             <Link href="/about" className="btn-outline min-w-[240px] !text-white !border-white/30 hover:!bg-white/10 backdrop-blur-md text-[11px] font-bold tracking-[0.2em] uppercase">
-               Explore More
-             </Link>
-           </motion.div>
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.6 }}
+               className="flex flex-col sm:flex-row gap-8 justify-center items-center"
+             >
+               <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.5)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase">
+                 Reserve Your Stay
+               </Link>
+               <Link href="/about" className="btn-outline min-w-[260px] !py-5 !text-white !border-white/40 hover:!bg-white/10 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase">
+                 Explore More
+               </Link>
+             </motion.div>
+           </div>
          </motion.div>
  
          {/* Simple Assamese Greeting */}
          <motion.div 
            initial={{ opacity: 0 }}
-           animate={{ opacity: 0.8 }}
+           animate={{ opacity: 1 }}
            transition={{ delay: 1, duration: 2 }}
-           className="mt-16 text-[11px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] drop-shadow-md"
+           className="mt-24 text-[12px] font-bold tracking-[0.5em] uppercase text-[var(--accent-primary)] drop-shadow-xl"
          >
            আপোনালৈ স্বাগতম • Welcome
          </motion.div>
