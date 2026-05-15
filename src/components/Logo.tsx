@@ -10,31 +10,43 @@
  
    useEffect(() => setMounted(true), [])
  
-   if (!mounted) return <div className={className + " w-14 bg-gray-200 animate-pulse rounded-full"} />
+   if (!mounted) return <div className={className + " w-32 bg-gray-200 animate-pulse rounded-lg"} />
  
    const isDark = resolvedTheme === "dark"
-   const goldPrimary = "#B88F54"
+   const isLight = resolvedTheme === "light"
  
    return (
      <div 
-       className={`relative flex items-center justify-center cursor-pointer group ${className}`}
+       className={`relative flex items-center gap-4 cursor-pointer group ${className}`}
        onClick={() => window.location.href = "/"}
      >
-       {/* Ornate Gold Borders around the Jaapi Logo */}
-       <div className="absolute inset-[-4px] rounded-full border border-[var(--gold-primary)] opacity-40 group-hover:scale-110 transition-transform duration-700" />
-       <div className="absolute inset-[-8px] rounded-full border border-dashed border-[var(--gold-primary)]/20 animate-[spin_30s_linear_infinite]" />
-       
-       <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-white p-1 shadow-lg border border-[var(--gold-primary)]/30">
-         <Image 
-           src="/jaapi.png" 
-           alt="StayNjoy Logo" 
-           fill 
-           className="object-contain p-0.5"
-         />
+       {/* Ornate Jaapi Mark */}
+       <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
+         <div className="absolute inset-[-4px] rounded-full border border-[var(--gold-primary)] opacity-40 group-hover:scale-110 transition-transform duration-700" />
+         <div className="absolute inset-[-6px] rounded-full border border-dashed border-[var(--gold-primary)]/20 animate-[spin_30s_linear_infinite]" />
+         
+         <div className="relative w-full h-full rounded-full overflow-hidden bg-white p-1 shadow-md border border-[var(--gold-primary)]/30">
+           <Image 
+             src="/jaapi.png" 
+             alt="StayNjoy Mark" 
+             fill 
+             className="object-contain p-0.5"
+           />
+         </div>
        </div>
  
-       {/* Luxury Flare */}
-       <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--gold-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--gold-primary)]" />
+       {/* Brand Text */}
+       <div className="flex flex-col">
+         <span className={`text-xl md:text-2xl font-bold font-heading tracking-tighter leading-none ${isDark ? "text-white" : "text-[#1A0811]"}`}>
+           Stay<span className="text-[var(--accent-primary)] mx-0.5 italic">N</span>joy
+         </span>
+         <span className={`text-[8px] font-bold tracking-[0.3em] uppercase opacity-50 ${isDark ? "text-white" : "text-[#1A0811]"}`}>
+           Resort • Homestay
+         </span>
+       </div>
+ 
+       {/* Luxury Accent Flare */}
+       <div className="absolute -top-1 -left-1 w-2 h-2 bg-[var(--gold-primary)] rounded-full animate-pulse shadow-[0_0_10px_var(--gold-primary)]" />
      </div>
    )
  }
