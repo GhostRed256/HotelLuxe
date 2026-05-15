@@ -104,7 +104,7 @@ export default function Navbar() {
                </Link>
              </div>
            )}
-         </div>v>
+         </div>
 
         {/* Mobile Toggle */}
         <div className="md:hidden flex items-center gap-4">

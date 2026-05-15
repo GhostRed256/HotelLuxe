@@ -1,4 +1,6 @@
-import { motion, AnimatePresence } from "framer-motion"
+"use client"
+ 
+ import { motion, AnimatePresence } from "framer-motion"
  import Link from "next/link"
  import { useState, useEffect } from "react"
  import { useTheme } from "next-themes"
@@ -63,7 +65,7 @@ import { motion, AnimatePresence } from "framer-motion"
              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
              style={{ 
-               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.4'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.4'})), url(${images[index]})`,
+               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.75'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.75'})), url(${images[index]})`,
                backgroundAttachment: 'fixed'
              }}
            />
@@ -73,8 +75,7 @@ import { motion, AnimatePresence } from "framer-motion"
        <Particles theme={resolvedTheme} />
  
        {/* Immersive Overlays */}
-       <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background)] pointer-events-none z-[1] ${isDark ? 'from-black/60' : 'from-white/40'}`} />
-       <div className={`absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-transparent pointer-events-none z-[1] ${isDark ? 'from-black/50' : 'from-white/30'}`} />
+       <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background)] pointer-events-none z-[1] ${isDark ? 'from-black/60' : 'from-white/60'}`} />
  
        <div className="max-w-6xl mx-auto text-center z-10">
          <motion.div
@@ -83,7 +84,7 @@ import { motion, AnimatePresence } from "framer-motion"
            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
            className="relative"
          >
-           {/* Sophisticated Glows behind text */}
+           {/* Subtle glow effect */}
            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] blur-[120px] rounded-full pointer-events-none z-0 ${isDark ? 'bg-black/20' : 'bg-[var(--accent-primary)]/5'}`} />
  
            <div className="relative z-10">
@@ -92,19 +93,14 @@ import { motion, AnimatePresence } from "framer-motion"
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.2 }}
              >
-               <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block drop-shadow-lg">
+               <span className="text-[var(--accent-primary)] font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block">
                  StayNjoy • The Soul of Upper Assam
                </span>
              </motion.div>
  
-             <h1 className={`text-7xl md:text-[11rem] font-heading font-extralight mb-8 leading-none tracking-tighter relative transition-colors duration-700 ${isDark ? 'text-white' : 'text-[var(--foreground)]'}`}>
-               {/* Text Back Glows */}
-               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                 <span className="text-[var(--accent-primary)] blur-[60px] opacity-20">Stay N Joy</span>
-               </div>
-               
+             <h1 className={`text-7xl md:text-[10rem] font-heading font-extralight mb-8 leading-none tracking-tighter relative transition-colors duration-700 ${isDark ? 'text-white' : 'text-[var(--foreground)]'}`}>
                <span className="relative z-10">Stay</span> 
-               <span className="relative z-10 text-[var(--accent-primary)] font-black mx-6 italic scale-110 inline-block drop-shadow-[0_0_20px_rgba(209,77,126,0.6)]">N</span> 
+               <span className="relative z-10 text-[var(--accent-primary)] font-black mx-6 italic scale-110 inline-block">N</span> 
                <span className="relative z-10">Joy</span>
              </h1>
              
@@ -121,7 +117,7 @@ import { motion, AnimatePresence } from "framer-motion"
                  <p className={`text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide transition-colors duration-700 ${isDark ? 'text-white/80 drop-shadow-md' : 'text-[var(--foreground)]/80'}`}>
                    Immerse yourself in curated elegance amidst the emerald tea estates of Tinsukia. 
                  </p>
-                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-500 uppercase drop-shadow-lg">A Legacy of Palatial Warmth</span>
+                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-500 uppercase">A Legacy of Palatial Warmth</span>
                </div>
              </motion.div>
  
@@ -131,10 +127,10 @@ import { motion, AnimatePresence } from "framer-motion"
                transition={{ delay: 0.6 }}
                className="flex flex-col sm:flex-row gap-8 justify-center items-center"
              >
-               <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.5)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase">
+               <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.3)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase border-none">
                  Reserve Your Stay
                </Link>
-               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-white/40 hover:!bg-white/10' : '!text-[var(--foreground)] !border-[var(--border-color)] hover:!bg-[var(--accent-primary)]/5'}`}>
+               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-white/20 hover:!bg-white/10' : '!text-[var(--foreground)] !border-[var(--border-color)] hover:!bg-[var(--accent-primary)]/5'}`}>
                  Explore More
                </Link>
              </motion.div>
@@ -146,7 +142,7 @@ import { motion, AnimatePresence } from "framer-motion"
            initial={{ opacity: 0 }}
            animate={{ opacity: 1 }}
            transition={{ delay: 1, duration: 2 }}
-           className="mt-24 text-[12px] font-bold tracking-[0.5em] uppercase text-[var(--accent-primary)] drop-shadow-xl"
+           className="mt-24 text-[12px] font-bold tracking-[0.5em] uppercase text-[var(--accent-primary)]"
          >
            আপোনালৈ স্বাগতম • Welcome
          </motion.div>
