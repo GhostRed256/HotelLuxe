@@ -1,8 +1,7 @@
-"use client"
- 
- import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
  import Link from "next/link"
  import { useState, useEffect } from "react"
+ import { useTheme } from "next-themes"
  
  const images = [
    "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=2000",
@@ -11,7 +10,7 @@
  ]
  
  // Subtle particle effect
- const Particles = () => (
+ const Particles = ({ theme }: { theme: string | undefined }) => (
    <div className="absolute inset-0 pointer-events-none overflow-hidden z-[5]">
      {[...Array(20)].map((_, i) => (
        <motion.div
@@ -19,7 +18,7 @@
          initial={{ opacity: 0, y: Math.random() * 1000, x: Math.random() * 2000 }}
          animate={{ 
            y: [null, Math.random() * -1000],
-           opacity: [0, 0.4, 0],
+           opacity: [0, theme === 'dark' ? 0.4 : 0.2, 0],
            scale: [0, Math.random() * 2, 0]
          }}
          transition={{ 
@@ -28,7 +27,7 @@
            ease: "linear",
            delay: Math.random() * 10
          }}
-         className="absolute w-1 h-1 bg-white rounded-full blur-[1px]"
+         className={`absolute w-1 h-1 rounded-full blur-[1px] ${theme === 'dark' ? 'bg-white' : 'bg-[var(--accent-primary)]'}`}
        />
      ))}
    </div>
@@ -36,16 +35,23 @@
  
  export default function Hero() {
    const [index, setIndex] = useState(0)
+   const { resolvedTheme } = useTheme()
+   const [mounted, setMounted] = useState(false)
  
    useEffect(() => {
+     setMounted(true)
      const timer = setInterval(() => {
        setIndex((prev) => (prev + 1) % images.length)
      }, 8000)
      return () => clearInterval(timer)
    }, [])
  
+   if (!mounted) return null
+ 
+   const isDark = resolvedTheme === 'dark'
+ 
    return (
-     <section className="min-h-screen flex items-center justify-center relative px-4 overflow-hidden pt-20 bg-black">
+     <section className="min-h-screen flex items-center justify-center relative px-4 overflow-hidden pt-20 bg-[var(--background)]">
        {/* Background Image Slider (Side-to-Side) */}
        <div className="absolute inset-0 z-0">
          <AnimatePresence initial={false}>
@@ -57,18 +63,18 @@
              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
              style={{ 
-               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${images[index]})`,
+               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.4'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.4'})), url(${images[index]})`,
                backgroundAttachment: 'fixed'
              }}
            />
          </AnimatePresence>
        </div>
  
-       <Particles />
+       <Particles theme={resolvedTheme} />
  
        {/* Immersive Overlays */}
-       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[var(--background)] pointer-events-none z-[1]" />
-       <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black/50 to-transparent pointer-events-none z-[1]" />
+       <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background)] pointer-events-none z-[1] ${isDark ? 'from-black/60' : 'from-white/40'}`} />
+       <div className={`absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-transparent pointer-events-none z-[1] ${isDark ? 'from-black/50' : 'from-white/30'}`} />
  
        <div className="max-w-6xl mx-auto text-center z-10">
          <motion.div
@@ -77,8 +83,8 @@
            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
            className="relative"
          >
-           {/* Sophisticated Glows behind text (No box) */}
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-black/20 blur-[120px] rounded-full pointer-events-none z-0" />
+           {/* Sophisticated Glows behind text */}
+           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] blur-[120px] rounded-full pointer-events-none z-0 ${isDark ? 'bg-black/20' : 'bg-[var(--accent-primary)]/5'}`} />
  
            <div className="relative z-10">
              <motion.div
@@ -91,7 +97,7 @@
                </span>
              </motion.div>
  
-             <h1 className="text-7xl md:text-[11rem] font-heading font-extralight text-white mb-8 leading-none tracking-tighter relative">
+             <h1 className={`text-7xl md:text-[11rem] font-heading font-extralight mb-8 leading-none tracking-tighter relative transition-colors duration-700 ${isDark ? 'text-white' : 'text-[var(--foreground)]'}`}>
                {/* Text Back Glows */}
                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
                  <span className="text-[var(--accent-primary)] blur-[60px] opacity-20">Stay N Joy</span>
@@ -108,14 +114,14 @@
                transition={{ delay: 0.4 }}
                className="mb-16"
              >
-               <h2 className="text-4xl md:text-7xl font-cinzel italic text-white mb-8 leading-tight drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+               <h2 className={`text-4xl md:text-7xl font-cinzel italic mb-8 leading-tight transition-colors duration-700 ${isDark ? 'text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]' : 'text-[var(--foreground)]'}`}>
                  Where <span className="text-[var(--accent-primary)]">Heritage</span> Meets the Horizon
                </h2>
                <div className="flex flex-col items-center gap-4">
-                 <p className="text-white/80 text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide drop-shadow-md">
+                 <p className={`text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed tracking-wide transition-colors duration-700 ${isDark ? 'text-white/80 drop-shadow-md' : 'text-[var(--foreground)]/80'}`}>
                    Immerse yourself in curated elegance amidst the emerald tea estates of Tinsukia. 
                  </p>
-                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-400 uppercase drop-shadow-lg">A Legacy of Palatial Warmth</span>
+                 <span className="text-[10px] font-bold tracking-[0.4em] text-amber-500 uppercase drop-shadow-lg">A Legacy of Palatial Warmth</span>
                </div>
              </motion.div>
  
@@ -128,7 +134,7 @@
                <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.5)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase">
                  Reserve Your Stay
                </Link>
-               <Link href="/about" className="btn-outline min-w-[260px] !py-5 !text-white !border-white/40 hover:!bg-white/10 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase">
+               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-white/40 hover:!bg-white/10' : '!text-[var(--foreground)] !border-[var(--border-color)] hover:!bg-[var(--accent-primary)]/5'}`}>
                  Explore More
                </Link>
              </motion.div>
@@ -150,7 +156,7 @@
        <motion.div 
          animate={{ y: [0, 10, 0] }}
          transition={{ duration: 2, repeat: Infinity }}
-         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-[9px] font-bold tracking-[0.5em] uppercase z-10"
+         className={`absolute bottom-10 left-1/2 -translate-x-1/2 text-[9px] font-bold tracking-[0.5em] uppercase z-10 ${isDark ? 'text-white/30' : 'text-[var(--foreground)]/30'}`}
        >
          Scroll
        </motion.div>
