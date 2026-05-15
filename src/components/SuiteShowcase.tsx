@@ -72,7 +72,7 @@ export default function SuiteShowcase({ rooms }: SuiteShowcaseProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl font-cinzel font-bold mb-6 gold-gradient-text drop-shadow-lg inline-block bg-[var(--background)] dark:bg-[#120610] px-8 relative z-10"
+            className="text-5xl md:text-7xl font-cinzel font-bold mb-6 gold-gradient-text drop-shadow-lg inline-block bg-[var(--background)] px-8 relative z-10"
           >
             Our Rooms
           </motion.h2>

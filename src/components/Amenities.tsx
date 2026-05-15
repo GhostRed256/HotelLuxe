@@ -19,7 +19,7 @@ const amenitiesList = [
 
 export default function Amenities() {
   return (
-    <section className="py-16 px-4" style={{ backgroundColor: "#120610", color: "var(--gold-primary)" }}>
+    <section className="py-16 px-4" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 flex items-center justify-center gap-4">
           <div className="h-[1px] bg-[var(--gold-primary)] w-16 opacity-50"></div>
@@ -58,21 +58,21 @@ export default function Amenities() {
               <Heart size={40} />
             </div>
             <div>
-              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1">Couple Friendly</h3>
-              <p className="text-sm opacity-80" style={{ color: "var(--gold-light)" }}>A Comfortable & Safe Stay for Couples</p>
+              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1 text-sm md:text-base">Couple Friendly</h3>
+              <p className="text-xs md:text-sm opacity-90 text-[var(--foreground-secondary)]">A Comfortable & Safe Stay for Couples</p>
             </div>
           </div>
           
           <div 
-            className="flex-1 flex items-center p-4 rounded-xl"
-            style={{ border: "1px solid var(--gold-primary)", backgroundColor: "rgba(184, 143, 84, 0.05)" }}
+            className="flex-1 flex items-center p-4 rounded-xl glass-panel"
+            style={{ border: "1px solid var(--gold-primary)", backgroundColor: "var(--input-bg)" }}
           >
             <div className="mr-4" style={{ color: "var(--accent-primary)" }}>
-              <Music size={40} />
+              <Music size={36} />
             </div>
             <div>
-              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1">Party Friendly</h3>
-              <p className="text-sm opacity-80" style={{ color: "var(--gold-light)" }}>Celebrate Moments, Create Memories</p>
+              <h3 className="text-[var(--accent-primary)] font-bold tracking-wider uppercase mb-1 text-sm md:text-base">Party Friendly</h3>
+              <p className="text-xs md:text-sm opacity-90 text-[var(--foreground-secondary)]">Celebrate Moments, Create Memories</p>
             </div>
           </div>
         </div>

@@ -88,7 +88,7 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
         )}
       </div>
 
-      <div className="p-8 flex-grow flex flex-col bg-white/5 dark:bg-black/60 backdrop-blur-md palace-bg relative">
+      <div className="p-8 flex-grow flex flex-col backdrop-blur-md palace-bg relative" style={{ backgroundColor: "rgba(var(--background-rgb, 255,255,255), 0.05)" }}>
         {/* Floating Artifacts */}
         {isCoupleSuite && (
           <div className="absolute top-4 right-8 text-4xl opacity-20 animate-float pointer-events-none">🌹</div>

@@ -29,8 +29,8 @@
   --surface: #FFFFFF;
 }
 
-[data-theme='dark'] {
-  --background: #1A0811;
+.dark {
+  --background: #0A0307;
   --foreground: #FFFFFF;
   --foreground-secondary: #B88F54;
   --accent-primary: #D14D7E;
@@ -39,10 +39,10 @@
   --gold-dark: #D4A866;
   --gold-light: #2D0B1A;
   --border-color: rgba(209, 77, 126, 0.25);
-  --card-bg: rgba(45, 11, 26, 0.85);
+  --card-bg: rgba(26, 8, 17, 0.85);
   --input-bg: rgba(255, 255, 255, 0.06);
   --input-border: rgba(255, 255, 255, 0.12);
-  --surface: #2D0B1A;
+  --surface: #1A0811;
 }
 
 body {
@@ -64,7 +64,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p, span, li, label, a {
-  color: var(--foreground);
+  color: inherit;
 }
 
 .palace-bg {
@@ -73,10 +73,10 @@ p, span, li, label, a {
   background-color: var(--background);
 }
 
-[data-theme='dark'] .palace-bg {
+.dark .palace-bg {
   background-image: radial-gradient(rgba(209, 77, 126, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
-  background-color: #120610;
+  background-color: #0A0307;
 }
 
 .gold-gradient-text {
@@ -97,7 +97,7 @@ p, span, li, label, a {
   transition: box-shadow 0.4s ease;
 }
 
-[data-theme='dark'] .glass-panel {
+.dark .glass-panel {
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
 }
 
@@ -106,6 +106,7 @@ p, span, li, label, a {
   position: relative;
   text-decoration: none;
   transition: color 0.3s ease;
+  color: var(--foreground);
 }
 
 .nav-link::after {

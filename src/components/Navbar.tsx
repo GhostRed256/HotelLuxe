@@ -1,4 +1,4 @@
-"use client" // Forced redeploy for branding sync
+"use client"
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
@@ -18,16 +18,20 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Dynamic background color based on scroll and theme
+  const getNavBg = () => {
+    if (!scrolled) return "transparent"
+    return resolvedTheme === "dark" 
+      ? "rgba(10, 3, 7, 0.9)" // Match new darker background
+      : "rgba(255, 255, 255, 0.92)"
+  }
+
   return (
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
         scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-sm" : "bg-transparent"
       }`}
-      style={{ 
-        backgroundColor: scrolled 
-          ? (resolvedTheme === 'dark' ? "rgba(26, 8, 17, 0.85)" : "rgba(255, 255, 255, 0.92)") 
-          : "transparent"
-      }}
+      style={{ backgroundColor: getNavBg() }}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo Section */}
@@ -45,8 +49,8 @@ export default function Navbar() {
             )}
             <div className="absolute -inset-2 bg-[var(--accent-primary)]/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
           </div>
-          <span style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.5px", fontFamily: "var(--font-heading)" }} className="hidden sm:inline-block">
-            Stay-<span style={{ color: "var(--accent-primary)" }}>N</span>-Joy
+          <span className="hidden sm:inline-block text-2xl font-bold font-cinzel">
+            Stay-<span className="text-[var(--accent-primary)]">N</span>-Joy
           </span>
         </div>
 
@@ -60,7 +64,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 ml-4">
             {mounted && (
               <button 
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-[var(--accent-primary)]"
                 aria-label="Toggle theme"
               >
@@ -77,7 +81,7 @@ export default function Navbar() {
         <div className="md:hidden flex items-center gap-4">
           {mounted && (
             <button 
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               className="p-2 text-[var(--accent-primary)]"
             >
               {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
@@ -94,7 +98,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden glass-panel rounded-none border-x-0 border-t absolute top-full w-full py-8 flex flex-col items-center gap-6 animate-in slide-in-from-top duration-300">
+        <div className="md:hidden absolute top-full w-full py-8 flex flex-col items-center gap-6 animate-in slide-in-from-top duration-300 bg-[var(--background)] border-b border-[var(--border-color)]">
           <Link href="/" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Home</Link>
           <Link href="/rooms" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">Rooms</Link>
           <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="nav-link text-lg font-bold">About</Link>
