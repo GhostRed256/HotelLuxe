@@ -97,7 +97,7 @@
        <g filter="url(#shadow)">
          <text 
            x="200" 
-           y="280" 
+           y="265" 
            textAnchor="middle" 
            className="font-heading italic font-black"
            style={{ 
@@ -112,17 +112,17 @@
          
          <text 
            x="200" 
-           y="350" 
+           y="330" 
            textAnchor="middle" 
            className="font-heading italic font-black"
            style={{ 
              fontSize: "90px", 
-             fill: "url(#goldGradient)",
              fontFamily: "var(--font-heading), cursive",
              letterSpacing: "-4px"
            }}
          >
-           Njoy
+           <tspan fill="url(#goldGradient)">N</tspan>
+           <tspan fill="#FF2D55">joy</tspan>
          </text>
        </g>
      </svg>
