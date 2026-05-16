@@ -108,8 +108,11 @@ export default function MyBookingsPage() {
           <Loader2 className="animate-spin text-[var(--accent-primary)] h-12 w-12" />
         </div>
       ) : searched && bookings.length === 0 && !error ? (
-        <div className="text-center py-20 opacity-30 italic font-light text-lg">
-          No bookings found for this email address.
+        <div className="text-center py-20">
+          <p className="opacity-30 italic font-light text-lg mb-8">No bookings found for this email address.</p>
+          <Link href="/rooms" className="btn-primary !px-10 !py-4 inline-flex items-center gap-3">
+            <span>Explore Suites & Book</span>
+          </Link>
         </div>
       ) : Array.isArray(bookings) && bookings.length > 0 ? (
         <div className="flex flex-col gap-8">

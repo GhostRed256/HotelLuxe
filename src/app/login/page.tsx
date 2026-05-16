@@ -99,7 +99,14 @@ export default function LoginPage() {
   if (loading) return <div className="h-screen bg-[#050505] flex items-center justify-center text-rose-500 font-black tracking-widest animate-pulse uppercase">Authenticating...</div>
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)] relative overflow-hidden">
+    <div 
+      className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)] relative overflow-hidden"
+      onClick={() => {
+        if (user && !isAdmin) {
+          window.location.assign("/")
+        }
+      }}
+    >
       {/* IDENTITY BANNER */}
       <div className="fixed top-0 left-0 w-full bg-[#E5B8AD] text-[#1A0811] py-3 text-center text-[11px] font-black tracking-[0.4em] uppercase z-[110] shadow-2xl border-b-2 border-black/10">
         GUEST & CUSTOMER RESERVATION PORTAL
@@ -108,6 +115,7 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
+        onClick={(e) => e.stopPropagation()}
         className="glass-panel w-full max-w-md p-10 border-white/10 relative z-10"
         style={{ background: "rgba(229, 184, 173, 0.08)", backdropFilter: "blur(40px)" }}
       >
