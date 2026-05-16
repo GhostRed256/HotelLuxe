@@ -11,7 +11,6 @@ import Footer from "@/components/Footer";
 import JaapiDivider from "@/components/JaapiDivider";
 import { db } from "@/lib/firebase-admin"
 import { serializeFirestoreData } from "@/lib/utils"
-import { Suspense } from "react"
  
  export default async function Home() {
    const roomsSnapshot = await db.collection("rooms").get();

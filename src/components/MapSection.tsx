@@ -1,12 +1,11 @@
 "use client"
  
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
   const [activeLocation, setActiveLocation] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
 
   const locations = [
     {
@@ -35,43 +34,8 @@ export default function MapSection() {
     }
   ]
 
-  // Auto-slide logic
-  useEffect(() => {
-    if (isPaused) return
-    const interval = setInterval(() => {
-      setActiveLocation((prev) => (prev + 1) % locations.length)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [isPaused, locations.length])
-
-  // Handle location from URL (Client Side Only)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const locParam = params.get('loc')
-    if (locParam !== null) {
-      const idx = parseInt(locParam)
-      if (!isNaN(idx) && idx >= 0 && idx < locations.length) {
-        setActiveLocation(idx)
-        setIsPaused(true)
-      }
-    }
-  }, [locations.length])
-
-  // Listen for custom event from Footer
-  useEffect(() => {
-    const handleLocationChange = (e: any) => {
-      const idx = e.detail?.index
-      if (typeof idx === 'number') {
-        setActiveLocation(idx)
-        setIsPaused(true) // Pause auto-slide if user manually selected
-      }
-    }
-    window.addEventListener('map-change-location', handleLocationChange)
-    return () => window.removeEventListener('map-change-location', handleLocationChange)
-  }, [])
-
   return (
-    <section id="map-section" className="py-24 px-4 bg-[var(--background)] relative">
+    <section className="py-24 px-4 bg-[var(--background)] relative">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.div
@@ -148,13 +112,11 @@ export default function MapSection() {
                <p className="text-xs font-light opacity-60 leading-relaxed mb-4">
                  {locations[activeLocation].address}
                </p>
-               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
-                  <span className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--accent-primary)] mb-1">
-                    <Clock size={12} /> 24/7 Concierge
-                  </span>
-                  <a href="tel:7002475079" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 70024 75079</a>
-                  <a href="tel:8133819414" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 81338 19414</a>
-                  <a href="tel:9181042005" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 91810 42005</a>
+               <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-white/10">
+                  <span className="flex items-center gap-1 text-[9px] font-bold tracking-[0.2em] uppercase text-[var(--gold-primary)] mb-1"><Clock size={12} /> 24/7 Concierge</span>
+                  <a href="tel:7002475079" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors">+91 70024 75079</a>
+                  <a href="tel:8133819414" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors">+91 81338 19414</a>
+                  <a href="tel:9181042005" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors">+91 91810 42005</a>
                </div>
             </div>
           </div>
@@ -168,10 +130,7 @@ export default function MapSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                onClick={() => {
-                  setActiveLocation(i)
-                  setIsPaused(true)
-                }}
+                onClick={() => setActiveLocation(i)}
                 className={`group p-8 rounded-[2rem] border cursor-pointer transition-all duration-500 ${
                   activeLocation === i 
                   ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)] shadow-lg scale-[1.02]" 

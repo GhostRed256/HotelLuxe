@@ -1,6 +1,5 @@
 import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
 import Logo from "./Logo"
-import Link from "next/link"
  
  export default function Footer() {
    return (
@@ -49,20 +48,14 @@ import Link from "next/link"
                  { name: "Bordoloi Nagar", desc: "Lake View" },
                  { name: "Bordoloi Nagar", desc: "Income Tax" }
                ].map((loc, i) => (
-                 <li key={i}>
-                   <Link 
-                     href={`/?loc=${i}#map-section`}
-                     onClick={() => {
-                       window.dispatchEvent(new CustomEvent('map-change-location', { detail: { index: i } }))
-                     }}
-                     className="group flex items-start gap-4 hover:translate-x-2 transition-transform cursor-pointer"
-                   >
+                 <li key={i} className="group cursor-default">
+                   <div className="flex items-start gap-4">
                      <MapPin size={18} className="mt-1 text-[var(--accent-primary)] opacity-40 group-hover:opacity-100 transition-opacity" />
                      <div>
-                       <span className="block font-bold text-sm tracking-tight group-hover:text-[var(--accent-primary)] transition-colors">{loc.name}</span>
+                       <span className="block font-bold text-sm tracking-tight">{loc.name}</span>
                        <span className="block text-[10px] font-light opacity-40 uppercase tracking-widest">{loc.desc}</span>
                      </div>
-                   </Link>
+                   </div>
                  </li>
                ))}
              </ul>
@@ -92,7 +85,7 @@ import Link from "next/link"
                    Need a custom arrangement? Our concierge is ready to assist.
                  </p>
                  <a href="tel:7002475079" className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--accent-primary)] group-hover:gap-4 transition-all">
-                   Direct Call Concierge <ArrowUpRight size={14} />
+                   Request Concierge <ArrowUpRight size={14} />
                  </a>
                </div>
              </div>
