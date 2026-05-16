@@ -344,7 +344,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 exit={{ scale: 0.95, opacity: 0, y: 20 }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 onClick={e => e.stopPropagation()}
-                className="glass-panel relative w-full max-w-lg overflow-hidden border-white/10"
+                className="glass-panel relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-hide border-white/10"
               >
                 {/* Header */}
                 <div className="p-8 pb-0">

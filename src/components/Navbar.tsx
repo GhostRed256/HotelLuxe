@@ -21,19 +21,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const getNavBg = () => {
-    if (resolvedTheme === "dark") {
-      return scrolled ? "rgba(10, 3, 7, 0.95)" : "transparent"
-    }
-    return "rgba(229, 184, 173, 1)"
-  }
-
   return (
     <nav 
       className={`fixed top-0 w-full z-[100] transition-all duration-500 py-3 backdrop-blur-sm ${
-        scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg" : "bg-[#E5B8AD] dark:bg-black/10 border-b border-[var(--gold-primary)]/20"
+        scrolled 
+          ? "bg-[#E5B8AD] dark:bg-[#0A0307]/95 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg" 
+          : "bg-[#E5B8AD] dark:bg-transparent border-b border-[var(--gold-primary)]/20"
       }`}
-      style={{ backgroundColor: getNavBg() }}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
          {/* Logo - Flex Item */}
@@ -155,22 +149,47 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-[#E5B8AD] dark:bg-black border-t border-black/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#0A0307] border-t border-white/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
           {["Home", "Rooms", "About", "Contact"].map((item) => (
-            <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase">
+            <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-white hover:text-rose-500 transition-colors">
               {item}
             </Link>
           ))}
-          <div className="pt-4 border-t border-black/10 flex flex-col gap-4">
+          <div className="pt-4 border-t border-white/10 flex flex-col gap-4">
             {isAdmin ? (
-              <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-rose-500">Dashboard</Link>
+              <>
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">Dashboard</Link>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
+              </>
             ) : user ? (
-              <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase">My Stays</Link>
+              <>
+                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-white hover:text-[var(--accent-primary)] transition-colors">My Stays</Link>
+                <button 
+                  onClick={async () => {
+                    await signOut()
+                    setMobileMenuOpen(false)
+                    window.location.assign("/staff-login")
+                  }}
+                  className="text-left text-[12px] font-black uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
+                >
+                  Staff Portal
+                </button>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
+              </>
             ) : (
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase">Guest Login</Link>
-            )}
-            {user && (
-              <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase opacity-50">Sign Out</button>
+              <>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-white hover:text-[var(--accent-primary)] transition-colors">Guest Login</Link>
+                <button 
+                  onClick={async () => {
+                    await signOut()
+                    setMobileMenuOpen(false)
+                    window.location.assign("/staff-login")
+                  }}
+                  className="text-left text-[12px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors"
+                >
+                  Staff Portal
+                </button>
+              </>
             )}
           </div>
         </div>
