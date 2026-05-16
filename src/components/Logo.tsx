@@ -34,6 +34,10 @@
             0%, 100% { filter: drop-shadow(0 0 8px ${goldGlow}44) drop-shadow(0 0 12px ${accentPrimary}33); }
             50% { filter: drop-shadow(0 0 20px ${goldGlow}88) drop-shadow(0 0 25px ${accentPrimary}66); }
           }
+          @keyframes glow-pink {
+            0%, 100% { filter: drop-shadow(0 0 15px ${accentPrimary}66) drop-shadow(0 0 25px ${accentPrimary}44); }
+            50% { filter: drop-shadow(0 0 25px ${accentPrimary}AA) drop-shadow(0 0 45px ${accentPrimary}77); }
+          }
           @keyframes particle-float {
             0% { transform: translate(0, 0) scale(0); opacity: 0; }
             20% { opacity: 0.6; transform: scale(1); }
@@ -46,6 +50,7 @@
           }
           .animate-entrance { animation: logo-entrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
           .animate-glow { animation: glow-pulse 4s ease-in-out infinite; }
+          .animate-glow-pink { animation: glow-pink 4s ease-in-out infinite; }
           .particle { animation: particle-float 6s infinite ease-in-out; pointer-events: none; }
         `}
       </style>
@@ -59,6 +64,17 @@
           <stop offset="100%" style={{ stopColor: goldDark, stopOpacity: 1 }} />
         </linearGradient>
         
+        <filter id="iconDepth" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
+          <feOffset dx="3" dy="5" result="offsetBlur" />
+          <feFlood floodColor="#000" floodOpacity="0.75" result="shadowColor" />
+          <feComposite in="shadowColor" in2="offsetBlur" operator="in" result="shadow" />
+          <feMerge>
+            <feMergeNode in="shadow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
           <feOffset dx="2" dy="2" result="offsetblur" />
@@ -113,8 +129,8 @@
         className="transition-colors duration-700"
       />
 
-      {/* Circular Borders */}
-      <g className="animate-glow">
+      {/* Circular Borders with Pink Glow */}
+      <g className="animate-glow-pink">
         <circle 
           cx="200" cy="200" r="185" 
           fill="none" 
@@ -130,10 +146,10 @@
         />
       </g>
       
-      {/* Icon and Typography Group */}
-      <g className="animate-glow">
+      {/* Icon with Pink Glow and Depth */}
+      <g className="animate-glow-pink">
         {/* Minimalist House Icon */}
-        <g transform="translate(160, 60) scale(0.8)">
+        <g transform="translate(160, 60) scale(0.8)" filter="url(#iconDepth)">
           <path 
             d="M10 50 L50 10 L90 50 L90 90 L10 90 Z" 
             fill="none" 
@@ -156,6 +172,10 @@
             strokeWidth="6"
           />
         </g>
+      </g>
+
+      {/* Typography Group */}
+      <g className="animate-glow">
 
         {/* StayNjoy Typography */}
         <g filter="url(#goldTextGlow)">
