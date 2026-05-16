@@ -4,7 +4,8 @@ import { useAuth } from "@/lib/auth-context"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Phone, Mail, Lock, User, Globe, ChevronDown } from "lucide-react"
+import { Phone, Mail, Lock, User, Globe, ChevronDown, LogIn, UserPlus } from "lucide-react"
+import Link from "next/link"
 
 const countryCodes = [
   { code: "+91", country: "India" },
@@ -43,7 +44,6 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError("")
 
-    // Validation
     if (loginMethod === "phone" && phone.length !== 10) {
       setError("Please enter a valid 10-digit phone number")
       setIsSubmitting(false)
@@ -51,14 +51,13 @@ export default function LoginPage() {
     }
 
     try {
-      // Internal identifier logic (hidden from Firestore profile)
       const finalEmail = loginMethod === "email" ? email : `${countryCode}${phone}@staynjoy.com`
       
       if (isRegister) {
         await register(finalEmail, password, {
           displayName: name,
           phoneNumber: `${countryCode}${phone}`,
-          email: email // Original email if provided (real email)
+          email: email
         })
       } else {
         await signIn(finalEmail, password)
@@ -81,14 +80,20 @@ export default function LoginPage() {
     if (val.length <= 10) setPhone(val)
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center opacity-20 italic">Loading...</div>
+  if (loading) return <div className="h-screen flex items-center justify-center opacity-20 italic">Loading Guest Experience...</div>
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)]">
+      {/* Top Identity Banner */}
+      <div className="fixed top-0 w-full bg-[#E5B8AD] text-[#1A0811] py-2 text-center text-[10px] font-black tracking-[0.3em] uppercase z-[60] shadow-md border-b border-black/5">
+        Customer Reservation Portal — Guest Access Only
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass-panel w-full max-w-md p-10 border-white/5 relative overflow-hidden"
+        style={{ background: "rgba(229, 184, 173, 0.05)" }}
       >
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-primary)]/5 blur-3xl -mr-16 -mt-16" />
@@ -96,7 +101,7 @@ export default function LoginPage() {
 
         <div className="text-center mb-10 relative z-10">
           <div className="w-16 h-16 rounded-full bg-[var(--accent-primary)]/10 flex items-center justify-center mx-auto mb-6">
-            <Globe className="text-[var(--accent-primary)]" size={28} />
+            {isRegister ? <UserPlus className="text-[var(--accent-primary)]" size={28} /> : <LogIn className="text-[var(--accent-primary)]" size={28} />}
           </div>
           <h2 className="text-3xl font-heading font-black tracking-tight mb-2">
             {isRegister ? "Join " : "Guest "} 
@@ -130,7 +135,7 @@ export default function LoginPage() {
           <motion.div 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-xs font-medium mb-6"
+            className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-[10px] font-bold uppercase tracking-widest text-center mb-6"
           >
             {error}
           </motion.div>
@@ -143,10 +148,10 @@ export default function LoginPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex flex-col gap-5"
+                className="flex flex-col gap-5 overflow-hidden"
               >
                 <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Full Name</label>
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block ml-2">Full Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
                     <input 
@@ -160,8 +165,8 @@ export default function LoginPage() {
           </AnimatePresence>
 
           {loginMethod === "email" ? (
-            <div>
-              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block ml-2">
                 Email Address
               </label>
               <div className="relative">
@@ -175,8 +180,8 @@ export default function LoginPage() {
               </div>
             </div>
           ) : (
-            <div>
-              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block ml-2">
                 Phone Number
               </label>
               <div className="flex gap-2">
@@ -202,8 +207,8 @@ export default function LoginPage() {
           )}
 
           {isRegister && loginMethod === "phone" && (
-            <div>
-              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block ml-2">
                 Email Address <span className="opacity-40 italic">(Optional)</span>
               </label>
               <div className="relative">
@@ -217,8 +222,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div>
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Password</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block ml-2">Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
               <input 
@@ -228,12 +233,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={isSubmitting} className="btn-primary !py-4 shadow-xl hover:shadow-2xl transition-all">
-            {isSubmitting ? "Processing..." : (isRegister ? "Create Account" : "Sign In")}
+          <button type="submit" disabled={isSubmitting} className="btn-primary !py-5 shadow-xl hover:shadow-2xl transition-all font-black tracking-[0.2em] uppercase text-[11px] mt-2">
+            {isSubmitting ? "PROCESSING..." : (isRegister ? "CREATE ACCOUNT" : "SIGN IN")}
           </button>
         </form>
 
-        <div className="my-8 flex items-center gap-4 opacity-20">
+        <div className="my-10 flex items-center gap-4 opacity-10">
           <div className="h-[1px] flex-1 bg-white" />
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase">OR</span>
           <div className="h-[1px] flex-1 bg-white" />
@@ -241,25 +246,25 @@ export default function LoginPage() {
 
         <button 
           onClick={signInWithGoogle} 
-          className="btn-outline w-full flex items-center justify-center gap-3 !py-4"
+          className="btn-outline w-full flex items-center justify-center gap-3 !py-4 text-[10px] font-bold tracking-widest uppercase"
         >
           <Globe size={18} className="text-[var(--accent-primary)]" />
           <span>Continue with Google</span>
         </button>
 
-        <div className="mt-10 text-center">
+        <div className="mt-12 text-center">
           <button 
             onClick={() => setIsRegister(!isRegister)}
-            className="text-xs font-bold tracking-widest uppercase text-[var(--accent-primary)] hover:opacity-70 transition-opacity"
+            className="text-[10px] font-black tracking-[0.2em] uppercase text-[var(--accent-primary)] hover:opacity-70 transition-opacity"
           >
-            {isRegister ? "Already have an account? Sign In" : "Don't have an account? Register"}
+            {isRegister ? "Already have an account? Sign In" : "Need an account? Register Now"}
           </button>
           
-          <div className="mt-8 pt-8 border-t border-white/5">
-            <p className="text-[9px] opacity-20 uppercase tracking-widest mb-3">Administrative Access Only</p>
-            <a href="/admin/login" className="text-[10px] font-bold tracking-[0.2em] uppercase text-rose-500 hover:text-rose-400 transition-colors">
-              Resort Management Portal →
-            </a>
+          <div className="mt-10 pt-10 border-t border-white/5">
+            <p className="text-[8px] opacity-20 uppercase tracking-[0.2em] mb-4 font-black">Authorized Staff Entry Only</p>
+            <Link href="/admin/login" className="inline-block px-8 py-3 rounded-full border border-rose-500/30 text-[10px] font-black tracking-[0.2em] uppercase text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/5">
+              Staff Portal Access →
+            </Link>
           </div>
         </div>
       </motion.div>
