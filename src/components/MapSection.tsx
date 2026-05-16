@@ -1,14 +1,12 @@
 "use client"
  
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
   const [activeLocation, setActiveLocation] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
-  const searchParams = useSearchParams()
 
   const locations = [
     {
@@ -46,9 +44,10 @@ export default function MapSection() {
     return () => clearInterval(interval)
   }, [isPaused, locations.length])
 
-  // Handle location from URL search params
+  // Handle location from URL (Client Side Only)
   useEffect(() => {
-    const locParam = searchParams.get('loc')
+    const params = new URLSearchParams(window.location.search)
+    const locParam = params.get('loc')
     if (locParam !== null) {
       const idx = parseInt(locParam)
       if (!isNaN(idx) && idx >= 0 && idx < locations.length) {
@@ -56,7 +55,7 @@ export default function MapSection() {
         setIsPaused(true)
       }
     }
-  }, [searchParams, locations.length])
+  }, [locations.length])
 
   // Listen for custom event from Footer
   useEffect(() => {

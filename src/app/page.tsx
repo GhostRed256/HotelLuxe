@@ -22,9 +22,7 @@ import { Suspense } from "react"
  
    return (
      <>
-       <Suspense fallback={null}>
-         <WelcomePopup />
-       </Suspense>
+       <WelcomePopup />
        <Hero />
        <JaapiDivider />
        <QuotesMarquee />
@@ -32,9 +30,7 @@ import { Suspense } from "react"
        <JaapiDivider />
        <Amenities />
        <LocationShowcase />
-       <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading Experience...</div>}>
-         <MapSection />
-       </Suspense>
+       <MapSection />
        <Footer />
      </>
    );
