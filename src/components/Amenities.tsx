@@ -42,7 +42,7 @@ export default function Amenities() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.05 }}
-              className="glass-panel p-8 flex flex-col items-center text-center hover:bg-white/10 transition-all border-white/5"
+              className="glass-panel p-8 flex flex-col items-center text-center hover:bg-white/10 transition-all border border-[var(--gold-primary)]/40 shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)]"
             >
               <div className="mb-4 text-[var(--accent-primary)] drop-shadow-lg">
                 {item.icon}
@@ -57,7 +57,7 @@ export default function Amenities() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <motion.div 
             whileHover={{ y: -5 }}
-            className="glass-panel p-10 flex items-center gap-8 border-l-4 border-l-[var(--accent-primary)]"
+            className="glass-panel p-10 flex items-center gap-8 border border-[var(--gold-primary)]/40 border-l-4 border-l-[var(--accent-primary)] shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)]"
           >
             <div className="text-[var(--accent-primary)]">
               <Heart size={48} strokeWidth={1} />
@@ -70,7 +70,7 @@ export default function Amenities() {
           
           <motion.div 
             whileHover={{ y: -5 }}
-            className="glass-panel p-10 flex items-center gap-8 border-l-4 border-l-[var(--gold-primary)]"
+            className="glass-panel p-10 flex items-center gap-8 border border-[var(--gold-primary)]/40 border-l-4 border-l-[var(--gold-primary)] shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)]"
           >
             <div className="text-[var(--gold-primary)]">
               <Music size={48} strokeWidth={1} />
