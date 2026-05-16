@@ -86,10 +86,14 @@ export default function Navbar() {
                     </button>
                   </div>
                 ) : user ? (
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-5">
                     <Link href="/bookings" className={`flex items-center gap-2 text-[9px] font-black tracking-[0.2em] uppercase transition-all ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
                       <User size={14} className="text-[var(--accent-primary)]" />
                       My Stays
+                    </Link>
+                    <span className="w-[1px] h-3 bg-rose-500/20" />
+                    <Link href="/admin/login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors">
+                      Staff
                     </Link>
                     <button 
                       onClick={() => signOut()}
