@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Phone, Mail, Lock, User, Globe, ChevronDown, LogIn, UserPlus, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
+import { normalizeGuestIdentifier, formatGuestIdentifierForDisplay } from "@/lib/utils"
 
 const countryCodes = [
   { code: "+91", country: "India" },
