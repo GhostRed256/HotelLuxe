@@ -11,10 +11,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    // REMOVED orderBy for compatibility. Sorting in-memory to prevent hangs/crashes 
-    // if the user hasn't created the Firestore composite index yet.
+    // RESTORED Native Firestore Ordering. Now that you've created the index,
+    // this will perform at cloud-scale speed directly on the Google servers.
     const bookingsSnapshot = await db.collection("bookings")
       .where("customerEmail", "==", email)
+      .orderBy("createdAt", "desc")
       .get()
 
     const roomsSnapshot = await db.collection("rooms").get()
@@ -30,16 +31,25 @@ export async function GET(request: Request) {
       }
     })
 
-    // Manual Sort by createdAt (descending) - works perfectly without cloud index
-    bookings.sort((a: any, b: any) => {
-      const dateA = a.createdAt?._seconds || new Date(a.createdAt).getTime() || 0
-      const dateB = b.createdAt?._seconds || new Date(b.createdAt).getTime() || 0
-      return dateB - dateA
-    })
-
     return NextResponse.json(bookings)
   } catch (error: any) {
     console.error("Bookings Fetch Error:", error)
+    
+    // Fallback logic: If the index is still "Building", return results without order
+    // to prevent the "Rotating Loader" from appearing while the index is being created.
+    if (error.message?.includes("index")) {
+       const fallbackSnapshot = await db.collection("bookings")
+        .where("customerEmail", "==", email)
+        .get()
+       
+       const bookings = fallbackSnapshot.docs.map(doc => ({
+         id: doc.id,
+         ...serializeFirestoreData(doc.data())
+       }))
+       
+       return NextResponse.json(bookings)
+    }
+
     return NextResponse.json({ 
       error: "Failed to fetch bookings", 
       details: error.message 
