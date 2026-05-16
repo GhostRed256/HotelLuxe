@@ -1,5 +1,6 @@
 import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
 import Logo from "./Logo"
+import Link from "next/link"
  
  export default function Footer() {
    return (
@@ -48,14 +49,20 @@ import Logo from "./Logo"
                  { name: "Bordoloi Nagar", desc: "Lake View" },
                  { name: "Bordoloi Nagar", desc: "Income Tax" }
                ].map((loc, i) => (
-                 <li key={i} className="group cursor-default">
-                   <div className="flex items-start gap-4">
+                 <li key={i}>
+                   <Link 
+                     href={`/?loc=${i}#map-section`}
+                     onClick={() => {
+                       window.dispatchEvent(new CustomEvent('map-change-location', { detail: { index: i } }))
+                     }}
+                     className="group flex items-start gap-4 hover:translate-x-2 transition-transform cursor-pointer"
+                   >
                      <MapPin size={18} className="mt-1 text-[var(--accent-primary)] opacity-40 group-hover:opacity-100 transition-opacity" />
                      <div>
-                       <span className="block font-bold text-sm tracking-tight">{loc.name}</span>
+                       <span className="block font-bold text-sm tracking-tight group-hover:text-[var(--accent-primary)] transition-colors">{loc.name}</span>
                        <span className="block text-[10px] font-light opacity-40 uppercase tracking-widest">{loc.desc}</span>
                      </div>
-                   </div>
+                   </Link>
                  </li>
                ))}
              </ul>

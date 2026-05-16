@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
 
@@ -60,6 +60,21 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
       scrollRef.current.scrollBy({ left: dir === "left" ? -w : w, behavior: "smooth" })
     }
   }
+
+  // Auto-scroll logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" })
+        } else {
+          scroll("right")
+        }
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [categories.length])
 
   return (
     <section className="py-24 relative overflow-hidden bg-[var(--background)]">

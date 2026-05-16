@@ -1,11 +1,12 @@
 "use client"
  
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
   const [activeLocation, setActiveLocation] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
   const locations = [
     {
@@ -34,10 +35,43 @@ export default function MapSection() {
     }
   ]
 
+  // Auto-slide logic
+  useEffect(() => {
+    if (isPaused) return
+    const interval = setInterval(() => {
+      setActiveLocation((prev) => (prev + 1) % locations.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [isPaused, locations.length])
+
+  // Listen for custom event from Footer
+  useEffect(() => {
+    const handleLocationChange = (e: any) => {
+      const idx = e.detail?.index
+      if (typeof idx === 'number') {
+        setActiveLocation(idx)
+        setIsPaused(true) // Pause auto-slide if user manually selected
+      }
+    }
+    window.addEventListener('map-change-location', handleLocationChange)
+    return () => window.removeEventListener('map-change-location', handleLocationChange)
+  }, [])
+
+  // Handle initial location from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const locParam = params.get('loc')
+    if (locParam !== null) {
+      const idx = parseInt(locParam)
+      if (!isNaN(idx) && idx >= 0 && idx < locations.length) {
+        setActiveLocation(idx)
+        setIsPaused(true)
+      }
+  }, [locations.length])
+
   return (
-    <section className="py-24 px-4 bg-[var(--background)] relative">
+    <section id="map-section" className="py-24 px-4 bg-[var(--background)] relative">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -132,7 +166,10 @@ export default function MapSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                onClick={() => setActiveLocation(i)}
+                onClick={() => {
+                  setActiveLocation(i)
+                  setIsPaused(true)
+                }}
                 className={`group p-8 rounded-[2rem] border cursor-pointer transition-all duration-500 ${
                   activeLocation === i 
                   ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)] shadow-lg scale-[1.02]" 
