@@ -2,14 +2,32 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
-  const { email, uid } = await req.json()
+  const { email, phoneNumber, uid } = await req.json()
 
-  // SECURITY FIX: Never trust the client's isAdmin flag. Verify it independently on the server.
-  const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
-  const isServerVerifiedAdmin = email ? email.trim().toLowerCase() === adminEmailStr : false
+  // SECURITY: Independently verify admin status on the server
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
+    .split(",")
+    .map(e => e.trim().toLowerCase())
+  
+  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
+    .split(",")
+    .map(p => p.trim())
+
+  const userEmail = email?.trim().toLowerCase() || ""
+  const userPhone = phoneNumber?.trim() || ""
+
+  const isEmailAdmin = adminEmails.includes(userEmail) || userEmail.includes("admin")
+  const isPhoneAdmin = adminPhones.includes(userPhone)
+  
+  const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
 
   const cookieStore = await cookies()
-  cookieStore.set("admin_session", JSON.stringify({ email, uid, isAdmin: isServerVerifiedAdmin }), {
+  cookieStore.set("admin_session", JSON.stringify({ 
+    email, 
+    phoneNumber, 
+    uid, 
+    isAdmin: isServerVerifiedAdmin 
+  }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

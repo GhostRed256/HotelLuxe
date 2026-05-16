@@ -48,14 +48,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Determine admin status based on env var or fallback for demo
-  const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
-  const adminPhone = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210").trim()
-  
-  const isAdmin = user ? (
-    (user.email?.trim().toLowerCase() === adminEmail || user.email?.trim().toLowerCase().includes("admin")) ||
-    (user.phoneNumber?.trim() === adminPhone)
-  ) : false
+  // Helper to check if a user is an admin based on environment variables
+  const checkIsAdmin = (u: User | null) => {
+    if (!u) return false
+    
+    // Support multiple admins via comma-separated lists
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
+      .split(",")
+      .map(e => e.trim().toLowerCase())
+    
+    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
+      .split(",")
+      .map(p => p.trim())
+
+    const userEmail = u.email?.trim().toLowerCase() || ""
+    const userPhone = u.phoneNumber?.trim() || ""
+
+    const isEmailAdmin = adminEmails.includes(userEmail) || userEmail.includes("admin")
+    const isPhoneAdmin = adminPhones.includes(userPhone)
+
+    return isEmailAdmin || isPhoneAdmin
+  }
+
+  const isAdmin = checkIsAdmin(user)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -68,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (docSnap.exists()) {
           setUserData(docSnap.data() as UserData)
         } else if (user.displayName || user.phoneNumber) {
-          // If Google sign-in or similar, create a profile if it doesn't exist
           const newData = { 
             displayName: user.displayName || "", 
             phoneNumber: user.phoneNumber || "",
@@ -78,15 +92,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUserData(newData)
         }
 
-        // Update server session cookie
+        // Update server session cookie with verified admin status
         await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             email: user.email, 
+            phoneNumber: user.phoneNumber,
             uid: user.uid,
-            isAdmin: user.email?.trim().toLowerCase() === adminEmail || 
-                     user.email?.trim().toLowerCase().includes("admin")
+            isAdmin: checkIsAdmin(user)
           })
         })
       } else {
@@ -98,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => unsubscribe()
-  }, [adminEmail])
+  }, []) // adminEmail check removed from deps as we use local helper
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider()
@@ -118,15 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, pass: string, data: UserData) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass)
     if (res.user) {
-      // Create a clean profile for Firestore
       const cleanData: any = { ...data }
-      
-      // If the email passed is our internal dummy email, don't store it as the user's email
       if (email.includes("@staynjoy.com") || email.includes("@hotel.com")) {
-        // If they didn't provide a real email, ensure the email field is empty or not set
-        if (!data.email) {
-          delete cleanData.email
-        }
+        if (!data.email) delete cleanData.email
       }
 
       await setDoc(doc(db, "customers", res.user.uid), {

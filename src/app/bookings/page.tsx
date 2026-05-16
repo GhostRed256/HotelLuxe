@@ -12,8 +12,9 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [hasAutoSearched, setHasAutoSearched] = useState(false)
   const [error, setError] = useState("")
-  const { user } = useAuth()
+  const { user, userData } = useAuth()
 
   const performSearch = useCallback(async (targetEmail: string) => {
     if (!targetEmail) return
@@ -54,11 +55,15 @@ export default function MyBookingsPage() {
   }, [])
 
   useEffect(() => {
-    if (user?.email && !searched && !isLoading) {
-      setEmail(user.email)
-      performSearch(user.email)
+    // Priority: 1. Profile Email from Firestore, 2. Firebase Auth Email
+    const targetEmail = userData?.email || user?.email
+    
+    if (targetEmail && !hasAutoSearched && !isLoading) {
+      setEmail(targetEmail)
+      performSearch(targetEmail)
+      setHasAutoSearched(true)
     }
-  }, [user, searched, isLoading, performSearch])
+  }, [user, userData, hasAutoSearched, isLoading, performSearch])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()

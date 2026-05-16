@@ -38,10 +38,14 @@ export default function Login() {
         cleanPhone = `+${cleanPhone}`
       }
       
-      const adminPhone = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210").trim()
-      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
+      const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
+        .split(",")
+        .map(p => p.trim())
       
-      if (cleanPhone === adminPhone) {
+      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").split(",")[0].trim().toLowerCase()
+      
+      if (adminPhones.includes(cleanPhone)) {
+        // Map phone to the primary admin email for Firebase Auth login
         loginIdentifier = adminEmailStr
       } else {
         setError("ACCESS DENIED: Phone number not found in Staff Registry.")
