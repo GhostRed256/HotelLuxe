@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { motion, AnimatePresence } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Phone, Mail, Lock, User, Globe, ChevronDown, LogIn, UserPlus, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
@@ -28,17 +28,6 @@ export default function LoginPage() {
   const [name, setName] = useState("")
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Redirect immediately when session is active
-  useEffect(() => {
-    if (!loading && user) {
-      if (isAdmin) {
-        window.location.assign("/admin")
-      } else {
-        window.location.assign("/")
-      }
-    }
-  }, [user, isAdmin, loading])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +67,9 @@ export default function LoginPage() {
       } else {
         await signIn(finalEmail, password)
       }
+      
+      // NO AUTOMATIC REDIRECT - User stays on page until they click a button
+      // This is handled by the "user && !isAdmin" view below
     } catch (err: any) {
       const msg = err.message || ""
       if (msg.includes("auth/user-not-found")) {
@@ -98,7 +90,9 @@ export default function LoginPage() {
     if (val.length <= 10) setPhone(val)
   }
 
-  const navigateToStaff = () => {
+  const navigateToStaff = async () => {
+    // Force logout before entering staff portal to clear guest session confusion
+    await signOut()
     window.location.assign("/staff-login")
   }
 

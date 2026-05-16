@@ -92,9 +92,15 @@ export default function Navbar() {
                       My Stays
                     </Link>
                     <span className="w-[1px] h-3 bg-rose-500/20" />
-                    <Link href="/staff-login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors">
+                    <button 
+                      onClick={async () => {
+                        await signOut()
+                        window.location.assign("/staff-login")
+                      }}
+                      className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors"
+                    >
                       Staff
-                    </Link>
+                    </button>
                     <button 
                       onClick={() => signOut()}
                       className={`text-[9px] font-bold tracking-[0.2em] uppercase transition-colors ${scrolled ? "text-rose-500 hover:text-rose-600" : "text-[#1A0811] hover:text-rose-600 dark:text-rose-400"}`}
@@ -108,9 +114,15 @@ export default function Navbar() {
                       Sign In
                     </Link>
                     <span className="w-[1px] h-3 bg-rose-500/20" />
-                    <Link href="/staff-login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500 hover:text-rose-600 transition-colors">
+                    <button 
+                      onClick={async () => {
+                        await signOut()
+                        window.location.assign("/staff-login")
+                      }}
+                      className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500 hover:text-rose-600 transition-colors"
+                    >
                       Staff Portal
-                    </Link>
+                    </button>
                   </div>
                 )}
                 
