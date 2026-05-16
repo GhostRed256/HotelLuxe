@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Explicit redirect logic
   useEffect(() => {
     if (!loading && user) {
       if (isAdmin) {
@@ -97,16 +98,16 @@ export default function LoginPage() {
     if (val.length <= 10) setPhone(val)
   }
 
+  // Force navigate function to ensure capture
   const navigateToStaff = () => {
+    console.log("Navigating to staff portal...")
     window.location.assign("/admin/login")
   }
-
-  if (loading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black text-rose-500 font-bold tracking-widest animate-pulse uppercase">Verifying Identity...</div>
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)] relative overflow-hidden">
       {/* IDENTITY BANNER */}
-      <div className="fixed top-0 left-0 w-full bg-[#E5B8AD] text-[#1A0811] py-3 text-center text-[11px] font-black tracking-[0.4em] uppercase z-[100] shadow-2xl border-b-2 border-black/10">
+      <div className="fixed top-0 left-0 w-full bg-[#E5B8AD] text-[#1A0811] py-3 text-center text-[11px] font-black tracking-[0.4em] uppercase z-[110] shadow-2xl border-b-2 border-black/10">
         GUEST & CUSTOMER RESERVATION PORTAL
       </div>
 
@@ -128,6 +129,12 @@ export default function LoginPage() {
             {isRegister ? "Start your luxury journey" : "Manage your resort reservations"}
           </p>
         </div>
+
+        {loading && !user && (
+          <div className="text-center py-4 mb-4 text-[10px] font-black uppercase tracking-widest text-[var(--accent-primary)] animate-pulse">
+            Syncing Profile...
+          </div>
+        )}
 
         {!isRegister && (
           <div className="flex p-1.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5 mb-10 shadow-inner">
@@ -301,16 +308,16 @@ export default function LoginPage() {
             {isRegister ? "Already have an account? Sign In" : "New guest? Create Account"}
           </button>
           
-          {/* STAFF LOGIN SECTION - EXPLICIT FORCE REDIRECT */}
           <div className="mt-14 pt-10 border-t border-white/5 bg-rose-500/5 -mx-10 px-10 rounded-b-3xl">
             <div className="flex items-center justify-center gap-2 mb-4 text-rose-500 animate-pulse">
               <ShieldAlert size={14} />
               <p className="text-[9px] uppercase tracking-[0.2em] font-black">Authorized Staff Personnel Only</p>
             </div>
+            {/* USE A BUTTON WITH ONCLICK TO BE 100% SURE IT CAPTURES EVENT */}
             <button 
+              type="button"
               onClick={navigateToStaff}
-              className="inline-block w-full py-4 rounded-xl border-2 border-rose-500/40 text-[11px] font-black tracking-[0.3em] uppercase text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/10 cursor-pointer text-center"
-              style={{ position: 'relative', zIndex: 50 }}
+              className="w-full py-4 rounded-xl border-2 border-rose-500/40 text-[11px] font-black tracking-[0.3em] uppercase text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/10 cursor-pointer text-center"
             >
               STAFF PORTAL ACCESS →
             </button>

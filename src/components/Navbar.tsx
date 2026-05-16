@@ -23,26 +23,26 @@ export default function Navbar() {
 
   const getNavBg = () => {
     if (resolvedTheme === "dark") {
-      return scrolled ? "rgba(10, 3, 7, 0.9)" : "transparent"
+      return scrolled ? "rgba(10, 3, 7, 0.95)" : "transparent"
     }
     return "rgba(229, 184, 173, 1)"
   }
 
   return (
     <nav 
-      className={`fixed top-0 w-full z-50 transition-all duration-500 py-3 backdrop-blur-sm ${
+      className={`fixed top-0 w-full z-[100] transition-all duration-500 py-3 backdrop-blur-sm ${
         scrolled ? "backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg" : "bg-[#E5B8AD] dark:bg-black/10 border-b border-[var(--gold-primary)]/20"
       }`}
       style={{ backgroundColor: getNavBg() }}
     >
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center relative">
-         {/* Logo Section */}
-         <div className="flex items-center">
-            <Logo className="h-14 md:h-16" />
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+         {/* Logo - Flex Item */}
+         <div className="flex-shrink-0">
+            <Logo className="h-12 md:h-16" />
          </div>
   
-         {/* Desktop Nav - Navigation Links */}
-         <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+         {/* Desktop Nav - Middle Links (Only visible on large screens to avoid overlap) */}
+         <div className="hidden lg:flex items-center gap-10 flex-1 justify-center whitespace-nowrap">
             {["Home", "Rooms", "About", "Contact"].map((item) => (
               <Link 
                 key={item} 
@@ -56,27 +56,27 @@ export default function Navbar() {
             ))}
          </div>
   
-         {/* Right Side - Session & Actions */}
-         <div className="hidden md:flex items-center gap-6 relative z-10">
+         {/* Right Side - Actions (Always visible, Flex End) */}
+         <div className="hidden md:flex items-center gap-6 flex-shrink-0 ml-auto relative z-10">
             {mounted && (
               <button 
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className={`p-2 transition-transform hover:rotate-12 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}
+                className={`p-2 transition-transform hover:scale-110 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}
               >
-                {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                {resolvedTheme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
               </button>
             )}
   
             {mounted && !loading && (
               <div className="flex items-center gap-6">
                 {isAdmin ? (
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-4">
                     <Link 
                       href="/admin" 
-                      className={`flex items-center gap-2 text-[9px] font-black tracking-[0.2em] uppercase px-4 py-2 bg-rose-500 text-white rounded-full shadow-lg shadow-rose-500/20 transition-all hover:scale-105 active:scale-95`}
+                      className="flex items-center gap-2 text-[9px] font-black tracking-[0.2em] uppercase px-4 py-2 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-700 transition-all"
                     >
                       <ShieldCheck size={14} />
-                      Staff Dashboard
+                      Dashboard
                     </Link>
                     <button 
                       onClick={() => signOut()}
@@ -86,7 +86,7 @@ export default function Navbar() {
                     </button>
                   </div>
                 ) : user ? (
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-4">
                     <Link href="/bookings" className={`flex items-center gap-2 text-[9px] font-black tracking-[0.2em] uppercase transition-all ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}>
                       <User size={14} className="text-[var(--accent-primary)]" />
                       My Stays
@@ -103,7 +103,7 @@ export default function Navbar() {
                     <Link href="/login" className={`text-[9px] font-black tracking-[0.2em] uppercase px-5 py-2 border border-black/10 dark:border-white/10 rounded-full transition-all ${scrolled ? "text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)]" : "text-[#1A0811] hover:bg-[#1A0811] hover:text-white dark:text-white dark:hover:bg-white dark:hover:text-black"}`}>
                       Sign In
                     </Link>
-                    <span className="w-[1px] h-3 bg-rose-500/30" />
+                    <span className="w-[1px] h-3 bg-rose-500/20" />
                     <Link href="/admin/login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500 hover:text-rose-600 transition-colors">
                       Staff Portal
                     </Link>
@@ -139,7 +139,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-[#E5B8AD] dark:bg-black border-t border-black/5 p-6 flex flex-col gap-6 shadow-2xl">
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#E5B8AD] dark:bg-black border-t border-black/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
           {["Home", "Rooms", "About", "Contact"].map((item) => (
             <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase">
               {item}
@@ -153,7 +153,9 @@ export default function Navbar() {
             ) : (
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase">Guest Login</Link>
             )}
-            <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase opacity-50">Sign Out</button>
+            {user && (
+              <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase opacity-50">Sign Out</button>
+            )}
           </div>
         </div>
       )}
