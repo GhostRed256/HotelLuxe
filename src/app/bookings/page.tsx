@@ -1,9 +1,9 @@
 "use client"
 export const dynamic = "force-dynamic"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Search, Loader2, CheckCircle, Clock, XCircle } from "lucide-react"
+import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 export default function MyBookingsPage() {
@@ -11,36 +11,60 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [error, setError] = useState("")
   const { user } = useAuth()
 
-  useEffect(() => {
-    if (user?.email && !searched) {
-      setEmail(user.email)
-      performSearch(user.email)
-    }
-  }, [user])
-
-  const performSearch = async (targetEmail: string) => {
+  const performSearch = useCallback(async (targetEmail: string) => {
+    if (!targetEmail) return
     setIsLoading(true)
-    setSearched(true)
+    setError("")
     try {
       const res = await fetch(`/api/bookings?email=${encodeURIComponent(targetEmail)}`)
       const data = await res.json()
-      setBookings(data)
-    } catch (err) {
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch bookings")
+      }
+      
+      if (Array.isArray(data)) {
+        setBookings(data)
+        setSearched(true)
+      } else {
+        setBookings([])
+        setSearched(true)
+      }
+    } catch (err: any) {
       console.error(err)
+      setError(err.message || "An unexpected error occurred while fetching your bookings.")
+      setBookings([])
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (user?.email && !searched && !isLoading) {
+      setEmail(user.email)
+      performSearch(user.email)
+    }
+  }, [user, searched, isLoading, performSearch])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
+    if (!email || isLoading) return
     performSearch(email)
   }
 
-  const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  const fmtDate = (d: any) => {
+    if (!d) return "N/A"
+    try {
+      const date = new Date(d)
+      if (isNaN(date.getTime())) return "Invalid Date"
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    } catch {
+      return "N/A"
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-8 pt-32 min-h-screen bg-[var(--background)]">
@@ -69,19 +93,29 @@ export default function MyBookingsPage() {
         </button>
       </form>
 
+      {error && (
+        <div className="max-w-2xl mx-auto mb-10 p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-start gap-4 text-rose-500">
+          <AlertCircle className="shrink-0 mt-0.5" size={20} />
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-widest mb-1">Search Error</p>
+            <p className="text-sm opacity-80">{error}</p>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="animate-spin text-[var(--accent-primary)] h-12 w-12" />
         </div>
-      ) : searched && bookings.length === 0 ? (
+      ) : searched && bookings.length === 0 && !error ? (
         <div className="text-center py-20 opacity-30 italic font-light text-lg">
           No bookings found for this email address.
         </div>
-      ) : (
+      ) : Array.isArray(bookings) && bookings.length > 0 ? (
         <div className="flex flex-col gap-8">
           {bookings.map((booking, index) => (
             <motion.div 
-              key={booking.id}
+              key={booking.id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -97,12 +131,12 @@ export default function MyBookingsPage() {
                       {booking.status === 'APPROVED' ? <CheckCircle size={12} /> : 
                        booking.status === 'REJECTED' ? <XCircle size={12} /> : 
                        <Clock size={12} />}
-                      {booking.status}
+                      {booking.status || "PENDING"}
                     </span>
                   </div>
                   <h3 className="text-2xl font-heading font-bold mb-2">{booking.room?.name || "Suite Request"}</h3>
                   <p className="text-[10px] font-bold tracking-[0.15em] uppercase opacity-30">
-                    {booking.room?.location} • {booking.room?.type}
+                    {booking.room?.location || "Resort Grounds"} • {booking.room?.type || "Luxury Suite"}
                   </p>
                 </div>
                 <div className="text-right">
@@ -132,7 +166,7 @@ export default function MyBookingsPage() {
             </motion.div>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

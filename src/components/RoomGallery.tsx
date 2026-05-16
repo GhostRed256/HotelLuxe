@@ -99,10 +99,14 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     if (!checkIn || !checkOut || !selectedRoomPrice) return 0
     const d1 = new Date(checkIn)
     const d2 = new Date(checkOut)
+    
+    // Defensive check for invalid dates
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0
+    
     const diffTime = d2.getTime() - d1.getTime()
     if (diffTime <= 0) return 0
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays * selectedRoomPrice
+    return diffDays * (Number(selectedRoomPrice) || 0)
   }, [checkIn, checkOut, selectedRoomPrice])
 
   // Floors available based on selected suite type
