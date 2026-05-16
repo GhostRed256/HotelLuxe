@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
+import { Lock } from "lucide-react"
 
 export default function Login() {
   const { user, isAdmin, signInWithGoogle, loading } = useAuth()
@@ -38,13 +39,9 @@ export default function Login() {
       if (cleanPhone.length === 10) {
         cleanPhone = `+91${cleanPhone}`
       } else if (!cleanPhone.startsWith("+")) {
-        // Fallback for other formats
         cleanPhone = `+${cleanPhone}`
       }
       
-      // For Admin Phone login, we check if it matches the configured admin phone
-      // and then use the admin email to sign in to Firebase Auth.
-      // This keeps the Auth account consistent while allowing phone entry.
       const adminPhone = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210").trim()
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
       
@@ -93,29 +90,42 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", background: "#0D0D0D" }}>
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         className="glass-panel"
-        style={{ width: "100%", maxWidth: "420px", padding: "3rem", border: "1px solid rgba(255,255,255,0.05)" }}
+        style={{ 
+          width: "100%", maxWidth: "440px", padding: "4rem 3rem", 
+          border: "1px solid rgba(255,255,255,0.05)",
+          background: "linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95))",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+        }}
       >
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <h2 style={{ fontSize: "2rem", fontWeight: 900, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-            Staff <span style={{ color: "var(--accent-primary)" }}>Portal</span>
+        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div style={{ 
+            width: "60px", height: "60px", borderRadius: "50%", background: "rgba(225, 29, 72, 0.1)", 
+            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" 
+          }}>
+            <Lock style={{ color: "#e11d48" }} size={24} />
+          </div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "0.1em", marginBottom: "0.5rem", textTransform: "uppercase", color: "#F3F4F6" }}>
+            Staff <span style={{ color: "#e11d48" }}>Management</span>
           </h2>
-          <p style={{ fontSize: "0.8rem", opacity: 0.4, fontWeight: 300 }}>Secure entry for hotel management only.</p>
+          <p style={{ fontSize: "0.75rem", opacity: 0.4, fontWeight: 300, textTransform: "uppercase", letterSpacing: "0.2em" }}>
+            Authorized Personnel Only
+          </p>
         </div>
 
         {/* Login Method Toggle */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "2rem", background: "rgba(255,255,255,0.03)", padding: "5px", borderRadius: "12px" }}>
+        <div style={{ display: "flex", gap: "2px", marginBottom: "2.5rem", background: "rgba(255,255,255,0.02)", padding: "4px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.05)" }}>
           <button 
             onClick={() => setLoginMethod("email")}
             style={{ 
-              flex: 1, padding: "10px", borderRadius: "8px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase",
-              background: loginMethod === "email" ? "var(--accent-primary)" : "transparent",
-              color: loginMethod === "email" ? "white" : "inherit",
-              border: "none", cursor: "pointer", transition: "all 0.3s"
+              flex: 1, padding: "12px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
+              background: loginMethod === "email" ? "rgba(255,255,255,0.05)" : "transparent",
+              color: loginMethod === "email" ? "white" : "rgba(255,255,255,0.3)",
+              border: "none", cursor: "pointer", transition: "all 0.4s ease"
             }}
           >
             Email
@@ -123,10 +133,10 @@ export default function Login() {
           <button 
             onClick={() => setLoginMethod("phone")}
             style={{ 
-              flex: 1, padding: "10px", borderRadius: "8px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase",
-              background: loginMethod === "phone" ? "var(--accent-primary)" : "transparent",
-              color: loginMethod === "phone" ? "white" : "inherit",
-              border: "none", cursor: "pointer", transition: "all 0.3s"
+              flex: 1, padding: "12px", borderRadius: "10px", fontSize: "0.7rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
+              background: loginMethod === "phone" ? "rgba(255,255,255,0.05)" : "transparent",
+              color: loginMethod === "phone" ? "white" : "rgba(255,255,255,0.3)",
+              border: "none", cursor: "pointer", transition: "all 0.4s ease"
             }}
           >
             Phone
@@ -135,86 +145,77 @@ export default function Login() {
         
         {error && (
           <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ padding: "12px", backgroundColor: "rgba(225, 29, 72, 0.1)", color: "#e11d48", borderRadius: "12px", marginBottom: "1.5rem", fontSize: "0.75rem", textAlign: "center", border: "1px solid rgba(225, 29, 72, 0.2)" }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            style={{ padding: "14px", backgroundColor: "rgba(225, 29, 72, 0.05)", color: "#e11d48", borderRadius: "12px", marginBottom: "2rem", fontSize: "0.7rem", textAlign: "center", border: "1px solid rgba(225, 29, 72, 0.15)", fontWeight: 600 }}
           >
             {error}
           </motion.div>
         )}
 
-        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
           {loginMethod === "email" ? (
             <div>
-              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Email Address</label>
+              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", opacity: 0.3 }}>Official Email</label>
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@hotel.com"
+                placeholder="id@resort.com"
                 style={{
-                  width: "100%", padding: "14px", borderRadius: "12px", 
-                  border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
-                  fontSize: "0.95rem"
+                  width: "100%", padding: "16px", borderRadius: "14px", 
+                  border: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.2)", color: "#FFF",
+                  fontSize: "0.9rem", outline: "none"
                 }}
                 required
               />
             </div>
           ) : (
             <div>
-              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Phone Number</label>
+              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", opacity: 0.3 }}>Staff Number</label>
               <div style={{ position: "relative" }}>
-                <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", opacity: 0.4, fontSize: "0.95rem" }}>+91</span>
+                <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", opacity: 0.2, fontSize: "0.9rem" }}>+91</span>
                 <input 
                   type="tel" 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="9876543210"
                   style={{
-                    width: "100%", padding: "14px 14px 14px 45px", borderRadius: "12px", 
-                    border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
-                    fontSize: "0.95rem"
+                    width: "100%", padding: "16px 16px 16px 50px", borderRadius: "14px", 
+                    border: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.2)", color: "#FFF",
+                    fontSize: "0.9rem", outline: "none"
                   }}
                   required
                 />
               </div>
-              <p style={{ fontSize: "0.65rem", opacity: 0.3, marginTop: "8px", fontStyle: "italic" }}>Confirm access via your registered staff number.</p>
             </div>
           )}
           
           <div>
-            <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Password</label>
+            <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", opacity: 0.3 }}>Passcode</label>
             <input 
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               style={{
-                width: "100%", padding: "14px", borderRadius: "12px", 
-                border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
-                fontSize: "0.95rem"
+                width: "100%", padding: "16px", borderRadius: "14px", 
+                border: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.2)", color: "#FFF",
+                fontSize: "0.9rem", outline: "none"
               }}
               required
             />
           </div>
-          <button type="submit" disabled={isSubmitting} className="btn-primary" style={{ marginTop: "1rem", padding: "14px", borderRadius: "12px" }}>
-            {isSubmitting ? "Authenticating..." : "Authorize Access"}
+          <button type="submit" disabled={isSubmitting} className="btn-primary" style={{ marginTop: "1rem", padding: "16px", borderRadius: "14px", background: "#e11d48", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", fontSize: "0.75rem" }}>
+            {isSubmitting ? "Verifying..." : "Initialize Access"}
           </button>
         </form>
 
-        <div style={{ display: "flex", alignItems: "center", margin: "1.5rem 0", opacity: 0.6 }}>
-          <hr style={{ flex: 1, borderColor: "var(--border-color)" }} />
-          <span style={{ padding: "0 10px", fontSize: "0.85rem" }}>OR</span>
-          <hr style={{ flex: 1, borderColor: "var(--border-color)" }} />
+        <div style={{ marginTop: "2.5rem", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "2rem" }}>
+          <p style={{ fontSize: "0.65rem", opacity: 0.3, letterSpacing: "0.05em" }}>
+            Problems logging in? Contact System Administrator.
+          </p>
         </div>
-
-        <button 
-          onClick={signInWithGoogle} 
-          className="btn-outline" 
-          style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}
-        >
-          Sign In with Google
-        </button>
       </motion.div>
     </div>
   )

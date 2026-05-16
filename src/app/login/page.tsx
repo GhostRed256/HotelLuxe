@@ -95,12 +95,15 @@ export default function LoginPage() {
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-[var(--gold-primary)]/5 blur-3xl -ml-16 -mb-16" />
 
         <div className="text-center mb-10 relative z-10">
+          <div className="w-16 h-16 rounded-full bg-[var(--accent-primary)]/10 flex items-center justify-center mx-auto mb-6">
+            <Globe className="text-[var(--accent-primary)]" size={28} />
+          </div>
           <h2 className="text-3xl font-heading font-black tracking-tight mb-2">
-            {isRegister ? "Create " : "Welcome "} 
-            <span className="text-[var(--accent-primary)]">{isRegister ? "Account" : "Back"}</span>
+            {isRegister ? "Join " : "Guest "} 
+            <span className="text-[var(--accent-primary)]">{isRegister ? "StayNjoy" : "Access"}</span>
           </h2>
-          <p className="text-sm opacity-40 font-light">
-            {isRegister ? "Join the StayNjoy family today." : "Please sign in to continue your journey."}
+          <p className="text-[10px] uppercase tracking-[0.2em] opacity-40 font-bold">
+            {isRegister ? "Create your customer profile" : "Sign in to manage your reservations"}
           </p>
         </div>
 
@@ -253,8 +256,9 @@ export default function LoginPage() {
           </button>
           
           <div className="mt-8 pt-8 border-t border-white/5">
-            <a href="/admin/login" className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-30 hover:opacity-100 transition-opacity">
-              Hotel Staff Login →
+            <p className="text-[9px] opacity-20 uppercase tracking-widest mb-3">Administrative Access Only</p>
+            <a href="/admin/login" className="text-[10px] font-bold tracking-[0.2em] uppercase text-rose-500 hover:text-rose-400 transition-colors">
+              Resort Management Portal →
             </a>
           </div>
         </div>

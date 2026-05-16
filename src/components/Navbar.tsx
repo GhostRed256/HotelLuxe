@@ -81,25 +81,47 @@ export default function Navbar() {
  
            {mounted && !loading && (
              <div className="flex items-center gap-6">
-               {user ? (
-                 <button 
-                   onClick={() => signOut()}
-                   className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-rose-500" : "!text-[#1A0811] hover:text-rose-500 dark:!text-white dark:hover:text-rose-400"} transition-colors`}
-                 >
-                   Sign Out
-                 </button>
+               {isAdmin ? (
+                 <div className="flex items-center gap-6">
+                   <Link 
+                     href="/admin" 
+                     className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled ? "text-rose-500" : "!text-rose-600 dark:!text-rose-400"}`}
+                   >
+                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                     Staff Panel
+                   </Link>
+                   <button 
+                     onClick={() => signOut()}
+                     className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-rose-500" : "!text-[#1A0811] hover:text-rose-500 dark:!text-white dark:hover:text-rose-400"} transition-colors`}
+                   >
+                     Sign Out
+                   </button>
+                 </div>
+               ) : user ? (
+                 <div className="flex items-center gap-6">
+                   <Link href="/bookings" className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-all drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "!text-[#1A0811] hover:text-[var(--accent-primary)] dark:!text-white dark:hover:text-[var(--accent-primary)]"}`}>
+                     My Stays
+                   </Link>
+                   <button 
+                     onClick={() => signOut()}
+                     className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-rose-500" : "!text-[#1A0811] hover:text-rose-500 dark:!text-white dark:hover:text-rose-400"} transition-colors`}
+                   >
+                     Sign Out
+                   </button>
+                 </div>
                ) : (
                  <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "!text-[#1A0811] hover:text-[var(--accent-primary)] dark:!text-white dark:hover:text-[var(--accent-primary)]"}`}>
-                   Sign In
+                   Guest Sign In
                  </Link>
                )}
+               
                <Link 
-                 href="/rooms" 
+                 href={isAdmin ? "/admin/rooms" : "/rooms"} 
                  className={`btn-primary !py-2.5 !px-8 !text-[9px] !font-black tracking-[0.2em] uppercase shadow-xl hover:scale-105 active:scale-95 transition-all ${
                    scrolled ? "" : "dark:!bg-white dark:!text-black !bg-[var(--accent-primary)] !text-white border-transparent"
                  }`}
                >
-                 Book A Stay
+                 {isAdmin ? "Manage Suites" : "Book A Stay"}
                </Link>
              </div>
            )}
