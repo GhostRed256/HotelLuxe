@@ -2,6 +2,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-plum-primary: #1A0811;
   --color-pink-accent: #D14D7E;
