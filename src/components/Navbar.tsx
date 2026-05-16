@@ -92,7 +92,7 @@ export default function Navbar() {
                       My Stays
                     </Link>
                     <span className="w-[1px] h-3 bg-rose-500/20" />
-                    <Link href="/admin/login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors">
+                    <Link href="/staff-login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors">
                       Staff
                     </Link>
                     <button 
@@ -108,7 +108,7 @@ export default function Navbar() {
                       Sign In
                     </Link>
                     <span className="w-[1px] h-3 bg-rose-500/20" />
-                    <Link href="/admin/login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500 hover:text-rose-600 transition-colors">
+                    <Link href="/staff-login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500 hover:text-rose-600 transition-colors">
                       Staff Portal
                     </Link>
                   </div>

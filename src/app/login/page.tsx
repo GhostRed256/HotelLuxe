@@ -99,7 +99,7 @@ export default function LoginPage() {
   }
 
   const navigateToStaff = () => {
-    window.location.assign("/admin/login")
+    window.location.assign("/staff-login")
   }
 
   if (loading) return <div className="h-screen bg-[#050505] flex items-center justify-center text-rose-500 font-black tracking-widest animate-pulse uppercase">Authenticating...</div>

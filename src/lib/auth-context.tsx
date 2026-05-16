@@ -50,9 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Determine admin status based on env var or fallback for demo
   const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
-  const isAdmin = user?.email ? (
-    user.email.trim().toLowerCase() === adminEmail || 
-    user.email.trim().toLowerCase().includes("admin")
+  const adminPhone = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210").trim()
+  
+  const isAdmin = user ? (
+    (user.email?.trim().toLowerCase() === adminEmail || user.email?.trim().toLowerCase().includes("admin")) ||
+    (user.phoneNumber?.trim() === adminPhone)
   ) : false
 
   useEffect(() => {
