@@ -70,6 +70,21 @@
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
+        <filter id="goldTextGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur1" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
+          <feMerge result="blur">
+             <feMergeNode in="blur1" />
+             <feMergeNode in="blur2" />
+          </feMerge>
+          <feFlood floodColor={goldPrimary} floodOpacity="0.5" result="glowColor" />
+          <feComposite in="glowColor" in2="blur" operator="in" result="glow" />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
       {/* Particles Layer */}
@@ -118,7 +133,7 @@
       {/* Icon and Typography Group */}
       <g className="animate-glow">
         {/* Minimalist House Icon */}
-        <g transform="translate(160, 80) scale(0.8)">
+        <g transform="translate(160, 60) scale(0.8)">
           <path 
             d="M10 50 L50 10 L90 50 L90 90 L10 90 Z" 
             fill="none" 
@@ -143,15 +158,15 @@
         </g>
 
         {/* StayNjoy Typography */}
-        <g filter="url(#shadow)">
+        <g filter="url(#goldTextGlow)">
           <text 
             x="200" 
-            y="265" 
+            y="245" 
             textAnchor="middle" 
             className="font-heading italic font-black"
             style={{ 
               fontSize: "90px", 
-              fill: isDark ? "#E8639A" : "#8B1A4A",
+              fill: accentPrimary,
               fontFamily: "var(--font-heading), cursive",
               letterSpacing: "-4px"
             }}
@@ -161,7 +176,7 @@
           
           <text 
             x="200" 
-            y="330" 
+            y="310" 
             textAnchor="middle" 
             className="font-heading italic font-black"
             style={{ 
