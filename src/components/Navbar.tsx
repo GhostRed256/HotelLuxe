@@ -81,7 +81,14 @@ export default function Navbar() {
  
            {mounted && !loading && (
              <div className="flex items-center gap-6">
-               {!user && (
+               {user ? (
+                 <button 
+                   onClick={() => signOut()}
+                   className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-rose-500" : "!text-[#1A0811] hover:text-rose-500 dark:!text-white dark:hover:text-rose-400"} transition-colors`}
+                 >
+                   Sign Out
+                 </button>
+               ) : (
                  <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "!text-[#1A0811] hover:text-[var(--accent-primary)] dark:!text-white dark:hover:text-[var(--accent-primary)]"}`}>
                    Sign In
                  </Link>

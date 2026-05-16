@@ -2,12 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useRef, useEffect, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { requestBooking } from "@/app/actions"
 import RoomCard from "./RoomCard"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any[], bookings?: any[] }) {
+  const { user, userData } = useAuth()
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -104,6 +107,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   }, [displayRooms, bookingSuiteType])
 
   const openBookingModal = (room?: any) => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
     if (room) {
       setBookingSuiteType(room.type)
       setBookingFloor(String(room.floor))
@@ -125,6 +132,14 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     setIsSubmitting(true)
     const formData = new FormData(e.target as HTMLFormElement)
     formData.append("roomId", bookingRoomId)
+    
+    // Combine phone with country code
+    const countryCode = formData.get("countryCode")
+    const phoneNumber = formData.get("customerPhone")
+    if (countryCode && phoneNumber) {
+      formData.set("customerPhone", `${countryCode}${phoneNumber}`)
+    }
+    
     await requestBooking(formData)
     setIsSubmitting(false)
     setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
@@ -359,12 +374,52 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                       {/* Guest Info */}
                       <div>
                         <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Full Name</label>
-                        <input type="text" name="customerName" required className="form-input" placeholder="Your full name" />
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                          <input 
+                            type="text" name="customerName" required className="form-input !pl-12" 
+                            defaultValue={userData?.displayName || ""} placeholder="Your full name" 
+                          />
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email Address</label>
-                        <input type="email" name="customerEmail" required className="form-input" placeholder="your@email.com" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Phone Number</label>
+                          <div className="flex gap-2">
+                            <div className="relative w-24">
+                              <select 
+                                name="countryCode"
+                                defaultValue="+91"
+                                className="form-input !pr-8 appearance-none cursor-pointer text-xs"
+                              >
+                                <option value="+91">+91</option>
+                                <option value="+1">+1</option>
+                                <option value="+44">+44</option>
+                                <option value="+971">+971</option>
+                                <option value="+61">+61</option>
+                              </select>
+                              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 text-[8px]">▼</div>
+                            </div>
+                            <div className="relative flex-1">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                              <input 
+                                type="tel" name="customerPhone" required className="form-input !pl-12" 
+                                defaultValue={userData?.phoneNumber?.replace(/^\+\d+/, "") || ""} placeholder="10-digit number" 
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email <span className="opacity-40 italic">(Optional)</span></label>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                            <input 
+                              type="email" name="customerEmail" className="form-input !pl-12" 
+                              defaultValue={userData?.email || ""} placeholder="your@email.com" 
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">

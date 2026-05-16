@@ -8,6 +8,7 @@ export async function requestBooking(formData: FormData) {
   const roomId = formData.get("roomId") as string
   const name = formData.get("customerName") as string
   const email = formData.get("customerEmail") as string
+  const phone = formData.get("customerPhone") as string
   const checkIn = formData.get("checkIn") as string
   const checkOut = formData.get("checkOut") as string
 
@@ -18,7 +19,8 @@ export async function requestBooking(formData: FormData) {
     await db.collection("bookings").add({
       roomId,
       customerName: name,
-      customerEmail: email,
+      customerEmail: email || "N/A",
+      customerPhone: phone,
       checkIn,
       checkOut,
       status: "PENDING",
@@ -27,15 +29,17 @@ export async function requestBooking(formData: FormData) {
     })
     
     // Notify Customer
-    await sendBookingEmail({
-      to: email,
-      subject: `Your Palace Reservation Request: ${room.name}`,
-      customerName: name,
-      roomName: room.name,
-      checkIn: checkIn,
-      checkOut: checkOut,
-      status: "PENDING"
-    });
+    if (email) {
+      await sendBookingEmail({
+        to: email,
+        subject: `Your Palace Reservation Request: ${room.name}`,
+        customerName: name,
+        roomName: room.name,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        status: "PENDING"
+      });
+    }
 
     // Notify Owners
     const ownerEmails = ["GhostRed256@gmail.com"]; // User specified earlier or common owner email

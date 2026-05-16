@@ -1,9 +1,39 @@
 "use client"
  
- import { motion } from "framer-motion"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
+  const [activeLocation, setActiveLocation] = useState(0)
+
+  const locations = [
+    {
+      name: "Chaliha Nagar",
+      desc: "Our Main Branch - Near Thana Chariali",
+      address: "Chaliha Nagar, Tinsukia, Assam 786125",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3539.0681345479633!2d95.3616944!3d27.4965556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDI5JzQ3LjYiTiA5NcKwMjEnNDIuMSJF!5e0!3m2!1sen!2sin!4v1715785000000!5m2!1sen!2sin",
+      navUrl: "https://maps.app.goo.gl/hRp5v7fiHNQ2TuYa8",
+      icon: MapPin
+    },
+    {
+      name: "Bordoloi Nagar (Lake)",
+      desc: "Serene views by the Lake side",
+      address: "Bordoloi Nagar, near Lake, Tinsukia, Assam 786125",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3539.0681345479633!2d95.3541111!3d27.5041389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjfCsDMwJzE0LjkiTiA5NcKwMjEnMTQuOCJF!5e0!3m2!1sen!2sin!4v1715785000000!5m2!1sen!2sin",
+      navUrl: "https://maps.app.goo.gl/JwLYU1VHeYQ6onZY8",
+      icon: Compass
+    },
+    {
+      name: "Bordoloi Nagar (Income Tax)",
+      desc: "Strategic location near Income Tax office",
+      address: "Ramdhenu Path, Sector 3, Bordoloi Nagar, Tinsukia, Assam 786126",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3539.0681345479633!2d95.35928!3d27.50293!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x373f6ba9dc8fe061%3A0x5d6e4e8877d4991c!2sRamdhenu%20Path%2C%20Sector%203%2C%20Bordoloi%20Nagar%2C%20Tinsukia%2C%20Assam%20786126!5e0!3m2!1sen!2sin!4v1715785000000!5m2!1sen!2sin",
+      navUrl: "https://maps.app.goo.gl/syysA9TrnmfZ1drk7",
+      icon: Navigation
+    }
+  ]
+
   return (
     <section className="py-24 px-4 bg-[var(--background)] relative">
       <div className="max-w-7xl mx-auto">
@@ -22,8 +52,8 @@ export default function MapSection() {
             Finding <span className="text-[var(--gold-primary)]">Your</span> <span className="text-[var(--accent-primary)]">Sanctuary</span>
           </h2>
           <p className="opacity-50 font-light text-lg max-w-2xl mx-auto italic">
-            Located in the vibrant heart of Tinsukia, where the tea estates meet the sky. 
-            Follow the scent of emerald leaves to find us.
+            Located in the vibrant heart of Tinsukia. 
+            Select a branch below to view its location on the map.
           </p>
         </div>
 
@@ -40,22 +70,30 @@ export default function MapSection() {
           
           {/* Map Container */}
           <div className="relative h-[500px] md:h-[600px] w-full rounded-[1.8rem] overflow-hidden shadow-2xl glass-panel">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113426.4716496468!2d95.27430159726562!3d27.50296760000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x37409949987a0c8b%3A0xc3485d45d3e09841!2sStayNjoy%20Tinsukia!5e0!3m2!1sen!2sin!4v1715844000000!5m2!1sen!2sin" 
-              width="100%" 
-              height="100%" 
-              style={{ border: 0, filter: 'grayscale(0.5) contrast(1.1) invert(0)' }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-              className="dark:invert-[0.9] dark:hue-rotate-[180deg]"
-            />
+            <AnimatePresence mode="wait">
+              <motion.iframe
+                key={activeLocation}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                src={locations[activeLocation].mapUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0, filter: 'grayscale(0.5) contrast(1.1) invert(0)' }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="dark:invert-[0.9] dark:hue-rotate-[180deg]"
+              />
+            </AnimatePresence>
             
             {/* Interactive Floaties */}
             <div className="absolute bottom-8 right-8 flex flex-col gap-4">
               <a 
-                href="https://maps.google.com" 
+                href={locations[activeLocation].navUrl}
                 target="_blank" 
+                rel="noopener noreferrer"
                 className="btn-primary !py-4 !px-8 flex items-center gap-3 shadow-2xl hover:scale-105 active:scale-95 transition-all"
               >
                 <Navigation size={16} />
@@ -69,15 +107,45 @@ export default function MapSection() {
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)]/10 flex items-center justify-center">
                     <MapPin className="text-[var(--accent-primary)]" size={20} />
                   </div>
-                  <h3 className="font-heading font-bold text-xl tracking-tight">StayNjoy</h3>
+                  <h3 className="font-heading font-bold text-xl tracking-tight">{locations[activeLocation].name}</h3>
                </div>
                <p className="text-xs font-light opacity-60 leading-relaxed mb-4">
-                 Chaliha Nagar, Near Thana Chariali, Tinsukia, Assam 786125
+                 {locations[activeLocation].address}
                </p>
                <div className="flex items-center gap-4 text-[9px] font-bold tracking-[0.2em] uppercase text-[var(--gold-primary)]">
                  <span className="flex items-center gap-1"><Clock size={12} /> 24/7 Concierge</span>
                </div>
             </div>
+          </div>
+
+          {/* 3 Location Boxes */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            {locations.map((loc, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                onClick={() => setActiveLocation(i)}
+                className={`group p-8 rounded-[2rem] border cursor-pointer transition-all duration-500 ${
+                  activeLocation === i 
+                  ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)] shadow-lg scale-[1.02]" 
+                  : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05]"
+                }`}
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all ${
+                  activeLocation === i ? "bg-[var(--accent-primary)] text-white" : "bg-white/5 text-[var(--accent-primary)]"
+                }`}>
+                  <loc.icon size={24} />
+                </div>
+                <h4 className="font-heading font-bold text-xl mb-2">{loc.name}</h4>
+                <p className="text-sm font-light opacity-40 mb-6 leading-relaxed">{loc.desc}</p>
+                <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--gold-primary)]">
+                  View on Map <Navigation size={12} className={activeLocation === i ? "translate-x-1 -translate-y-1" : ""} />
+                </div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
       </div>

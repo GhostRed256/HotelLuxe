@@ -98,7 +98,7 @@ import Logo from "./Logo"
            <div className="flex gap-10 text-[10px] font-bold tracking-[0.2em] uppercase">
              <a href="#" className="opacity-40 hover:text-[var(--accent-primary)] transition-colors">Privacy</a>
              <a href="#" className="opacity-40 hover:text-[var(--accent-primary)] transition-colors">Terms</a>
-             <a href="/login" className="opacity-40 hover:text-[var(--accent-primary)] transition-colors">Staff Login</a>
+             <a href="/admin/login" className="opacity-40 hover:text-[var(--accent-primary)] transition-colors">Staff Login</a>
            </div>
          </div>
        </div>
