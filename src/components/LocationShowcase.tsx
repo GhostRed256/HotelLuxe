@@ -51,9 +51,9 @@ export default function LocationShowcase() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 * i }}
-                  className="flex items-center gap-3 px-5 py-3 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors"
+                  className="glass-panel flex items-center gap-3 px-5 py-3 rounded-2xl border border-[var(--gold-primary)]/40 shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)] hover:bg-white/10 transition-all"
                 >
-                  <lm.icon size={16} className="text-[var(--accent-primary)] opacity-60" />
+                  <lm.icon size={16} className="text-[var(--accent-primary)] opacity-60 drop-shadow-lg" />
                   <div>
                     <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-80 block">{lm.name}</span>
                     <span className="text-[10px] font-bold text-[var(--accent-primary)]">{lm.distance}</span>
@@ -71,22 +71,22 @@ export default function LocationShowcase() {
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="grid grid-cols-2 gap-px bg-white/5 rounded-3xl overflow-hidden border border-white/5">
+            <div className="glass-panel grid grid-cols-2 gap-px rounded-3xl overflow-hidden border border-[var(--gold-primary)]/40 shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)] transition-all">
               {highlights.map((item, i) => (
-                <div key={i} className="p-10 bg-[var(--background)] hover:bg-white/5 transition-colors text-center">
+                <div key={i} className="p-10 bg-[var(--background)]/80 hover:bg-white/5 transition-colors text-center border-white/5">
                   <span className="text-[9px] font-bold tracking-[0.3em] uppercase opacity-30 block mb-3">{item.label}</span>
-                  <span className="text-xl font-heading font-bold">{item.value}</span>
+                  <span className="text-xl font-heading font-bold drop-shadow-sm">{item.value}</span>
                 </div>
               ))}
             </div>
 
             {/* Map Hint */}
-            <div className="mt-8 p-8 rounded-3xl border border-white/5 bg-white/[0.02] flex items-center gap-6">
-              <div className="p-4 rounded-2xl bg-[var(--accent-primary)]/10">
+            <div className="mt-8 p-8 rounded-3xl glass-panel border border-[var(--gold-primary)]/40 shadow-[0_0_15px_rgba(184,143,84,0.15)] hover:shadow-[0_0_30px_rgba(184,143,84,0.4)] flex items-center gap-6 transition-all">
+              <div className="p-4 rounded-2xl bg-[var(--accent-primary)]/10 drop-shadow-lg border border-[var(--gold-primary)]/20">
                 <MapPin size={28} className="text-[var(--accent-primary)]" />
               </div>
               <div>
-                <h4 className="font-heading font-bold text-lg mb-1">Multiple Sanctuaries</h4>
+                <h4 className="font-heading font-bold text-lg mb-1 drop-shadow-sm">Multiple Sanctuaries</h4>
                 <p className="text-sm font-light opacity-50">
                   Chaliha Nagar · Bordoloi Nagar (Lake) · Bordoloi Nagar (Income Tax)
                 </p>
