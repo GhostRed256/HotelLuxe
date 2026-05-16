@@ -112,8 +112,13 @@ export default function MapSection() {
                <p className="text-xs font-light opacity-60 leading-relaxed mb-4">
                  {locations[activeLocation].address}
                </p>
-               <div className="flex items-center gap-4 text-[9px] font-bold tracking-[0.2em] uppercase text-[var(--gold-primary)]">
-                 <span className="flex items-center gap-1"><Clock size={12} /> 24/7 Concierge</span>
+               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
+                  <span className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--accent-primary)] mb-1">
+                    <Clock size={12} /> 24/7 Concierge
+                  </span>
+                  <a href="tel:7002475079" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 70024 75079</a>
+                  <a href="tel:8133819414" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 81338 19414</a>
+                  <a href="tel:9181042005" className="text-sm font-bold hover:text-[var(--accent-primary)] transition-colors tracking-tight">+91 91810 42005</a>
                </div>
             </div>
           </div>
