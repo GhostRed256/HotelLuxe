@@ -115,9 +115,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, pass: string, data: UserData) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass)
     if (res.user) {
+      // Create a clean profile for Firestore
+      const cleanData: any = { ...data }
+      
+      // If the email passed is our internal dummy email, don't store it as the user's email
+      if (email.includes("@staynjoy.com") || email.includes("@hotel.com")) {
+        // If they didn't provide a real email, ensure the email field is empty or not set
+        if (!data.email) {
+          delete cleanData.email
+        }
+      }
+
       await setDoc(doc(db, "customers", res.user.uid), {
-        ...data,
-        email: email // Store the email used for login
+        ...cleanData,
+        uid: res.user.uid,
+        createdAt: new Date()
       })
     }
   }

@@ -19,6 +19,7 @@ export default function LoginPage() {
   const router = useRouter()
   
   const [isRegister, setIsRegister] = useState(false)
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [phone, setPhone] = useState("")
@@ -42,30 +43,35 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError("")
 
-    // Phone validation
-    if (isRegister && phone.length !== 10) {
+    // Validation
+    if (loginMethod === "phone" && phone.length !== 10) {
       setError("Please enter a valid 10-digit phone number")
       setIsSubmitting(false)
       return
     }
 
     try {
-      // If email is optional and not provided, use phone-based dummy email
-      const finalEmail = email || `${phone}@staynjoy.com`
+      // Internal identifier logic (hidden from Firestore profile)
+      const finalEmail = loginMethod === "email" ? email : `${countryCode}${phone}@staynjoy.com`
       
       if (isRegister) {
         await register(finalEmail, password, {
           displayName: name,
           phoneNumber: `${countryCode}${phone}`,
-          email: email // Original email if provided
+          email: email // Original email if provided (real email)
         })
       } else {
-        // For login, if email is empty, we assume they used phone to register
-        // This is a simplification; ideally we'd look up the email by phone
         await signIn(finalEmail, password)
       }
     } catch (err: any) {
-      setError(err.message || "Authentication failed")
+      const msg = err.message || ""
+      if (msg.includes("auth/user-not-found")) {
+        setError("Account not found. Please register first.")
+      } else if (msg.includes("auth/wrong-password")) {
+        setError("Incorrect password. Please try again.")
+      } else {
+        setError("Authentication failed. Please check your credentials.")
+      }
       setIsSubmitting(false)
     }
   }
@@ -98,6 +104,25 @@ export default function LoginPage() {
           </p>
         </div>
 
+        <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 mb-8">
+          <button
+            onClick={() => setLoginMethod("email")}
+            className={`flex-1 py-2.5 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+              loginMethod === "email" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+            }`}
+          >
+            Email Login
+          </button>
+          <button
+            onClick={() => setLoginMethod("phone")}
+            className={`flex-1 py-2.5 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+              loginMethod === "phone" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+            }`}
+          >
+            Phone Login
+          </button>
+        </div>
+
         {error && (
           <motion.div 
             initial={{ opacity: 0, height: 0 }}
@@ -127,50 +152,67 @@ export default function LoginPage() {
                     />
                   </div>
                 </div>
-
-                <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Phone Number</label>
-                  <div className="flex gap-2">
-                    <div className="relative w-28">
-                      <select 
-                        value={countryCode} 
-                        onChange={e => setCountryCode(e.target.value)}
-                        className="form-input !pr-8 appearance-none cursor-pointer"
-                      >
-                        {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none" size={14} />
-                    </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                      <input 
-                        type="tel" required value={phone} onChange={handlePhoneChange}
-                        placeholder="10-digit number" className="form-input !pl-12" 
-                      />
-                    </div>
-                  </div>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div>
-            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
-              Email Address {isRegister && <span className="opacity-40 italic">(Optional)</span>}
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-              <input 
-                type="email" 
-                required={!isRegister || !!phone} 
-                value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com" className="form-input !pl-12" 
-              />
+          {loginMethod === "email" ? (
+            <div>
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                <input 
+                  type="email" 
+                  required 
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com" className="form-input !pl-12" 
+                />
+              </div>
             </div>
-            {!isRegister && !email && phone && (
-              <p className="text-[9px] opacity-30 mt-2 italic">Tip: If you registered with phone only, use your phone-email or just provide email.</p>
-            )}
-          </div>
+          ) : (
+            <div>
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                Phone Number
+              </label>
+              <div className="flex gap-2">
+                <div className="relative w-28">
+                  <select 
+                    value={countryCode} 
+                    onChange={e => setCountryCode(e.target.value)}
+                    className="form-input !pr-8 appearance-none cursor-pointer"
+                  >
+                    {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 opacity-30 pointer-events-none" size={14} />
+                </div>
+                <div className="relative flex-1">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                  <input 
+                    type="tel" required value={phone} onChange={handlePhoneChange}
+                    placeholder="10-digit number" className="form-input !pl-12" 
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRegister && loginMethod === "phone" && (
+            <div>
+              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                Email Address <span className="opacity-40 italic">(Optional)</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                <input 
+                  type="email" 
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com" className="form-input !pl-12" 
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Password</label>

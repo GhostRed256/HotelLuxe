@@ -9,7 +9,9 @@ import { auth } from "@/lib/firebase"
 export default function Login() {
   const { user, isAdmin, signInWithGoogle, loading } = useAuth()
   
-  const [identifier, setIdentifier] = useState("")
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,22 +31,38 @@ export default function Login() {
     setIsSubmitting(true)
     setError("")
 
-    let loginIdentifier = identifier.trim()
+    let loginIdentifier = ""
     
-    // Auto-prefix +91 if it's a 10-digit number
-    if (/^\d{10}$/.test(loginIdentifier)) {
-      loginIdentifier = `+91${loginIdentifier}`
+    if (loginMethod === "phone") {
+      let cleanPhone = phone.trim().replace(/\D/g, "")
+      if (cleanPhone.length === 10) {
+        cleanPhone = `+91${cleanPhone}`
+      } else if (!cleanPhone.startsWith("+")) {
+        // Fallback for other formats
+        cleanPhone = `+${cleanPhone}`
+      }
+      
+      // For Admin Phone login, we check if it matches the configured admin phone
+      // and then use the admin email to sign in to Firebase Auth.
+      // This keeps the Auth account consistent while allowing phone entry.
+      const adminPhone = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210").trim()
+      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
+      
+      if (cleanPhone === adminPhone) {
+        loginIdentifier = adminEmailStr
+      } else {
+        setError("This phone number is not authorized as an admin.")
+        setIsSubmitting(false)
+        return
+      }
+    } else {
+      loginIdentifier = email.trim().toLowerCase()
     }
 
     try {
-      // For phone-based login, we assume the account follows the phone-email pattern
-      const finalEmail = loginIdentifier.includes("@") ? loginIdentifier : `${loginIdentifier}@hotel.com`
-
-      const cred = await signInWithEmailAndPassword(auth, finalEmail, password)
+      const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
       
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
-      // Check if user matches admin email or is explicitly marked as admin in Firestore if needed
-      // For now, checking email match as per original logic
       const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr || 
                           cred.user.email?.trim().toLowerCase().includes("admin")
       
@@ -65,7 +83,7 @@ export default function Login() {
         setIsSubmitting(false)
       }
     } catch (err: any) {
-      setError("Invalid credentials. Please use your registered admin email or phone.")
+      setError("Invalid credentials. Please check your " + loginMethod + " and password.")
       setIsSubmitting(false)
     }
   }
@@ -88,6 +106,32 @@ export default function Login() {
           </h2>
           <p style={{ fontSize: "0.8rem", opacity: 0.4, fontWeight: 300 }}>Secure entry for hotel management only.</p>
         </div>
+
+        {/* Login Method Toggle */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "2rem", background: "rgba(255,255,255,0.03)", padding: "5px", borderRadius: "12px" }}>
+          <button 
+            onClick={() => setLoginMethod("email")}
+            style={{ 
+              flex: 1, padding: "10px", borderRadius: "8px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase",
+              background: loginMethod === "email" ? "var(--accent-primary)" : "transparent",
+              color: loginMethod === "email" ? "white" : "inherit",
+              border: "none", cursor: "pointer", transition: "all 0.3s"
+            }}
+          >
+            Email
+          </button>
+          <button 
+            onClick={() => setLoginMethod("phone")}
+            style={{ 
+              flex: 1, padding: "10px", borderRadius: "8px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase",
+              background: loginMethod === "phone" ? "var(--accent-primary)" : "transparent",
+              color: loginMethod === "phone" ? "white" : "inherit",
+              border: "none", cursor: "pointer", transition: "all 0.3s"
+            }}
+          >
+            Phone
+          </button>
+        </div>
         
         {error && (
           <motion.div 
@@ -100,23 +144,44 @@ export default function Login() {
         )}
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <div>
-            <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>
-              Email or Phone <span style={{ textTransform: "none", opacity: 0.6, fontWeight: 400 }}>(e.g. 9876543210)</span>
-            </label>
-            <input 
-              type="text" 
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="Admin ID or Number"
-              style={{
-                width: "100%", padding: "14px", borderRadius: "12px", 
-                border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
-                fontSize: "0.95rem"
-              }}
-              required
-            />
-          </div>
+          {loginMethod === "email" ? (
+            <div>
+              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Email Address</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@hotel.com"
+                style={{
+                  width: "100%", padding: "14px", borderRadius: "12px", 
+                  border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
+                  fontSize: "0.95rem"
+                }}
+                required
+              />
+            </div>
+          ) : (
+            <div>
+              <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Phone Number</label>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", opacity: 0.4, fontSize: "0.95rem" }}>+91</span>
+                <input 
+                  type="tel" 
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="9876543210"
+                  style={{
+                    width: "100%", padding: "14px 14px 14px 45px", borderRadius: "12px", 
+                    border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "inherit",
+                    fontSize: "0.95rem"
+                  }}
+                  required
+                />
+              </div>
+              <p style={{ fontSize: "0.65rem", opacity: 0.3, marginTop: "8px", fontStyle: "italic" }}>Confirm access via your registered staff number.</p>
+            </div>
+          )}
+          
           <div>
             <label style={{ display: "block", marginBottom: "0.75rem", fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.5 }}>Password</label>
             <input 
