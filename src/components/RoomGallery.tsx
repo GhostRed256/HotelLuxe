@@ -54,6 +54,13 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [checkIn, setCheckIn] = useState("")
   const [checkOut, setCheckOut] = useState("")
 
+  // Form Field States for dynamic auto-fill
+  const [bookingFor, setBookingFor] = useState<"myself" | "others">("myself")
+  const [customerName, setCustomerName] = useState("")
+  const [customerPhone, setCustomerPhone] = useState("")
+  const [customerEmail, setCustomerEmail] = useState("")
+  const [countryCode, setCountryCode] = useState("+91")
+
   // Unique types and floors for filters
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
   const floors = useMemo(() => [...new Set(displayRooms.map((r: any) => r.floor))].sort(), [displayRooms])
@@ -122,20 +129,41 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     }
     setCheckIn("")
     setCheckOut("")
+
+    // Initialize form with user data
+    setBookingFor("myself")
+    setCustomerName(userData?.displayName || "")
+    const phoneOnly = userData?.phoneNumber?.replace(/^\+\d+/, "") || ""
+    setCustomerPhone(phoneOnly)
+    const code = userData?.phoneNumber?.match(/^\+\d+/)?.[0] || "+91"
+    setCountryCode(code)
+    setCustomerEmail(userData?.email || "")
+
+    setBookingError("")
     setShowBookingModal(true)
     setSuccessMsg("")
   }
 
+  const [bookingError, setBookingError] = useState("")
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!bookingRoomId) return
-    setIsSubmitting(true)
+    setBookingError("")
+
     const formData = new FormData(e.target as HTMLFormElement)
+    const phoneNumber = formData.get("customerPhone") as string
+    
+    if (phoneNumber.length !== 10) {
+      setBookingError("Please enter a valid 10-digit phone number.")
+      return
+    }
+
+    setIsSubmitting(true)
     formData.append("roomId", bookingRoomId)
     
     // Combine phone with country code
     const countryCode = formData.get("countryCode")
-    const phoneNumber = formData.get("customerPhone")
     if (countryCode && phoneNumber) {
       formData.set("customerPhone", `${countryCode}${phoneNumber}`)
     }
@@ -337,6 +365,48 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                     </div>
                   ) : (
                     <form onSubmit={handleBookingSubmit} className="flex flex-col gap-6">
+                      {bookingError && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-[10px] font-bold uppercase tracking-widest text-center"
+                        >
+                          {bookingError}
+                        </motion.div>
+                      )}
+                      {/* Booking For Toggle */}
+                      <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBookingFor("myself")
+                            setCustomerName(userData?.displayName || "")
+                            const phoneOnly = userData?.phoneNumber?.replace(/^\+\d+/, "") || ""
+                            setCustomerPhone(phoneOnly)
+                            const code = userData?.phoneNumber?.match(/^\+\d+/)?.[0] || "+91"
+                            setCountryCode(code)
+                          }}
+                          className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+                            bookingFor === "myself" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                          }`}
+                        >
+                          Booking for Myself
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBookingFor("others")
+                            setCustomerName("")
+                            setCustomerPhone("")
+                          }}
+                          className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+                            bookingFor === "others" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                          }`}
+                        >
+                          For Someone Else
+                        </button>
+                      </div>
+
                       {/* Simplified Single Room Selection */}
                       <div>
                         <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Suite</label>
@@ -373,24 +443,30 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
                       {/* Guest Info */}
                       <div>
-                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Full Name</label>
+                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                          {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
+                        </label>
                         <div className="relative">
                           <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
                           <input 
                             type="text" name="customerName" required className="form-input !pl-12" 
-                            defaultValue={userData?.displayName || ""} placeholder="Your full name" 
+                            value={customerName} onChange={e => setCustomerName(e.target.value)}
+                            placeholder="Full name" 
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Phone Number</label>
+                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                            {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
+                          </label>
                           <div className="flex gap-2">
                             <div className="relative w-24">
                               <select 
                                 name="countryCode"
-                                defaultValue="+91"
+                                value={countryCode}
+                                onChange={e => setCountryCode(e.target.value)}
                                 className="form-input !pr-8 appearance-none cursor-pointer text-xs"
                               >
                                 <option value="+91">+91</option>
@@ -405,7 +481,12 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
                               <input 
                                 type="tel" name="customerPhone" required className="form-input !pl-12" 
-                                defaultValue={userData?.phoneNumber?.replace(/^\+\d+/, "") || ""} placeholder="10-digit number" 
+                                value={customerPhone} 
+                                onChange={e => {
+                                  const val = e.target.value.replace(/\D/g, "").slice(0, 10)
+                                  setCustomerPhone(val)
+                                }}
+                                placeholder="10-digit number" 
                               />
                             </div>
                           </div>
@@ -416,7 +497,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
                             <input 
                               type="email" name="customerEmail" className="form-input !pl-12" 
-                              defaultValue={userData?.email || ""} placeholder="your@email.com" 
+                              value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
+                              placeholder="your@email.com" 
                             />
                           </div>
                         </div>

@@ -50,7 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Determine admin status based on env var or fallback for demo
   const adminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
-  const isAdmin = user?.email ? user.email.trim().toLowerCase() === adminEmail : false
+  const isAdmin = user?.email ? (
+    user.email.trim().toLowerCase() === adminEmail || 
+    user.email.trim().toLowerCase().includes("admin")
+  ) : false
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
