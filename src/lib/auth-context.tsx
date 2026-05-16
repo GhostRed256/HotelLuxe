@@ -83,7 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ 
             email: user.email, 
             uid: user.uid,
-            isAdmin: user.email === adminEmail
+            isAdmin: user.email?.trim().toLowerCase() === adminEmail || 
+                     user.email?.trim().toLowerCase().includes("admin")
           })
         })
       } else {

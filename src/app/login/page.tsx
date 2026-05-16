@@ -32,7 +32,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!loading && user) {
       if (isAdmin) {
-        router.push("/admin")
+        window.location.assign("/admin")
       } else {
         router.push("/")
       }
@@ -44,7 +44,6 @@ export default function LoginPage() {
     setIsSubmitting(true)
     setError("")
 
-    // In registration, phone is ALWAYS mandatory
     if (isRegister) {
       if (phone.length !== 10) {
         setError("Please enter a valid 10-digit phone number for registration")
@@ -57,7 +56,6 @@ export default function LoginPage() {
         return
       }
     } else {
-      // In login, check the selected method
       if (loginMethod === "phone" && phone.length !== 10) {
         setError("Please enter your 10-digit phone number")
         setIsSubmitting(false)
@@ -66,19 +64,15 @@ export default function LoginPage() {
     }
 
     try {
-      // Registration logic: Use real email if provided, otherwise dummy
       const registrationEmail = email || `${countryCode}${phone}@staynjoy.com`
-      
-      // Login logic: Use method
       const loginEmail = loginMethod === "email" ? email : `${countryCode}${phone}@staynjoy.com`
-      
       const finalEmail = isRegister ? registrationEmail : loginEmail
       
       if (isRegister) {
         await register(finalEmail, password, {
           displayName: name,
           phoneNumber: `${countryCode}${phone}`,
-          email: email // Real email stored only if provided
+          email: email
         })
       } else {
         await signIn(finalEmail, password)
@@ -103,7 +97,11 @@ export default function LoginPage() {
     if (val.length <= 10) setPhone(val)
   }
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black text-rose-500 font-bold tracking-widest animate-pulse">VERIFYING SESSION...</div>
+  const navigateToStaff = () => {
+    window.location.assign("/admin/login")
+  }
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-black text-rose-500 font-bold tracking-widest animate-pulse uppercase">Verifying Identity...</div>
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)] relative overflow-hidden">
@@ -131,7 +129,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Login Method Toggle - ONLY SHOW ON LOGIN */}
         {!isRegister && (
           <div className="flex p-1.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-white/5 mb-10 shadow-inner">
             <button
@@ -173,7 +170,6 @@ export default function LoginPage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex flex-col gap-6 overflow-hidden"
               >
-                {/* Full Name */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Full Name</label>
                   <div className="relative group">
@@ -185,7 +181,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Mandatory Phone */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Phone Number (Mandatory)</label>
                   <div className="flex gap-2">
@@ -209,7 +204,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Optional Email */}
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Email Address (Optional)</label>
                   <div className="relative group">
@@ -269,7 +263,6 @@ export default function LoginPage() {
             )}
           </AnimatePresence>
 
-          {/* Password - Always Shown */}
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Password</label>
             <div className="relative group">
@@ -282,7 +275,7 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" disabled={isSubmitting} className="btn-primary !py-5 shadow-2xl hover:shadow-rose-500/20 active:scale-95 transition-all font-black tracking-[0.3em] uppercase text-[12px] mt-4">
-            {isSubmitting ? "PROCESSING..." : (isRegister ? "CREATE GUEST PROFILE" : "SIGN IN TO ACCOUNT")}
+            {isSubmitting ? "PROCESSING..." : (isRegister ? "CREATE GUEST PROFILE" : "SIGN IN TO GUEST ACCOUNT")}
           </button>
         </form>
 
@@ -308,19 +301,19 @@ export default function LoginPage() {
             {isRegister ? "Already have an account? Sign In" : "New guest? Create Account"}
           </button>
           
-          {/* STAFF LOGIN SECTION */}
+          {/* STAFF LOGIN SECTION - EXPLICIT FORCE REDIRECT */}
           <div className="mt-14 pt-10 border-t border-white/5 bg-rose-500/5 -mx-10 px-10 rounded-b-3xl">
             <div className="flex items-center justify-center gap-2 mb-4 text-rose-500 animate-pulse">
               <ShieldAlert size={14} />
               <p className="text-[9px] uppercase tracking-[0.2em] font-black">Authorized Staff Personnel Only</p>
             </div>
-            <a 
-              href="/admin/login" 
-              className="inline-block w-full py-4 rounded-xl border-2 border-rose-500/40 text-[11px] font-black tracking-[0.3em] uppercase text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/10 cursor-pointer text-center no-underline"
+            <button 
+              onClick={navigateToStaff}
+              className="inline-block w-full py-4 rounded-xl border-2 border-rose-500/40 text-[11px] font-black tracking-[0.3em] uppercase text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/10 cursor-pointer text-center"
               style={{ position: 'relative', zIndex: 50 }}
             >
               STAFF PORTAL ACCESS →
-            </a>
+            </button>
             <p className="mt-4 text-[8px] opacity-20 uppercase tracking-widest font-bold">Registration is not available for staff.</p>
           </div>
         </div>
