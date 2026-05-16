@@ -345,9 +345,10 @@ export default function LoginPage() {
                   STAFF PORTAL ACCESS →
                 </button>
               </div>
-            </>
-          )}
-        </motion.div>
-      </div>
-    )
-  }
+            </div>
+          </>
+        )}
+      </motion.div>
+    </div>
+  )
+}
