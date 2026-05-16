@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
+import Link from "next/link"
 
 export default function MyBookingsPage() {
   const [email, setEmail] = useState("")
