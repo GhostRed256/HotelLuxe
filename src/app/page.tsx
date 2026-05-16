@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import JaapiDivider from "@/components/JaapiDivider";
 import { db } from "@/lib/firebase-admin"
 import { serializeFirestoreData } from "@/lib/utils"
+import { Suspense } from "react"
  
  export default async function Home() {
    const roomsSnapshot = await db.collection("rooms").get();
@@ -21,7 +22,9 @@ import { serializeFirestoreData } from "@/lib/utils"
  
    return (
      <>
-       <WelcomePopup />
+       <Suspense fallback={null}>
+         <WelcomePopup />
+       </Suspense>
        <Hero />
        <JaapiDivider />
        <QuotesMarquee />
@@ -29,7 +32,9 @@ import { serializeFirestoreData } from "@/lib/utils"
        <JaapiDivider />
        <Amenities />
        <LocationShowcase />
-       <MapSection />
+       <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading Experience...</div>}>
+         <MapSection />
+       </Suspense>
        <Footer />
      </>
    );

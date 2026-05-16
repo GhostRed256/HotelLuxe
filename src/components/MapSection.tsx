@@ -1,12 +1,14 @@
 "use client"
  
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { MapPin, Navigation, Compass, Clock } from "lucide-react"
 
 export default function MapSection() {
   const [activeLocation, setActiveLocation] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const searchParams = useSearchParams()
 
   const locations = [
     {
@@ -44,6 +46,18 @@ export default function MapSection() {
     return () => clearInterval(interval)
   }, [isPaused, locations.length])
 
+  // Handle location from URL search params
+  useEffect(() => {
+    const locParam = searchParams.get('loc')
+    if (locParam !== null) {
+      const idx = parseInt(locParam)
+      if (!isNaN(idx) && idx >= 0 && idx < locations.length) {
+        setActiveLocation(idx)
+        setIsPaused(true)
+      }
+    }
+  }, [searchParams, locations.length])
+
   // Listen for custom event from Footer
   useEffect(() => {
     const handleLocationChange = (e: any) => {
@@ -56,18 +70,6 @@ export default function MapSection() {
     window.addEventListener('map-change-location', handleLocationChange)
     return () => window.removeEventListener('map-change-location', handleLocationChange)
   }, [])
-
-  // Handle initial location from URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const locParam = params.get('loc')
-    if (locParam !== null) {
-      const idx = parseInt(locParam)
-      if (!isNaN(idx) && idx >= 0 && idx < locations.length) {
-        setActiveLocation(idx)
-        setIsPaused(true)
-      }
-  }, [locations.length])
 
   return (
     <section id="map-section" className="py-24 px-4 bg-[var(--background)] relative">
