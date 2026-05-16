@@ -66,10 +66,18 @@ import Logo from "./Logo"
              <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8 text-[var(--accent-primary)]">Reservations</h4>
              <div className="flex flex-col gap-10">
                <div className="group">
-                 <span className="block text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 mb-2">Speak With Us</span>
-                 <a href="tel:7002475079" className="text-2xl font-black tracking-tighter hover:text-[var(--accent-primary)] transition-colors">
-                   +91 70024 75079
-                 </a>
+                 <span className="block text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 mb-3">Speak With Us</span>
+                 <div className="flex flex-col gap-2">
+                   <a href="tel:7002475079" className="text-xl font-black tracking-tighter hover:text-[var(--accent-primary)] transition-colors">
+                     +91 70024 75079
+                   </a>
+                   <a href="tel:8133819414" className="text-xl font-black tracking-tighter hover:text-[var(--accent-primary)] transition-colors">
+                     +91 81338 19414
+                   </a>
+                   <a href="tel:9181042005" className="text-xl font-black tracking-tighter hover:text-[var(--accent-primary)] transition-colors">
+                     +91 91810 42005
+                   </a>
+                 </div>
                </div>
                
                <div className="p-6 rounded-2xl bg-[var(--accent-primary)]/5 border border-[var(--border-color)] hover:border-[var(--accent-primary)]/30 transition-colors group">
@@ -77,7 +85,7 @@ import Logo from "./Logo"
                    Need a custom arrangement? Our concierge is ready to assist.
                  </p>
                  <a href="tel:7002475079" className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--accent-primary)] group-hover:gap-4 transition-all">
-                   Request Concierge <ArrowUpRight size={14} />
+                   Direct Call Concierge <ArrowUpRight size={14} />
                  </a>
                </div>
              </div>

@@ -68,7 +68,7 @@ export async function sendBookingEmail({
       
       <div style="text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
         <p style="color: #999; font-size: 12px;">
-          Tinsukia, Assam • +91 7002475079<br>
+          Tinsukia, Assam • +91 7002475079 | 8133819414 | 9181042005<br>
           © 2026 StayNjoy Palace. All Rights Reserved.
         </p>
       </div>

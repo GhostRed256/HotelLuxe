@@ -3,12 +3,13 @@ export const dynamic = "force-dynamic"
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react"
+import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle, Hash, Phone as PhoneIcon, Mail as MailIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import { normalizeGuestIdentifier, formatGuestIdentifierForDisplay } from "@/lib/utils"
 
 export default function MyBookingsPage() {
-  const [email, setEmail] = useState("")
+  const [inputValue, setInputValue] = useState("")
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searched, setSearched] = useState(false)
@@ -16,17 +17,19 @@ export default function MyBookingsPage() {
   const [error, setError] = useState("")
   const { user, userData } = useAuth()
 
-  const performSearch = useCallback(async (targetEmail: string) => {
-    if (!targetEmail) return
+  const performSearch = useCallback(async (identifier: string) => {
+    if (!identifier) return
     setIsLoading(true)
     setError("")
     
-    // Set a safety timeout to prevent infinite loader
+    // Normalize input (e.g. phone to internal email)
+    const normalizedEmail = normalizeGuestIdentifier(identifier)
+    
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000)
 
     try {
-      const res = await fetch(`/api/bookings?email=${encodeURIComponent(targetEmail)}`, {
+      const res = await fetch(`/api/bookings?email=${encodeURIComponent(normalizedEmail)}`, {
         signal: controller.signal
       })
       clearTimeout(timeoutId)
@@ -48,27 +51,27 @@ export default function MyBookingsPage() {
         setError(err.message || "An unexpected error occurred while fetching your bookings.")
       }
       setBookings([])
-      setSearched(true) // Ensure we mark as searched so loader disappears
+      setSearched(true)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    // Priority: 1. Profile Email from Firestore, 2. Firebase Auth Email
-    const targetEmail = userData?.email || user?.email
+    const targetIdentifier = userData?.email || user?.email
     
-    if (targetEmail && !hasAutoSearched && !isLoading) {
-      setEmail(targetEmail)
-      performSearch(targetEmail)
+    if (targetIdentifier && !hasAutoSearched && !isLoading) {
+      // For display, we strip the internal patterns
+      setInputValue(formatGuestIdentifierForDisplay(targetIdentifier))
+      performSearch(targetIdentifier)
       setHasAutoSearched(true)
     }
   }, [user, userData, hasAutoSearched, isLoading, performSearch])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || isLoading) return
-    performSearch(email)
+    if (!inputValue || isLoading) return
+    performSearch(inputValue)
   }
 
   const fmtDate = (d: any) => {
@@ -91,22 +94,35 @@ export default function MyBookingsPage() {
         <p className="opacity-40 font-light italic text-lg">Track your reservation status and confirmations.</p>
       </div>
 
-      <form onSubmit={handleSearch} className="glass-panel p-8 mb-16 flex flex-col md:flex-row gap-6 items-end justify-center max-w-2xl mx-auto border-white/5">
-        <div className="flex-1 w-full">
-          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Registered Email</label>
-          <input 
-            type="email" 
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="form-input"
-          />
+      <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-20 group">
+        <div className="glass-panel p-2 pl-6 flex items-center gap-4 border-white/10 group-focus-within:border-[var(--accent-primary)]/30 transition-all duration-500 shadow-2xl">
+          <div className="opacity-30 group-focus-within:opacity-100 group-focus-within:text-[var(--accent-primary)] transition-all">
+            {inputValue.includes('@') ? <MailIcon size={20} /> : <PhoneIcon size={20} />}
+          </div>
+          <div className="flex-1">
+            <label className="absolute -top-3 left-6 bg-[var(--background)] px-3 text-[9px] font-black tracking-[0.2em] uppercase text-[var(--accent-primary)] z-10">
+              Booking Lookup
+            </label>
+            <input 
+              type="text" 
+              placeholder="Enter Phone Number or Email"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              required
+              className="w-full bg-transparent border-none py-4 text-lg font-medium focus:ring-0 outline-none placeholder:opacity-20"
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-white p-4 rounded-xl transition-all active:scale-95 shadow-lg flex items-center justify-center min-w-[60px]"
+          >
+            {isLoading ? <Loader2 className="animate-spin" size={22} /> : <Search size={22} />}
+          </button>
         </div>
-        <button type="submit" disabled={isLoading} className="btn-primary flex items-center gap-3 !py-4 !px-10">
-          {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
-          <span>Lookup</span>
-        </button>
+        <p className="mt-4 text-center text-[10px] uppercase tracking-[0.2em] opacity-20 font-bold">
+          Input your registered 10-digit phone or email address
+        </p>
       </form>
 
       {error && (

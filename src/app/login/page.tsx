@@ -35,8 +35,8 @@ export default function LoginPage() {
     setError("")
 
     if (isRegister) {
-      if (phone.length !== 10) {
-        setError("Please enter a valid 10-digit phone number for registration")
+      if (phone.length < 10) {
+        setError("Please enter a valid phone number")
         setIsSubmitting(false)
         return
       }
@@ -46,17 +46,21 @@ export default function LoginPage() {
         return
       }
     } else {
-      if (loginMethod === "phone" && phone.length !== 10) {
-        setError("Please enter your 10-digit phone number")
+      if (loginMethod === "phone" && phone.length < 10) {
+        setError("Please enter your phone number")
         setIsSubmitting(false)
         return
       }
     }
 
     try {
-      const registrationEmail = email || `${countryCode}${phone}@staynjoy.com`
-      const loginEmail = loginMethod === "email" ? email : `${countryCode}${phone}@staynjoy.com`
-      const finalEmail = isRegister ? registrationEmail : loginEmail
+      // Normalize: if it's a phone login/registration, use the normalization helper
+      let finalEmail = ""
+      if (isRegister) {
+        finalEmail = email || normalizeGuestIdentifier(`${countryCode}${phone}`)
+      } else {
+        finalEmail = loginMethod === "email" ? email : normalizeGuestIdentifier(`${countryCode}${phone}`)
+      }
       
       if (isRegister) {
         await register(finalEmail, password, {
@@ -125,8 +129,11 @@ export default function LoginPage() {
               <CheckCircle2 className="text-emerald-500" size={32} />
             </div>
             <h2 className="text-3xl font-heading font-black text-white mb-4">Signed In</h2>
-            <p className="text-[11px] text-white/40 uppercase tracking-[0.3em] mb-10 font-black">
+            <p className="text-[11px] text-white/40 uppercase tracking-[0.3em] mb-2 font-black">
               Welcome back, {userData?.displayName || "Guest"}
+            </p>
+            <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] mb-10 font-bold">
+              {formatGuestIdentifierForDisplay(userData?.email || user?.email || "")}
             </p>
             <div className="flex flex-col gap-4">
               <Link href="/bookings" className="btn-primary !py-5 shadow-2xl font-black tracking-[0.3em] uppercase text-[11px]">
@@ -242,15 +249,19 @@ export default function LoginPage() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Email Address (Optional)</label>
+                      <div className="flex justify-between items-center ml-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30">Email Address</label>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-emerald-500/60 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/10">Optional</span>
+                      </div>
                       <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" size={18} />
                         <input 
                           type="email" 
                           value={email} onChange={e => setEmail(e.target.value)}
-                          placeholder="your@email.com" className="form-input !pl-12 !py-4" 
+                          placeholder="Leave empty if you prefer" className="form-input !pl-12 !py-4" 
                         />
                       </div>
+                      <p className="text-[8px] uppercase tracking-widest opacity-20 ml-2 mt-1">You can register and login with just your phone number</p>
                     </div>
                   </motion.div>
                 ) : (
