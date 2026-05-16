@@ -18,25 +18,35 @@ export default function MyBookingsPage() {
     if (!targetEmail) return
     setIsLoading(true)
     setError("")
+    
+    // Set a safety timeout to prevent infinite loader
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+
     try {
-      const res = await fetch(`/api/bookings?email=${encodeURIComponent(targetEmail)}`)
+      const res = await fetch(`/api/bookings?email=${encodeURIComponent(targetEmail)}`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      
       const data = await res.json()
       
       if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch bookings")
+        throw new Error(data.error || data.message || "Failed to fetch bookings")
       }
       
-      if (Array.isArray(data)) {
-        setBookings(data)
-        setSearched(true)
-      } else {
-        setBookings([])
-        setSearched(true)
-      }
+      setBookings(Array.isArray(data) ? data : [])
+      setSearched(true)
     } catch (err: any) {
-      console.error(err)
-      setError(err.message || "An unexpected error occurred while fetching your bookings.")
+      clearTimeout(timeoutId)
+      console.error("Search Error:", err)
+      if (err.name === 'AbortError') {
+        setError("Connection timeout: The server is taking too long to respond. Please try again.")
+      } else {
+        setError(err.message || "An unexpected error occurred while fetching your bookings.")
+      }
       setBookings([])
+      setSearched(true) // Ensure we mark as searched so loader disappears
     } finally {
       setIsLoading(false)
     }

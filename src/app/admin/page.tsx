@@ -23,7 +23,13 @@ export default async function AdminDashboard() {
       return (a.floor || 0) - (b.floor || 0);
     });
 
-  const bookingsSnapshot = await db.collection("bookings").orderBy("createdAt", "desc").get()
+  let bookingsSnapshot;
+  try {
+    bookingsSnapshot = await db.collection("bookings").orderBy("createdAt", "desc").get()
+  } catch (e) {
+    console.warn("Index not ready, falling back to unordered fetch for admin.")
+    bookingsSnapshot = await db.collection("bookings").get()
+  }
   const bookings = bookingsSnapshot.docs.map((doc: any) => {
     const data = serializeFirestoreData(doc.data())
     const associatedRoom = rooms.find(r => r.id === data.roomId)
@@ -32,6 +38,13 @@ export default async function AdminDashboard() {
       ...data,
       room: associatedRoom || { name: "Unknown Room" }
     }
+  })
+
+  // Manual fallback sort to ensure newest bookings are always first
+  bookings.sort((a: any, b: any) => {
+    const dateA = a.createdAt?._seconds || new Date(a.createdAt).getTime() || 0
+    const dateB = b.createdAt?._seconds || new Date(b.createdAt).getTime() || 0
+    return dateB - dateA
   })
 
   return (
