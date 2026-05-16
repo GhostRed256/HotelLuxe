@@ -29,10 +29,14 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Redirect ONLY if they are an Admin (they should be on /admin)
+  // Redirect immediately when session is active
   useEffect(() => {
-    if (!loading && user && isAdmin) {
-      window.location.assign("/admin")
+    if (!loading && user) {
+      if (isAdmin) {
+        window.location.assign("/admin")
+      } else {
+        window.location.assign("/")
+      }
     }
   }, [user, isAdmin, loading])
 
