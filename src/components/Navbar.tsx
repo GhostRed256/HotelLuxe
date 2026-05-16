@@ -110,9 +110,15 @@ export default function Navbar() {
                    </button>
                  </div>
                ) : (
-                 <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "!text-[#1A0811] hover:text-[var(--accent-primary)] dark:!text-white dark:hover:text-[var(--accent-primary)]"}`}>
-                   Guest Sign In
-                 </Link>
+                 <div className="flex items-center gap-4">
+                   <Link href="/login" className={`text-[10px] font-bold tracking-[0.2em] uppercase drop-shadow-sm ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "!text-[#1A0811] hover:text-[var(--accent-primary)] dark:!text-white dark:hover:text-[var(--accent-primary)]"}`}>
+                     Guest Sign In
+                   </Link>
+                   <span className="w-[1px] h-3 bg-rose-500/20" />
+                   <Link href="/admin/login" className="text-[9px] font-black tracking-[0.2em] uppercase text-rose-500/40 hover:text-rose-500 transition-colors">
+                     Staff
+                   </Link>
+                 </div>
                )}
                
                <Link 
