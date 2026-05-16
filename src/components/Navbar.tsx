@@ -149,21 +149,21 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-[#0A0307] border-t border-white/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#0A0307] border-t border-black/5 dark:border-white/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
           {["Home", "Rooms", "About", "Contact"].map((item) => (
-            <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-white hover:text-rose-500 transition-colors">
+            <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-black dark:text-white hover:text-rose-500 transition-colors">
               {item}
             </Link>
           ))}
-          <div className="pt-4 border-t border-white/10 flex flex-col gap-4">
+          <div className="pt-4 border-t border-black/10 dark:border-white/10 flex flex-col gap-4">
             {isAdmin ? (
               <>
                 <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors">Dashboard</Link>
-                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
               </>
             ) : user ? (
               <>
-                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-white hover:text-[var(--accent-primary)] transition-colors">My Stays</Link>
+                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-black dark:text-white hover:text-[var(--accent-primary)] transition-colors">My Stays</Link>
                 <button 
                   onClick={async () => {
                     await signOut()
@@ -174,11 +174,11 @@ export default function Navbar() {
                 >
                   Staff Portal
                 </button>
-                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
               </>
             ) : (
               <>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-white hover:text-[var(--accent-primary)] transition-colors">Guest Login</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-black dark:text-white hover:text-[var(--accent-primary)] transition-colors">Guest Login</Link>
                 <button 
                   onClick={async () => {
                     await signOut()
