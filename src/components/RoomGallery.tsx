@@ -65,8 +65,14 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
     const filtered = displayRooms.filter((r: any) => {
-      if (filterType !== "ALL" && r.type !== filterType) return false
-      return true
+      if (filterType === "ALL") return true
+      if (filterType === "Cozy Pink Room") return r.type === "Cozy Pink Room"
+      if (filterType === "Deluxe Room") return r.type === "Deluxe Room"
+      if (filterType === "Premium 1BHK Suite") return r.type === "Premium 1BHK Suite"
+      if (filterType === "2BHK_2700") return r.type === "2BHK House" && Number(r.price) === 2700
+      if (filterType === "2BHK_3600") return r.type === "2BHK House" && Number(r.price) === 3600
+      if (filterType === "2BHK_4400") return r.type === "2BHK House" && Number(r.price) === 4400
+      return r.type === filterType
     })
     
     // Sort: available rooms first
@@ -208,7 +214,12 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 className="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full px-6 py-3 text-sm font-semibold tracking-wide appearance-none cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors pr-12"
               >
                 <option value="ALL">All Suite Types</option>
-                {suiteTypes.map((t: any) => <option key={t} value={t}>{t}</option>)}
+                <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
+                <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
+                <option value="Premium 1BHK Suite">Premium 1BHK Suite {"\u20B9"}2200</option>
+                <option value="2BHK_2700">2BHK {"\u20B9"}2700</option>
+                <option value="2BHK_3600">2BHK {"\u20B9"}3600</option>
+                <option value="2BHK_4400">2BHK {"\u20B9"}4400</option>
               </select>
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
