@@ -86,10 +86,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   // Rooms available for booking modal selection
   const availableRoomsForBooking = useMemo(() => {
     return displayRooms.filter((r: any) => {
-      if (bookingSuiteType && r.type !== bookingSuiteType) return false
       return !isRoomBooked(r.id)
     })
-  }, [displayRooms, bookingSuiteType, bookings])
+  }, [displayRooms, bookings])
 
   const selectedRoomPrice = useMemo(() => {
     const r = availableRoomsForBooking.find((r: any) => r.id === bookingRoomId)
