@@ -399,7 +399,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               <optgroup key={type} label={type}>
                                 {roomsOfType.map((r: any) => (
                                   <option key={r.id} value={r.id}>
-                                    {r.name} (Floor {r.floor}) — ₹{r.price}/night
+                                    {r.name} (Floor {r.floor}) — Price: ₹{r.price}/night
                                   </option>
                                 ))}
                               </optgroup>

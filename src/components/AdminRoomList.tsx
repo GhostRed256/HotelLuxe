@@ -191,7 +191,7 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
               </div>
 
               <div className="flex flex-wrap items-center gap-3 md:gap-6 justify-between md:justify-end w-full md:w-auto border-t border-white/5 pt-4 md:border-t-0 md:pt-0">
-                <span className="font-bold text-lg text-[var(--accent-primary)]">₹{room.price}</span>
+                <span className="font-bold text-lg text-[var(--accent-primary)]">Price: ₹{room.price}</span>
                 
                 {activeBooking ? (
                   <span className="px-4 py-1.5 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase bg-rose-500/10 text-rose-500 border border-rose-500/20">
