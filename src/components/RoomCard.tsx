@@ -69,7 +69,7 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
         
         <div className="absolute top-6 right-6 bg-black/40 backdrop-blur-xl text-white px-5 py-2 rounded-full font-bold text-sm border border-white/10 z-10">
-          Price: ₹{room.price} <span className="opacity-60 font-normal">/ night</span>
+          Price: {"\u20B9"}{room.price} <span className="opacity-60 font-normal">/ night</span>
         </div>
 
         {images.length > 1 && (

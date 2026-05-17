@@ -95,7 +95,7 @@ export default function ManualBookingForm({ rooms }: { rooms: Room[] }) {
                 <optgroup key={groupName} label={groupName}>
                   {groupRooms.map(room => (
                     <option key={room.id} value={room.id}>
-                      {room.name} ₹{room.price}
+                      {room.name} {"\u20B9"}{room.price}
                     </option>
                   ))}
                 </optgroup>
