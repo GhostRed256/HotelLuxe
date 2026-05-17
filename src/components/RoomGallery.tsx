@@ -43,11 +43,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
   // Filters
   const [filterType, setFilterType] = useState("ALL")
-  const [filterFloor, setFilterFloor] = useState("ALL")
 
   // Booking modal state
   const [bookingSuiteType, setBookingSuiteType] = useState("")
-  const [bookingFloor, setBookingFloor] = useState("")
   const [bookingRoomId, setBookingRoomId] = useState("")
   const [showBookingModal, setShowBookingModal] = useState(false)
   
@@ -63,13 +61,11 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
   // Unique types and floors for filters
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
-  const floors = useMemo(() => [...new Set(displayRooms.map((r: any) => r.floor))].sort(), [displayRooms])
 
   // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
     const filtered = displayRooms.filter((r: any) => {
       if (filterType !== "ALL" && r.type !== filterType) return false
-      if (filterFloor !== "ALL" && String(r.floor) !== filterFloor) return false
       return true
     })
     
@@ -79,16 +75,15 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       const bBooked = isRoomBooked(b.id) ? 1 : 0
       return aBooked - bBooked
     })
-  }, [displayRooms, filterType, filterFloor, bookings])
+  }, [displayRooms, filterType, bookings])
 
   // Rooms available for booking modal selection
   const availableRoomsForBooking = useMemo(() => {
     return displayRooms.filter((r: any) => {
       if (bookingSuiteType && r.type !== bookingSuiteType) return false
-      if (bookingFloor && String(r.floor) !== bookingFloor) return false
       return !isRoomBooked(r.id)
     })
-  }, [displayRooms, bookingSuiteType, bookingFloor, bookings])
+  }, [displayRooms, bookingSuiteType, bookings])
 
   const selectedRoomPrice = useMemo(() => {
     const r = availableRoomsForBooking.find((r: any) => r.id === bookingRoomId)
@@ -109,14 +104,6 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     return diffDays * (Number(selectedRoomPrice) || 0)
   }, [checkIn, checkOut, selectedRoomPrice])
 
-  // Floors available based on selected suite type
-  const floorsForSelectedType = useMemo(() => {
-    const filtered = bookingSuiteType
-      ? displayRooms.filter((r: any) => r.type === bookingSuiteType)
-      : displayRooms
-    return [...new Set(filtered.map((r: any) => r.floor))].sort()
-  }, [displayRooms, bookingSuiteType])
-
   const openBookingModal = (room?: any) => {
     if (!user) {
       router.push("/login")
@@ -124,11 +111,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     }
     if (room) {
       setBookingSuiteType(room.type)
-      setBookingFloor(String(room.floor))
       setBookingRoomId(room.id)
     } else {
       setBookingSuiteType("")
-      setBookingFloor("")
       setBookingRoomId("")
     }
     setCheckIn("")
@@ -232,17 +217,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
 
-            <div className="relative">
-              <select
-                value={filterFloor}
-                onChange={e => setFilterFloor(e.target.value)}
-                className="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full px-6 py-3 text-sm font-semibold tracking-wide appearance-none cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors pr-12"
-              >
-                <option value="ALL">All Floors</option>
-                {floors.map((f: any) => <option key={f} value={String(f)}>Floor {f}</option>)}
-              </select>
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
-            </div>
+
           </div>
 
           <button onClick={() => openBookingModal()} className="btn-primary">
