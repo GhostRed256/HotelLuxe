@@ -217,9 +217,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
                 <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
                 <option value="Premium 1BHK Suite">Premium 1BHK Suite {"\u20B9"}2200</option>
-                <option value="2BHK_2700">2BHK {"\u20B9"}2700</option>
-                <option value="2BHK_3600">2BHK {"\u20B9"}3600</option>
-                <option value="2BHK_4400">2BHK {"\u20B9"}4400</option>
+                <option value="2BHK_2700">2BHK House {"\u20B9"}2700</option>
+                <option value="2BHK_3600">2BHK House {"\u20B9"}3600</option>
+                <option value="2BHK_4400">2BHK House {"\u20B9"}4400</option>
               </select>
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
