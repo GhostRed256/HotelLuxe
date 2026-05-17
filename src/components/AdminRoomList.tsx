@@ -164,10 +164,10 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
           <div key={room.id} className="rounded-2xl border border-white/5 bg-white/5 overflow-hidden transition-all hover:border-white/10">
             {/* Room Header */}
             <div 
-              className="p-6 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
+              className="p-6 flex flex-col md:flex-row md:items-center justify-between cursor-pointer hover:bg-white/5 transition-colors gap-4"
               onClick={() => setExpandedId(isExpanded ? null : room.id)}
             >
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 md:gap-6">
                 {images.length > 0 ? (
                   <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
                     <img src={images[0]} alt={room.name} className="w-full h-full object-cover" />
@@ -179,18 +179,18 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
                 )}
                 
                 <div>
-                  <h3 className="font-heading font-bold text-lg">{room.name}</h3>
-                  <div className="flex flex-wrap gap-3 mt-1">
-                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40">{room.location}</span>
-                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
-                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40">{room.type}</span>
-                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
-                    <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40">Lvl {room.floor}</span>
+                  <h3 className="font-heading font-bold text-lg md:text-xl leading-tight">{room.name}</h3>
+                  <div className="flex flex-wrap gap-2 md:gap-3 mt-1">
+                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">{room.location}</span>
+                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
+                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">{room.type}</span>
+                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
+                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">Lvl {room.floor}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-3 md:gap-6 justify-between md:justify-end w-full md:w-auto border-t border-white/5 pt-4 md:border-t-0 md:pt-0">
                 <span className="font-bold text-lg text-[var(--accent-primary)]">₹{room.price}</span>
                 
                 {activeBooking ? (
