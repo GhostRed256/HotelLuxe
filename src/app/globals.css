@@ -320,6 +320,11 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 3px rgba(209, 77, 126, 0.1);
 }
 
+.form-select option, select option {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
 .form-label {
   display: block;
   font-family: var(--font-body);
