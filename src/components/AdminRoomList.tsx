@@ -184,8 +184,6 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
                     <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">{room.location}</span>
                     <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
                     <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">{room.type}</span>
-                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">•</span>
-                    <span className="text-[9px] md:text-[10px] font-bold tracking-[0.15em] uppercase opacity-40">Lvl {room.floor}</span>
                   </div>
                 </div>
               </div>

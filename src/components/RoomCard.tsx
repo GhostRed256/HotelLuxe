@@ -89,11 +89,6 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
           <h3 className="text-3xl font-heading font-black mb-2 leading-tight">
             {room.type || room.name}
           </h3>
-          <div className="flex flex-wrap gap-3">
-             <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 px-4 py-1.5 rounded-full border border-[var(--accent-primary)]/20">
-               {availableFloors ? availableFloors : `Lvl ${room.floor || 1}`}
-             </span>
-          </div>
         </div>
 
         <p className="text-sm font-light leading-relaxed opacity-70 flex-grow italic mb-10">
