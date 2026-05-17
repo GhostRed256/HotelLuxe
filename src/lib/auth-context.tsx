@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!u) return false
     
     // Support multiple admins via comma-separated lists
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
       .split(",")
       .map(e => e.trim().toLowerCase())
     
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await createUserWithEmailAndPassword(auth, email, pass)
     if (res.user) {
       const cleanData: any = { ...data }
-      if (email.includes("@staynjoy.com") || email.includes("@hotel.com")) {
+      if (email.includes("@staynjoy.com") || email.includes("@homestay.com")) {
         if (!data.email) delete cleanData.email
       }
 

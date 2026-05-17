@@ -105,10 +105,6 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   }, [checkIn, checkOut, selectedRoomPrice])
 
   const openBookingModal = (room?: any) => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
     if (room) {
       setBookingSuiteType(room.type)
       setBookingRoomId(room.id)

@@ -42,7 +42,7 @@ export default function Login() {
         .split(",")
         .map(p => p.trim())
       
-      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").split(",")[0].trim().toLowerCase()
+      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").split(",")[0].trim().toLowerCase()
       
       if (adminPhones.includes(cleanPhone)) {
         // Map phone to the primary admin email for Firebase Auth login
@@ -59,7 +59,7 @@ export default function Login() {
     try {
       const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
       
-      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").trim().toLowerCase()
+      const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").trim().toLowerCase()
       const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr || 
                           cred.user.email?.trim().toLowerCase().includes("admin")
       

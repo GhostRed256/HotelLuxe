@@ -4,7 +4,7 @@ import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Stay-N-Joy | Premium Hotel Booking",
+  title: "Stay-N-Joy | Premium Homestay Booking",
   description: "Experience world-class comfort and joy at Stay-N-Joy, Tinsukia.",
 };
 

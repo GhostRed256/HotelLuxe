@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   const { email, phoneNumber, uid } = await req.json()
 
   // SECURITY: Independently verify admin status on the server
-  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
     .split(",")
     .map(e => e.trim().toLowerCase())
   
