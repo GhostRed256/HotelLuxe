@@ -54,22 +54,24 @@
  
    return (
      <section className="min-h-screen flex items-center justify-center relative px-4 overflow-hidden pt-20 bg-[var(--background)]">
-       {/* Background Image Slider (Side-to-Side) */}
-       <div className="absolute inset-0 z-0">
-         <AnimatePresence initial={false}>
+       {/* Background Image Slider (Seamless Crossfade) */}
+       <div className="absolute inset-0 z-0 bg-[var(--background)]">
+         {images.map((src, i) => (
            <motion.div
-             key={index}
-             initial={{ x: "100%" }}
-             animate={{ x: 0 }}
-             exit={{ x: "-100%" }}
-             transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+             key={src}
+             initial={false}
+             animate={{ 
+               opacity: index === i ? 1 : 0,
+               zIndex: index === i ? 1 : 0
+             }}
+             transition={{ duration: 1.5, ease: "easeInOut" }}
              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
              style={{ 
-               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'})), url(${images[index]})`,
+               backgroundImage: `linear-gradient(rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'}), rgba(${isDark ? '0,0,0,0.7' : '255,255,255,0.55'})), url(${src})`,
                backgroundAttachment: 'fixed'
              }}
            />
-         </AnimatePresence>
+         ))}
        </div>
  
        <Particles theme={resolvedTheme} />
