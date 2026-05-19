@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { updateBookingStatus } from "./actions"
 
@@ -11,61 +11,11 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const [csvStartDate, setCsvStartDate] = useState("")
-  const [csvEndDate, setCsvEndDate] = useState("")
-
-  useEffect(() => {
-    if (bookings && bookings.length > 0) {
-      const min = new Date(Math.min(...bookings.map(b => new Date(b.checkIn).getTime()))).toISOString().split('T')[0]
-      
-      const approvedBookings = bookings.filter(b => b.status === 'APPROVED')
-      const max = approvedBookings.length > 0 
-        ? new Date(Math.max(...approvedBookings.map(b => new Date(b.checkOut).getTime()))).toISOString().split('T')[0]
-        : new Date().toISOString().split('T')[0]
-        
-      setCsvStartDate(min)
-      setCsvEndDate(max)
-    }
-  }, [bookings])
-
   const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
     startTransition(async () => {
       await updateBookingStatus(id, status)
       router.refresh()
     })
-  }
-
-  const handleExportCSV = () => {
-    const csvBookings = bookings.filter(b => {
-      const bIn = new Date(b.checkIn).toISOString().split('T')[0]
-      if (csvStartDate && bIn < csvStartDate) return false
-      if (csvEndDate && bIn > csvEndDate) return false
-      return true
-    })
-
-    const headers = ["ID", "Customer Name", "Customer Email", "Room", "Check In", "Check Out", "Status"]
-    const csvContent = [
-      headers.join(","),
-      ...csvBookings.map(b => [
-        b.id,
-        `"${b.customerName}"`,
-        `"${b.customerEmail}"`,
-        `"${b.room.name}"`,
-        new Date(b.checkIn).toLocaleDateString(),
-        new Date(b.checkOut).toLocaleDateString(),
-        b.status
-      ].join(","))
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement("a")
-    const url = URL.createObjectURL(blob)
-    link.setAttribute("href", url)
-    link.setAttribute("download", `bookings_export_${new Date().toISOString().split('T')[0]}.csv`)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
 
   const filteredBookings = bookings.filter(b => {
@@ -119,42 +69,6 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
             <option value="APPROVED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
-        </div>
-        
-        {/* CSV Export Section */}
-        <div className="flex flex-col gap-3 border border-white/10 p-4 md:p-3 rounded-2xl bg-black/20">
-          <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-50">CSV Date Range</span>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto] gap-3 md:gap-4 items-center">
-            {/* Start Date */}
-            <div className="relative">
-              <label className="text-[9px] font-bold uppercase tracking-[0.15em] opacity-30 mb-1.5 block md:hidden">From</label>
-              <input 
-                type="date" 
-                value={csvStartDate} 
-                onChange={e => setCsvStartDate(e.target.value)} 
-                className="form-input !py-4 !px-5 !text-base md:!text-sm md:!py-2.5 w-full cursor-pointer"
-                style={{ minHeight: '52px' }}
-              />
-            </div>
-            
-            <span className="hidden md:block opacity-50 text-xs font-bold">to</span>
-            
-            {/* End Date */}
-            <div className="relative">
-              <label className="text-[9px] font-bold uppercase tracking-[0.15em] opacity-30 mb-1.5 block md:hidden">To</label>
-              <input 
-                type="date" 
-                value={csvEndDate} 
-                onChange={e => setCsvEndDate(e.target.value)} 
-                className="form-input !py-4 !px-5 !text-base md:!text-sm md:!py-2.5 w-full cursor-pointer"
-                style={{ minHeight: '52px' }}
-              />
-            </div>
-
-            <button onClick={handleExportCSV} className="btn-outline !py-4 md:!py-2.5 !px-8 text-[10px] uppercase tracking-widest font-bold w-full md:w-auto" style={{ minHeight: '52px' }}>
-              Download CSV
-            </button>
-          </div>
         </div>
       </div>
 

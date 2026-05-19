@@ -1,18 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { addRoom } from "./actions"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
-import { Plus, X, Calendar, Home } from "lucide-react"
+import { Plus, X, Calendar, Home, Download, ChevronDown } from "lucide-react"
 
 export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[], bookings: any[] }) {
   const searchParams = useSearchParams()
   const initialTab = (searchParams.get("tab") as "bookings" | "manual" | "rooms") || "bookings"
   const [showAddRoom, setShowAddRoom] = useState(false)
   const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "rooms">(initialTab)
+  const [showCsvExport, setShowCsvExport] = useState(false)
+
+  const [csvStartDate, setCsvStartDate] = useState("")
+  const [csvEndDate, setCsvEndDate] = useState("")
 
   useEffect(() => {
     const tab = searchParams.get("tab")
@@ -20,6 +24,57 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       setActiveTab(tab)
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (bookings && bookings.length > 0) {
+      try {
+        const min = new Date(Math.min(...bookings.map(b => new Date(b.checkIn).getTime()))).toISOString().split('T')[0]
+        const approvedBookings = bookings.filter(b => b.status === 'APPROVED')
+        const max = approvedBookings.length > 0 
+          ? new Date(Math.max(...approvedBookings.map(b => new Date(b.checkOut).getTime()))).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0]
+        setCsvStartDate(min)
+        setCsvEndDate(max)
+      } catch(e) {}
+    }
+  }, [bookings])
+
+  const handleExportCSV = () => {
+    const csvBookings = bookings.filter(b => {
+      try {
+        const bIn = new Date(b.checkIn).toISOString().split('T')[0]
+        if (csvStartDate && bIn < csvStartDate) return false
+        if (csvEndDate && bIn > csvEndDate) return false
+      } catch(e) { return false }
+      return true
+    })
+
+    const headers = ["ID", "Customer Name", "Customer Email", "Phone", "Room", "Check In", "Check Out", "Status"]
+    const csvContent = [
+      headers.join(","),
+      ...csvBookings.map(b => [
+        b.id,
+        `"${b.customerName}"`,
+        `"${b.customerEmail}"`,
+        `"${b.customerPhone || ''}"`,
+        `"${b.room?.name || 'Unknown'}"`,
+        new Date(b.checkIn).toLocaleDateString(),
+        new Date(b.checkOut).toLocaleDateString(),
+        b.status
+      ].join(","))
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `bookings_export_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setShowCsvExport(false)
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-12 min-h-screen bg-[var(--background)]">
@@ -31,7 +86,46 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           </h1>
           <p className="opacity-50 font-light italic text-lg">Curating the royal experience for every guest.</p>
         </div>
-        {/* Header buttons removed - Add Room is now inside Suite Inventory tab */}
+
+        {/* CSV Export - Desktop: inline panel, Mobile: dropdown */}
+        <div className="relative w-full md:w-auto">
+          {/* Mobile toggle button */}
+          <button 
+            onClick={() => setShowCsvExport(!showCsvExport)}
+            className="md:hidden flex items-center gap-2 w-full justify-between px-5 py-3.5 rounded-xl border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest"
+          >
+            <span className="flex items-center gap-2"><Download size={14} /> Export Records</span>
+            <ChevronDown size={14} className={`transition-transform ${showCsvExport ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Desktop: always visible / Mobile: dropdown */}
+          <div className={`${showCsvExport ? 'block' : 'hidden'} md:block mt-2 md:mt-0`}>
+            <div className="flex flex-col gap-2.5 border border-white/10 p-4 rounded-2xl bg-black/30 backdrop-blur-sm">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40">Export CSV</span>
+              <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
+                <input 
+                  type="date" 
+                  value={csvStartDate} 
+                  onChange={e => setCsvStartDate(e.target.value)} 
+                  className="form-input !py-3 !px-4 !text-sm w-full md:!w-36 cursor-pointer"
+                />
+                <span className="hidden md:block opacity-40 text-[10px] font-bold">→</span>
+                <input 
+                  type="date" 
+                  value={csvEndDate} 
+                  onChange={e => setCsvEndDate(e.target.value)} 
+                  className="form-input !py-3 !px-4 !text-sm w-full md:!w-36 cursor-pointer"
+                />
+                <button 
+                  onClick={handleExportCSV} 
+                  className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-[var(--accent-primary)] text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
+                >
+                  <Download size={13} /> Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Conditionally Show Add Room Form */}
