@@ -2,7 +2,7 @@
 
 import { useState, useRef, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { uploadRoomImages, removeRoomImage, updateBookingStatus } from "@/app/admin/actions"
+import { uploadRoomImages, removeRoomImage, updateBookingStatus, deleteRoom } from "@/app/admin/actions"
 import { ImagePlus, Eye, XCircle, CheckCircle, ChevronDown, ChevronUp, Trash2, Upload, Loader2 } from "lucide-react"
 
 const compressImage = async (file: File): Promise<File> => {
@@ -62,6 +62,8 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, name: string } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleFilesSelected = (roomId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -141,8 +143,50 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
     })
   }
 
+  const handleDeleteRoom = async () => {
+    if (!deleteConfirm) return
+    setIsDeleting(true)
+    startTransition(async () => {
+      await deleteRoom(deleteConfirm.id)
+      setDeleteConfirm(null)
+      setIsDeleting(false)
+      router.refresh()
+    })
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[200] flex items-center justify-center p-4">
+          <div className="bg-[#111] border-2 border-rose-500/30 rounded-3xl p-8 md:p-10 max-w-md w-full text-center shadow-2xl shadow-rose-500/10">
+            <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-6">
+              <Trash2 className="text-rose-500" size={28} />
+            </div>
+            <h3 className="text-xl font-black uppercase tracking-tight mb-2 text-white">Remove Suite</h3>
+            <p className="text-sm opacity-60 mb-2">Are you sure you want to permanently remove</p>
+            <p className="text-lg font-bold text-rose-500 mb-6">{deleteConfirm.name}?</p>
+            <p className="text-[10px] uppercase tracking-widest opacity-30 mb-8">This action cannot be undone. All images and data for this suite will be lost.</p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+                className="flex-1 py-4 rounded-2xl border border-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteRoom}
+                disabled={isDeleting}
+                className="flex-1 py-4 rounded-2xl bg-rose-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-rose-700 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? "Removing..." : "Yes, Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {rooms.map(room => {
         let images: string[] = []
         try {
@@ -202,6 +246,14 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
                 )}
 
                 <span className="text-[9px] font-bold tracking-widest uppercase opacity-30">{images.length} img</span>
+
+                <button
+                  onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ id: room.id, name: room.name }); }}
+                  className="p-2 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                  title="Remove Suite"
+                >
+                  <Trash2 size={14} />
+                </button>
 
                 {isExpanded ? <ChevronUp size={16} className="opacity-30" /> : <ChevronDown size={16} className="opacity-30" />}
               </div>

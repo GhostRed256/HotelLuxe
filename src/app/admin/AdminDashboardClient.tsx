@@ -31,15 +31,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           </h1>
           <p className="opacity-50 font-light italic text-lg">Curating the royal experience for every guest.</p>
         </div>
-        <div className="flex gap-4">
-          <button 
-            onClick={() => setShowAddRoom(!showAddRoom)}
-            className="btn-primary !px-8"
-          >
-            {showAddRoom ? <X size={18} /> : <Plus size={18} />}
-            <span className="ml-2">{showAddRoom ? 'Cancel' : 'New Suite'}</span>
-          </button>
-        </div>
+        {/* Header buttons removed - Add Room is now inside Suite Inventory tab */}
       </div>
 
       {/* Conditionally Show Add Room Form */}
@@ -139,6 +131,17 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
             <div className="lg:col-span-2 glass-panel p-10 border-white/5">
               <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Active <span className="text-[var(--accent-primary)]">Inventory</span></h2>
               <AdminRoomList rooms={rooms} bookings={bookings} />
+
+              {/* Add New Room - Hidden at bottom */}
+              <div className="mt-12 pt-8 border-t border-white/5">
+                <button
+                  onClick={() => setShowAddRoom(!showAddRoom)}
+                  className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity"
+                >
+                  {showAddRoom ? <X size={14} /> : <Plus size={14} />}
+                  {showAddRoom ? 'Cancel' : 'Add New Suite'}
+                </button>
+              </div>
             </div>
             <div className="glass-panel p-10 border-white/5 bg-gradient-to-br from-white/5 to-transparent">
                <h2 className="text-xl font-heading font-bold mb-6">Manager Notes</h2>

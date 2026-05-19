@@ -142,6 +142,22 @@ export async function removeRoomImage(roomId: string, imageIndex: number) {
   revalidatePath("/")
 }
 
+export async function deleteRoom(roomId: string) {
+  await validateAdminSession()
+  
+  const roomDoc = await db.collection("rooms").doc(roomId).get()
+  if (!roomDoc.exists) return { success: false, error: "Room not found" }
+  
+  // Delete the room document
+  await db.collection("rooms").doc(roomId).delete()
+  
+  revalidatePath("/admin")
+  revalidatePath("/rooms")
+  revalidatePath("/")
+  
+  return { success: true }
+}
+
 export async function addEmailForReports(formData: FormData) {
   await validateAdminSession()
   const email = formData.get("email") as string
