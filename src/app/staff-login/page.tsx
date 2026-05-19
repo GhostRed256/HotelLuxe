@@ -19,7 +19,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user) {
+    if (user && !loading) {
       if (isAdmin) {
         window.location.assign("/admin")
       } else {
@@ -27,7 +27,7 @@ export default function Login() {
         signOut()
       }
     }
-  }, [user, isAdmin, signOut])
+  }, [user, isAdmin, loading, signOut])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
