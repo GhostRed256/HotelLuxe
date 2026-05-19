@@ -135,9 +135,9 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
         </div>
       </div>
 
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="border-b border-white/5 text-left text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
+      <table className="w-full border-collapse block md:table">
+        <thead className="hidden md:table-header-group">
+          <tr className="border-b border-white/5 text-left text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 md:table-row">
             <th className="p-6">Guest Profile</th>
             <th className="p-6">Suite Selection</th>
             <th className="p-6">Duration</th>
@@ -145,26 +145,30 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
             <th className="p-6 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="text-sm font-light">
+        <tbody className="text-sm font-light block md:table-row-group">
           {filteredBookings.length === 0 ? (
             <tr>
               <td colSpan={5} className="p-20 text-center opacity-40 italic">No records found in the registry.</td>
             </tr>
           ) : (
             filteredBookings.map((b) => (
-              <tr key={b.id} className="border-b border-white/5 group hover:bg-white/5 transition-colors">
-                <td className="p-6">
-                  <div className="font-bold text-lg">{b.customerName}</div>
+              <tr key={b.id} className="border border-white/10 md:border-0 md:border-b md:border-white/5 group hover:bg-white/5 transition-colors block md:table-row mb-6 md:mb-0 rounded-2xl md:rounded-none overflow-hidden bg-black/20 md:bg-transparent">
+                <td className="p-5 md:p-6 block md:table-cell border-b border-white/5 md:border-0">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Guest Profile</div>
+                  <div className="font-bold text-xl md:text-lg">{b.customerName}</div>
                   <div className="text-[10px] opacity-40 tracking-widest">{b.customerEmail}</div>
                 </td>
-                <td className="p-6 font-medium">
-                  {b.room.name}
+                <td className="p-5 md:p-6 font-medium block md:table-cell border-b border-white/5 md:border-0">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Suite Selection</div>
+                  <div className="text-lg md:text-sm">{b.room.name}</div>
                 </td>
-                <td className="p-6 opacity-60">
+                <td className="p-5 md:p-6 opacity-60 block md:table-cell border-b border-white/5 md:border-0">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-60 mb-1 text-[var(--accent-primary)]">Duration</div>
                   {new Date(b.checkIn).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })} — {new Date(b.checkOut).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 </td>
-                <td className="p-6 text-center">
-                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase ${
+                <td className="p-5 md:p-6 md:text-center block md:table-cell border-b border-white/5 md:border-0">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-2 text-[var(--accent-primary)]">Protocol Status</div>
+                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase inline-block ${
                     b.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
                     b.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
                     'bg-rose-500/10 text-rose-500 border border-rose-500/20'
@@ -172,20 +176,21 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
                     {b.status}
                   </span>
                 </td>
-                <td className="p-6 text-right">
+                <td className="p-5 md:p-6 md:text-right block md:table-cell bg-white/5 md:bg-transparent">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--accent-primary)]">Actions</div>
                   {b.status === 'PENDING' ? (
-                    <div className="flex gap-4 justify-end">
+                    <div className="flex gap-4 md:justify-end">
                       <button 
                         onClick={() => handleAction(b.id, 'APPROVED')}
                         disabled={isPending}
-                        className="text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50"
+                        className="flex-1 md:flex-none py-3 md:py-0 border border-emerald-500/20 md:border-0 rounded-xl md:rounded-none bg-emerald-500/10 md:bg-transparent text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50 text-center"
                       >
                         Authorize
                       </button>
                       <button 
                         onClick={() => handleAction(b.id, 'REJECTED')}
                         disabled={isPending}
-                        className="text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50"
+                        className="flex-1 md:flex-none py-3 md:py-0 border border-rose-500/20 md:border-0 rounded-xl md:rounded-none bg-rose-500/10 md:bg-transparent text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-colors disabled:opacity-50 text-center"
                       >
                         Decline
                       </button>
