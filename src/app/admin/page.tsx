@@ -13,7 +13,11 @@ export default async function AdminDashboard() {
     redirect("/staff-login")
   }
 
-  const roomsSnapshot = await db.collection("rooms").get()
+  const [roomsSnapshot, bookingsSnapshot] = await Promise.all([
+    db.collection("rooms").get(),
+    db.collection("bookings").orderBy("createdAt", "desc").get().catch(() => db.collection("bookings").get())
+  ])
+
   const rooms = roomsSnapshot.docs
     .map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() as any }))
     .sort((a, b) => {
@@ -23,13 +27,6 @@ export default async function AdminDashboard() {
       return (a.floor || 0) - (b.floor || 0);
     });
 
-  let bookingsSnapshot;
-  try {
-    bookingsSnapshot = await db.collection("bookings").orderBy("createdAt", "desc").get()
-  } catch (e) {
-    console.warn("Index not ready, falling back to unordered fetch for admin.")
-    bookingsSnapshot = await db.collection("bookings").get()
-  }
   const bookings = bookingsSnapshot.docs.map((doc: any) => {
     const data = serializeFirestoreData(doc.data())
     const associatedRoom = rooms.find(r => r.id === data.roomId)

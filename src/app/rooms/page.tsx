@@ -6,10 +6,12 @@ import { db } from "@/lib/firebase-admin"
 import { serializeFirestoreData } from "@/lib/utils"
 
 export default async function RoomsPage() {
-  const roomsSnapshot = await db.collection("rooms").get();
-  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
+  const [roomsSnapshot, bookingsSnapshot] = await Promise.all([
+    db.collection("rooms").get(),
+    db.collection("bookings").where("status", "==", "APPROVED").get()
+  ]);
 
-  const bookingsSnapshot = await db.collection("bookings").where("status", "==", "APPROVED").get();
+  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
   const bookings = bookingsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
   
   return (

@@ -6,10 +6,12 @@ import { serializeFirestoreData } from "@/lib/utils";
 import { ShieldCheck } from "lucide-react";
 
 export default async function PreBookingWindow() {
-  const roomsSnapshot = await db.collection("rooms").get();
-  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
+  const [roomsSnapshot, bookingsSnapshot] = await Promise.all([
+    db.collection("rooms").get(),
+    db.collection("bookings").where("status", "==", "APPROVED").get()
+  ]);
 
-  const bookingsSnapshot = await db.collection("bookings").where("status", "==", "APPROVED").get();
+  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
   const bookings = bookingsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
 
   // Group rooms by type AND price to separate the 3 different 2BHK options
