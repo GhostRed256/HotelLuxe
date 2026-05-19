@@ -95,11 +95,20 @@ export default async function PreBookingWindow() {
   return (
     <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center">
       <div className="max-w-5xl w-full">
-        <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-4 text-center">
-          Book Your <span className="text-[var(--accent-primary)]">Stay</span>
-        </h1>
-        <p className="opacity-60 text-center mb-12 max-w-2xl mx-auto">
-          Select a room category below to proceed with your booking.
+        <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
+          <h1 className="text-6xl md:text-8xl font-heading font-black tracking-tight mb-3 text-foreground drop-shadow-2xl">
+            StayNJoy
+          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
+            <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80">
+              Book <span className="text-[var(--gold-primary)] font-extrabold">your</span> Stay
+            </p>
+            <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
+          </div>
+        </div>
+        <p className="opacity-50 text-center text-xs md:text-sm font-light italic mb-12 max-w-2xl mx-auto">
+          Select a suite category below to begin your premium homestay experience.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
