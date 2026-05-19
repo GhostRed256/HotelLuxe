@@ -19,10 +19,15 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (user && isAdmin) {
-      window.location.assign("/admin")
+    if (user) {
+      if (isAdmin) {
+        window.location.assign("/admin")
+      } else {
+        // Auto-logout guest session if they try to access staff login
+        signOut()
+      }
     }
-  }, [user, isAdmin])
+  }, [user, isAdmin, signOut])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,18 +126,12 @@ export default function Login() {
           className="glass-panel w-full max-w-md p-10 border-2 border-rose-500/20 text-center bg-black/40"
         >
           <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-8">
-            <LogOut className="text-rose-500" size={32} />
+            <LogOut className="text-rose-500 animate-pulse" size={32} />
           </div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Switch to Staff Account</h2>
-          <p className="text-[11px] text-white/40 leading-relaxed mb-10 uppercase tracking-widest">
-            You are currently logged in as a Guest. You must sign out to access the Management Portal.
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-4 animate-pulse">Switching Modes...</h2>
+          <p className="text-[11px] text-white/40 leading-relaxed uppercase tracking-widest">
+            Clearing guest session for staff entry.
           </p>
-          <button 
-            onClick={() => signOut()}
-            className="w-full bg-rose-600 text-white font-black py-5 rounded-2xl tracking-[0.2em] uppercase text-[11px] hover:bg-rose-700 transition-all shadow-xl shadow-rose-600/20"
-          >
-            Sign Out of Guest Session
-          </button>
         </motion.div>
       ) : (
         <motion.div 

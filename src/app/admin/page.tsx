@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
   const session = await getAdminSession()
   
   if (!session || !session.isAdmin) {
-    redirect("/login")
+    redirect("/staff-login")
   }
 
   const roomsSnapshot = await db.collection("rooms").get()
