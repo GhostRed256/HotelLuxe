@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard } from "lucide-react"
@@ -17,6 +17,12 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      window.location.assign("/admin")
+    }
+  }, [user, isAdmin])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,27 +109,10 @@ export default function Login() {
           className="glass-panel w-full max-w-md p-12 border-2 border-rose-500/30 text-center bg-black/40"
         >
           <div className="w-24 h-24 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-8 border border-rose-500/20">
-            <ShieldCheck className="text-rose-500" size={48} />
+            <ShieldCheck className="text-rose-500 animate-pulse" size={48} />
           </div>
-          <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">Staff Identity Verified</h2>
-          <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black mb-10">Access Granted to Management Panel</p>
-          
-          <div className="flex flex-col gap-4">
-            <button 
-              onClick={() => window.location.assign("/admin")}
-              className="w-full bg-rose-600 text-white font-black py-5 rounded-2xl tracking-[0.3em] uppercase text-[12px] hover:bg-rose-700 transition-all shadow-2xl shadow-rose-600/30 flex items-center justify-center gap-3"
-            >
-              <LayoutDashboard size={18} />
-              Open Admin Panel
-            </button>
-            <button 
-              onClick={() => signOut()}
-              className="w-full py-4 text-[10px] font-black tracking-[0.2em] uppercase text-white/30 hover:text-white transition-all flex items-center justify-center gap-2"
-            >
-              <LogOut size={16} />
-              Sign Out
-            </button>
-          </div>
+          <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-4 animate-pulse">Redirecting...</h2>
+          <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black">Opening Management Portal</p>
         </motion.div>
       ) : user && !isAdmin ? (
         <motion.div 
