@@ -30,9 +30,13 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   useEffect(() => {
     const suiteParam = searchParams.get("suite")
     if (suiteParam && displayRooms.length > 0) {
-      const matchingRoom = displayRooms.find((r: any) => 
-        r.type === suiteParam && !isRoomBooked(r.id)
-      )
+      const matchingRoom = displayRooms.find((r: any) => {
+        if (suiteParam.startsWith("2BHK_")) {
+          const [typePrefix, expectedPrice] = suiteParam.split("_");
+          return r.type === "2BHK House" && Number(r.price) === Number(expectedPrice) && !isRoomBooked(r.id);
+        }
+        return r.type === suiteParam && !isRoomBooked(r.id);
+      })
       if (matchingRoom) {
         // Wait a beat for the page to settle
         const timer = setTimeout(() => openBookingModal(matchingRoom), 500)
