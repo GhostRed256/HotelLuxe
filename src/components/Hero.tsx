@@ -4,6 +4,7 @@
  import Link from "next/link"
  import { useState, useEffect } from "react"
  import { useTheme } from "next-themes"
+ import { ShieldCheck } from "lucide-react"
  
  const images = [
    "https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=2000",
@@ -151,6 +152,21 @@
              আপোনালৈ স্বাগতম • Welcome
            </span>
            <div className="w-12 h-[1px] bg-[var(--gold-primary)] opacity-30" />
+         </motion.div>
+
+         <motion.div
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           transition={{ delay: 1.2, duration: 2 }}
+           className="mt-8 flex justify-center"
+         >
+           <Link 
+             href="/staff-login" 
+             className={`flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase transition-colors ${isDark ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black'}`}
+           >
+             <ShieldCheck size={14} />
+             Admin / Staff Sign In
+           </Link>
          </motion.div>
        </div>
  

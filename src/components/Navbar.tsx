@@ -40,7 +40,7 @@ export default function Navbar() {
             {["Home", "Rooms", "About", "Contact"].map((item) => (
               <Link 
                 key={item} 
-                href={item === "Home" ? "/" : `/${item.toLowerCase()}`} 
+                href={item === "Home" ? "/home" : `/${item.toLowerCase()}`} 
                 className={`text-[9px] font-black tracking-[0.3em] uppercase transition-all ${
                   scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "text-[#1A0811] hover:text-[var(--accent-primary)] dark:text-white"
                 }`}
@@ -151,7 +151,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#0A0307] border-t border-black/5 dark:border-white/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
           {["Home", "Rooms", "About", "Contact"].map((item) => (
-            <Link key={item} href={item === "Home" ? "/" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-black dark:text-white hover:text-rose-500 transition-colors">
+            <Link key={item} href={item === "Home" ? "/home" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-black dark:text-white hover:text-rose-500 transition-colors">
               {item}
             </Link>
           ))}
