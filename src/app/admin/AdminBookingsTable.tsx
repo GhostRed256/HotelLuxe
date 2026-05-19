@@ -85,25 +85,34 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <div className="flex flex-col md:flex-row justify-between mb-10 gap-6">
-        <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-6 mb-10">
+        {/* Search & Filter Row */}
+        <div className="flex flex-col md:flex-row gap-4">
           <input 
             type="text" 
             placeholder="Search Registry..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="form-input !py-3 !px-6 !w-64"
+            className="form-input !py-4 !px-6 !text-base md:!text-sm w-full md:!w-64"
           />
-          <input 
-            type="date" 
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="form-input !py-3 !px-6 !w-auto"
-          />
+          
+          {/* Date Filter - Large tappable container */}
+          <div className="relative w-full md:w-auto">
+            <label className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1.5 block md:hidden">Filter by Date</label>
+            <input 
+              type="date" 
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="form-input !py-4 !px-6 !text-base md:!text-sm md:!py-3 w-full md:!w-auto cursor-pointer"
+              style={{ minHeight: '52px' }}
+            />
+          </div>
+
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="form-select !py-3 !px-6 !w-auto"
+            className="form-select !py-4 !px-6 !text-base md:!text-sm md:!py-3 w-full md:!w-auto"
+            style={{ minHeight: '52px' }}
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
@@ -112,26 +121,40 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
           </select>
         </div>
         
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 border border-white/10 p-2 rounded-xl bg-black/20">
-            <span className="text-[9px] font-bold uppercase opacity-50 whitespace-nowrap pl-2">CSV Range:</span>
-            <input 
-              type="date" 
-              value={csvStartDate} 
-              onChange={e => setCsvStartDate(e.target.value)} 
-              className="form-input !py-1 !px-2 !text-xs !bg-transparent !border-none !shadow-none" 
-            />
-            <span className="opacity-50 text-xs">to</span>
-            <input 
-              type="date" 
-              value={csvEndDate} 
-              onChange={e => setCsvEndDate(e.target.value)} 
-              className="form-input !py-1 !px-2 !text-xs !bg-transparent !border-none !shadow-none" 
-            />
+        {/* CSV Export Section */}
+        <div className="flex flex-col gap-3 border border-white/10 p-4 md:p-3 rounded-2xl bg-black/20">
+          <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-50">CSV Date Range</span>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto] gap-3 md:gap-4 items-center">
+            {/* Start Date */}
+            <div className="relative">
+              <label className="text-[9px] font-bold uppercase tracking-[0.15em] opacity-30 mb-1.5 block md:hidden">From</label>
+              <input 
+                type="date" 
+                value={csvStartDate} 
+                onChange={e => setCsvStartDate(e.target.value)} 
+                className="form-input !py-4 !px-5 !text-base md:!text-sm md:!py-2.5 w-full cursor-pointer"
+                style={{ minHeight: '52px' }}
+              />
+            </div>
+            
+            <span className="hidden md:block opacity-50 text-xs font-bold">to</span>
+            
+            {/* End Date */}
+            <div className="relative">
+              <label className="text-[9px] font-bold uppercase tracking-[0.15em] opacity-30 mb-1.5 block md:hidden">To</label>
+              <input 
+                type="date" 
+                value={csvEndDate} 
+                onChange={e => setCsvEndDate(e.target.value)} 
+                className="form-input !py-4 !px-5 !text-base md:!text-sm md:!py-2.5 w-full cursor-pointer"
+                style={{ minHeight: '52px' }}
+              />
+            </div>
+
+            <button onClick={handleExportCSV} className="btn-outline !py-4 md:!py-2.5 !px-8 text-[10px] uppercase tracking-widest font-bold w-full md:w-auto" style={{ minHeight: '52px' }}>
+              Download CSV
+            </button>
           </div>
-          <button onClick={handleExportCSV} className="btn-outline !py-2 !px-8 text-[10px] uppercase tracking-widest font-bold w-full">
-            Download CSV
-          </button>
         </div>
       </div>
 
