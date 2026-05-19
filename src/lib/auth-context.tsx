@@ -76,39 +76,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user)
       
-      if (user) {
-        // Fetch extended profile
-        const docRef = doc(db, "customers", user.uid)
-        const docSnap = await getDoc(docRef)
-        if (docSnap.exists()) {
-          setUserData(docSnap.data() as UserData)
-        } else if (user.displayName || user.phoneNumber) {
-          const newData = { 
-            displayName: user.displayName || "", 
-            phoneNumber: user.phoneNumber || "",
-            email: user.email || ""
+      try {
+        if (user) {
+          // Fetch extended profile
+          try {
+            const docRef = doc(db, "customers", user.uid)
+            const docSnap = await getDoc(docRef)
+            if (docSnap.exists()) {
+              setUserData(docSnap.data() as UserData)
+            } else if (user.displayName || user.phoneNumber) {
+              const newData = { 
+                displayName: user.displayName || "", 
+                phoneNumber: user.phoneNumber || "",
+                email: user.email || ""
+              }
+              await setDoc(docRef, newData)
+              setUserData(newData)
+            }
+          } catch (profileError) {
+            console.error("Error fetching/creating user profile:", profileError)
           }
-          await setDoc(docRef, newData)
-          setUserData(newData)
-        }
 
-        // Update server session cookie with verified admin status
-        await fetch("/api/auth/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            email: user.email, 
-            phoneNumber: user.phoneNumber,
-            uid: user.uid,
-            isAdmin: checkIsAdmin(user)
+          // Update server session cookie with verified admin status
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              email: user.email, 
+              phoneNumber: user.phoneNumber,
+              uid: user.uid,
+              isAdmin: checkIsAdmin(user)
+            })
           })
-        })
-      } else {
-        setUserData(null)
-        await fetch("/api/auth/session", { method: "DELETE" })
+        } else {
+          setUserData(null)
+          await fetch("/api/auth/session", { method: "DELETE" })
+        }
+      } catch (err) {
+        console.error("Auth state change error:", err)
+      } finally {
+        setLoading(false)
       }
-      
-      setLoading(false)
     })
 
     return () => unsubscribe()
