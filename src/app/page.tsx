@@ -96,10 +96,10 @@ export default async function PreBookingWindow() {
     <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center">
       <div className="max-w-5xl w-full">
         <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
-          <h1 className="text-6xl md:text-8xl font-heading italic font-black tracking-tight mb-3 drop-shadow-2xl" style={{ filter: "drop-shadow(0 0 20px rgba(255, 45, 85, 0.35))" }}>
-            <span className="text-[#FF2D55]">Stay</span>
-            <span className="bg-gradient-to-r from-[#96713F] via-[#B88F54] to-[#96713F] bg-clip-text text-transparent">N</span>
-            <span className="text-[#FF2D55]">joy</span>
+          <h1 className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white">
+            <span>Stay</span>
+            <span className="text-[var(--accent-primary)] italic mx-0.5">N</span>
+            <span>Joy</span>
           </h1>
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
