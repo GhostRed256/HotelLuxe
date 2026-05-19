@@ -156,7 +156,20 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
                 <td className="p-5 md:p-6 block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Guest Profile</div>
                   <div className="font-bold text-xl md:text-lg">{b.customerName}</div>
-                  <div className="text-[10px] opacity-40 tracking-widest">{b.customerEmail}</div>
+                  <div className="flex flex-col gap-1 mt-1">
+                    <div className="text-[10px] opacity-40 tracking-widest">{b.customerEmail || 'No Email'}</div>
+                    {b.customerPhone && (
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[11px] font-medium opacity-80 tracking-wider">{b.customerPhone}</span>
+                        <a 
+                          href={`tel:${b.customerPhone}`}
+                          className="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-colors flex items-center gap-1"
+                        >
+                          Call Now
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="p-5 md:p-6 font-medium block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Suite Selection</div>
