@@ -6,7 +6,56 @@ import { addRoom } from "./actions"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
-import { Plus, X, Calendar, Home, Download, ChevronDown } from "lucide-react"
+import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2 } from "lucide-react"
+
+const compressImage = async (file: File): Promise<File> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.5
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
 
 export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[], bookings: any[] }) {
   const searchParams = useSearchParams()
@@ -17,6 +66,38 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
 
   const [csvStartDate, setCsvStartDate] = useState("")
   const [csvEndDate, setCsvEndDate] = useState("")
+  const [isSubmittingRoom, setIsSubmittingRoom] = useState(false)
+
+  const handleSubmitRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmittingRoom(true)
+    
+    try {
+      const form = e.currentTarget
+      const formData = new FormData(form)
+      
+      const fileInput = form.querySelector('input[type="file"]') as HTMLInputElement
+      if (fileInput && fileInput.files) {
+        const files = Array.from(fileInput.files)
+        // Clear standard images
+        formData.delete("images")
+        
+        // Add compressed images
+        for (const file of files) {
+          if (file.size === 0) continue
+          const compressed = await compressImage(file)
+          formData.append("images", compressed)
+        }
+      }
+      
+      await addRoom(formData)
+      setShowAddRoom(false)
+    } catch(err) {
+      console.error("Error establishing suite", err)
+    } finally {
+      setIsSubmittingRoom(false)
+    }
+  }
 
   useEffect(() => {
     const tab = searchParams.get("tab")
@@ -86,46 +167,6 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           </h1>
           <p className="opacity-50 font-light italic text-lg">Curating the royal experience for every guest.</p>
         </div>
-
-        {/* CSV Export - Desktop: inline panel, Mobile: dropdown */}
-        <div className="relative w-full md:w-auto">
-          {/* Mobile toggle button */}
-          <button 
-            onClick={() => setShowCsvExport(!showCsvExport)}
-            className="md:hidden flex items-center gap-2 w-full justify-between px-5 py-3.5 rounded-xl border border-white/10 bg-white/5 text-[10px] font-bold uppercase tracking-widest"
-          >
-            <span className="flex items-center gap-2"><Download size={14} /> Export Records</span>
-            <ChevronDown size={14} className={`transition-transform ${showCsvExport ? 'rotate-180' : ''}`} />
-          </button>
-
-          {/* Desktop: always visible / Mobile: dropdown */}
-          <div className={`${showCsvExport ? 'block' : 'hidden'} md:block mt-2 md:mt-0`}>
-            <div className="flex flex-col gap-2.5 border border-white/10 p-4 rounded-2xl bg-black/30 backdrop-blur-sm">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40">Export CSV</span>
-              <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
-                <input 
-                  type="date" 
-                  value={csvStartDate} 
-                  onChange={e => setCsvStartDate(e.target.value)} 
-                  className="form-input !py-3 !px-4 !text-sm w-full md:!w-36 cursor-pointer"
-                />
-                <span className="hidden md:block opacity-40 text-[10px] font-bold">→</span>
-                <input 
-                  type="date" 
-                  value={csvEndDate} 
-                  onChange={e => setCsvEndDate(e.target.value)} 
-                  className="form-input !py-3 !px-4 !text-sm w-full md:!w-36 cursor-pointer"
-                />
-                <button 
-                  onClick={handleExportCSV} 
-                  className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-[var(--accent-primary)] text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
-                >
-                  <Download size={13} /> Download
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Conditionally Show Add Room Form */}
@@ -139,28 +180,28 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
               <X size={24} />
             </button>
             <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Establish <span className="text-[var(--accent-primary)]">Suite</span></h2>
-            <form action={async (fd) => { await addRoom(fd); setShowAddRoom(false); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmitRoom} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Name</label>
-                <input type="text" name="name" placeholder="E.g. Royal Rose" required className="form-input" />
+                <input type="text" name="name" placeholder="E.g. Royal Rose" required disabled={isSubmittingRoom} className="form-input" />
               </div>
               <div className="md:col-span-2">
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Description</label>
-                <textarea name="description" placeholder="What makes this stay unique?" required className="form-input min-h-[100px]" />
+                <textarea name="description" placeholder="What makes this stay unique?" required disabled={isSubmittingRoom} className="form-input min-h-[100px]" />
               </div>
               
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Price (₹)</label>
-                <input type="number" name="price" placeholder="1999" required className="form-input" />
+                <input type="number" name="price" placeholder="1999" required disabled={isSubmittingRoom} className="form-input" />
               </div>
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Floor / Level</label>
-                <input type="text" name="floor" placeholder="Ground Level" required className="form-input" />
+                <input type="text" name="floor" placeholder="Ground Level" required disabled={isSubmittingRoom} className="form-input" />
               </div>
 
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Location</label>
-                <select name="location" className="form-select" required>
+                <select name="location" className="form-select" required disabled={isSubmittingRoom}>
                   <option value="Chaliha Nagar">Chaliha Nagar</option>
                   <option value="Bordoloi Nagar (Near Lake)">Bordoloi Nagar (Near Lake)</option>
                   <option value="Bordoloi Nagar (Near Income Tax Office)">Bordoloi Nagar (Near Income Tax Office)</option>
@@ -168,7 +209,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
               </div>
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Suite Category</label>
-                <select name="type" className="form-select">
+                <select name="type" className="form-select" disabled={isSubmittingRoom}>
                   <option value="Cozy Pink Room">Cozy Pink Room</option>
                   <option value="Deluxe Room">Deluxe Room</option>
                   <option value="Premium 1BHK Suite">Premium 1BHK Suite</option>
@@ -179,17 +220,26 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
 
               <div className="md:col-span-2">
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-4 block">Visual Assets (Max 10)</label>
-                <input type="file" name="images" multiple accept="image/*" className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-primary)] file:text-white hover:file:bg-[var(--accent-primary)]/80 cursor-pointer" />
+                <input type="file" name="images" multiple accept="image/*" disabled={isSubmittingRoom} className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-primary)] file:text-white hover:file:bg-[var(--accent-primary)]/80 cursor-pointer" />
               </div>
               
-              <button type="submit" className="md:col-span-2 btn-primary !py-4 mt-4 shadow-none hover:shadow-2xl">Confirm Establishment</button>
+              <button type="submit" disabled={isSubmittingRoom} className="md:col-span-2 btn-primary !py-4 mt-4 shadow-none hover:shadow-2xl flex items-center justify-center gap-2">
+                {isSubmittingRoom ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Compressing & Establishing...</span>
+                  </>
+                ) : (
+                  <span>Confirm Establishment</span>
+                )}
+              </button>
             </form>
           </div>
         </div>
       )}
 
       {/* Tabs Selection */}
-      <div className="flex flex-wrap gap-4 mb-12 backdrop-blur-md bg-white/5 p-2 rounded-2xl border border-white/5 w-fit">
+      <div className="flex flex-wrap gap-4 mb-8 backdrop-blur-md bg-white/5 p-2 rounded-2xl border border-white/5 w-fit">
         {[
           { id: "bookings", label: "Guest Registry", icon: Calendar },
           { id: "manual", label: "Manual Intake", icon: Plus },
@@ -204,6 +254,52 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
             <tab.icon size={14} /> {tab.label}
           </button>
         ))}
+      </div>
+
+      {/* CSV Export - Positioned below the tabs selection, collapsible on both mobile and PC */}
+      <div className="relative mb-12 w-full max-w-2xl animate-in fade-in duration-500">
+        <button 
+          onClick={() => setShowCsvExport(!showCsvExport)}
+          className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all w-full justify-between"
+        >
+          <span className="flex items-center gap-2">
+            <Download size={14} className="text-[var(--accent-primary)]" />
+            DOWNLOAD HOMESTAY RECORDS DATA
+          </span>
+          <ChevronDown size={14} className={`transition-transform duration-300 ${showCsvExport ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showCsvExport && (
+          <div className="mt-3 p-6 border border-white/10 rounded-2xl bg-black/40 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 block mb-3">Filter date range for data export</span>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-widest opacity-35">From</span>
+                <input 
+                  type="date" 
+                  value={csvStartDate} 
+                  onChange={e => setCsvStartDate(e.target.value)} 
+                  className="form-input !py-3 !pl-14 !pr-4 !text-sm w-full cursor-pointer"
+                />
+              </div>
+              <div className="relative flex-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-widest opacity-35">To</span>
+                <input 
+                  type="date" 
+                  value={csvEndDate} 
+                  onChange={e => setCsvEndDate(e.target.value)} 
+                  className="form-input !py-3 !pl-12 !pr-4 !text-sm w-full cursor-pointer"
+                />
+              </div>
+              <button 
+                onClick={handleExportCSV} 
+                className="flex items-center justify-center gap-2 py-3 px-8 rounded-xl bg-[var(--accent-primary)] text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
+              >
+                <Download size={13} /> Download
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">

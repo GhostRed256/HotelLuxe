@@ -11,7 +11,28 @@ export default async function PreBookingWindow() {
     db.collection("bookings").where("status", "==", "APPROVED").get()
   ]);
 
-  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
+  const rooms = roomsSnapshot.docs.map((doc: any) => {
+    const data = doc.data();
+    let firstImg = "";
+    if (data.images) {
+      try {
+        const imgs = typeof data.images === 'string' ? JSON.parse(data.images) : data.images;
+        firstImg = imgs?.[0] || "";
+      } catch {
+        firstImg = "";
+      }
+    }
+    return serializeFirestoreData({
+      id: doc.id,
+      name: data.name,
+      type: data.type,
+      price: data.price,
+      description: data.description,
+      location: data.location,
+      floor: data.floor,
+      images: firstImg ? [firstImg] : []
+    });
+  });
   const bookings = bookingsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
 
   // Group rooms by type AND price to separate the 3 different 2BHK options
