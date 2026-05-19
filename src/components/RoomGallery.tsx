@@ -529,9 +529,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                       <button
                         type="submit"
                         disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
-                        className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2"
+                        className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
                       >
-                        {isSubmitting ? "Processing..." : "Confirm Reservation"}
+                        {isSubmitting ? "Request Received - Awaiting Staff Confirmation" : "Confirm Reservation"}
                       </button>
                     </form>
                   )}
