@@ -74,8 +74,7 @@ export default function Login() {
       })
 
       if (isUserAdmin) {
-        // NO AUTOMATIC REDIRECT - User stays on page to see success
-        setIsSubmitting(false)
+        window.location.assign("/admin")
       } else {
         setError("AUTHORIZED PERSONNEL ONLY: Your account does not have admin privileges.")
         setIsSubmitting(false)

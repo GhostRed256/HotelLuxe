@@ -13,7 +13,7 @@ export default async function PreBookingWindow() {
   const bookings = bookingsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
 
   // Group rooms by type AND price to separate the 3 different 2BHK options
-  const uniqueCategories = [];
+  const uniqueCategories: any[] = [];
   const seen = new Set();
   
   for (const r of rooms) {

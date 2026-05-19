@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { updateBookingStatus } from "./actions"
 
@@ -11,6 +11,23 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
+  const [csvStartDate, setCsvStartDate] = useState("")
+  const [csvEndDate, setCsvEndDate] = useState("")
+
+  useEffect(() => {
+    if (bookings && bookings.length > 0) {
+      const min = new Date(Math.min(...bookings.map(b => new Date(b.checkIn).getTime()))).toISOString().split('T')[0]
+      
+      const approvedBookings = bookings.filter(b => b.status === 'APPROVED')
+      const max = approvedBookings.length > 0 
+        ? new Date(Math.max(...approvedBookings.map(b => new Date(b.checkOut).getTime()))).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0]
+        
+      setCsvStartDate(min)
+      setCsvEndDate(max)
+    }
+  }, [bookings])
+
   const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
     startTransition(async () => {
       await updateBookingStatus(id, status)
@@ -19,10 +36,17 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
   }
 
   const handleExportCSV = () => {
+    const csvBookings = bookings.filter(b => {
+      const bIn = new Date(b.checkIn).toISOString().split('T')[0]
+      if (csvStartDate && bIn < csvStartDate) return false
+      if (csvEndDate && bIn > csvEndDate) return false
+      return true
+    })
+
     const headers = ["ID", "Customer Name", "Customer Email", "Room", "Check In", "Check Out", "Status"]
     const csvContent = [
       headers.join(","),
-      ...filteredBookings.map(b => [
+      ...csvBookings.map(b => [
         b.id,
         `"${b.customerName}"`,
         `"${b.customerEmail}"`,
@@ -87,9 +111,28 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
             <option value="REJECTED">Rejected</option>
           </select>
         </div>
-        <button onClick={handleExportCSV} className="btn-outline !py-3 !px-8 text-[10px] uppercase tracking-widest font-bold">
-          Download CSV
-        </button>
+        
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 border border-white/10 p-2 rounded-xl bg-black/20">
+            <span className="text-[9px] font-bold uppercase opacity-50 whitespace-nowrap pl-2">CSV Range:</span>
+            <input 
+              type="date" 
+              value={csvStartDate} 
+              onChange={e => setCsvStartDate(e.target.value)} 
+              className="form-input !py-1 !px-2 !text-xs !bg-transparent !border-none !shadow-none" 
+            />
+            <span className="opacity-50 text-xs">to</span>
+            <input 
+              type="date" 
+              value={csvEndDate} 
+              onChange={e => setCsvEndDate(e.target.value)} 
+              className="form-input !py-1 !px-2 !text-xs !bg-transparent !border-none !shadow-none" 
+            />
+          </div>
+          <button onClick={handleExportCSV} className="btn-outline !py-2 !px-8 text-[10px] uppercase tracking-widest font-bold w-full">
+            Download CSV
+          </button>
+        </div>
       </div>
 
       <table className="w-full border-collapse">
