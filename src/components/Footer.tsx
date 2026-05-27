@@ -31,6 +31,14 @@ import Logo from "./Logo"
                  <Camera size={20} />
                </a>
                <a 
+                 href="https://wa.me/919181042005" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:text-white transition-all duration-500"
+               >
+                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+               </a>
+               <a 
                  href="mailto:contact@staynjoy.com" 
                  className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center hover:bg-[var(--accent-primary)] hover:text-white transition-all duration-500"
                >

@@ -13,6 +13,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
+  const [selectedContact, setSelectedContact] = useState("9181042005")
+  const contactNumbersList = ["9181042005", "8133819414", "7002475079"]
   const scrollRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
 
@@ -165,10 +167,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     await requestBooking(formData)
     setIsSubmitting(false)
     setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
-    setTimeout(() => {
-      setShowBookingModal(false)
-      setSuccessMsg("")
-    }, 3500)
+    // Removed auto-close so the user can interact with contact numbers
   }
 
   const scroll = (dir: "left" | "right") => {
@@ -340,7 +339,12 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 </div>
 
                 <button
-                  onClick={() => setShowBookingModal(false)}
+                  onClick={() => {
+                    setShowBookingModal(false)
+                    if (successMsg) {
+                      setSuccessMsg("")
+                    }
+                  }}
                   className="absolute top-6 right-6 text-white/30 hover:text-white text-xl transition-colors"
                 >
                   ✕
@@ -348,9 +352,52 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
                 <div className="p-8">
                   {successMsg ? (
-                    <div className="text-center py-10">
-                      <span className="text-5xl block mb-4">✓</span>
-                      <p className="text-emerald-500 font-bold text-lg">{successMsg}</p>
+                    <div className="text-center py-8 flex flex-col items-center justify-center">
+                      <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                        <span className="text-3xl text-emerald-500 font-bold">✓</span>
+                      </div>
+                      <h4 className="text-xl font-heading font-bold text-emerald-500 mb-2">Request Successful!</h4>
+                      <p className="text-white/60 text-sm max-w-sm mx-auto leading-relaxed mb-6">
+                        {successMsg} Our team will notify you within minutes. Or reach out to us directly:
+                      </p>
+
+                      {/* Contact Selection */}
+                      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-sm mx-auto flex flex-col gap-4">
+                        <div className="flex gap-2 justify-center flex-wrap">
+                          {contactNumbersList.map(num => (
+                            <button
+                              key={num}
+                              onClick={() => setSelectedContact(num)}
+                              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${
+                                selectedContact === num
+                                  ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                                  : "bg-white/5 text-white/50 hover:bg-white/10"
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="flex gap-3 justify-center mt-2 w-full">
+                          <a
+                            href={`https://wa.me/91${selectedContact}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/30 py-3 rounded-xl transition-colors text-sm font-bold"
+                          >
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            WhatsApp
+                          </a>
+                          <a
+                            href={`tel:+91${selectedContact}`}
+                            className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 py-3 rounded-xl transition-colors text-sm font-bold"
+                          >
+                            <Phone size={18} />
+                            Call
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <form onSubmit={handleBookingSubmit} className="flex flex-col gap-6">
