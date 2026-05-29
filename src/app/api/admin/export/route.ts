@@ -24,7 +24,7 @@ export async function GET() {
 
   const fields = ['id', 'customerName', 'customerEmail', 'checkIn', 'checkOut', 'status', 'room.name', 'createdAt']
   
-  const csvRows = []
+  const csvRows: string[] = []
   csvRows.push(fields.join(','))
   for (const row of bookings) {
     const values = fields.map(field => {
