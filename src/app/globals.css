@@ -9,7 +9,7 @@
   --color-pink-accent: #D14D7E;
   --color-gold-harvest: #B88F54;
   --color-black-accent: #0A0307;
-  
+
   --font-body: 'DM Sans', sans-serif;
   --font-heading: 'Outfit', sans-serif;
   --font-script: 'Outfit', sans-serif;
@@ -62,7 +62,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   color: var(--foreground);
   letter-spacing: -0.02em;
@@ -97,8 +102,14 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background: rgba(209, 77, 126, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  @media (min-width: 768px) {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
   color: #fff;
   padding: 0.875rem 2.5rem;
   border-radius: 9999px;
@@ -123,8 +134,14 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  @media (min-width: 768px) {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
   color: var(--foreground);
   padding: 0.875rem 2.5rem;
   border-radius: 9999px;
@@ -145,8 +162,14 @@ h1, h2, h3, h4, h5, h6 {
 /* --- Clean Glass Panel --- */
 .glass-panel {
   background: var(--card-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @media (min-width: 768px) {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
   border: 1px solid var(--border-color);
   border-radius: 2rem;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -169,7 +192,8 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-color);
 }
 
-.ornate-border::before, .ornate-border::after {
+.ornate-border::before,
+.ornate-border::after {
   content: '';
   position: absolute;
   width: 12px;
@@ -193,7 +217,8 @@ h1, h2, h3, h4, h5, h6 {
   border-top: none;
 }
 
-.ornate-border:hover::before, .ornate-border:hover::after {
+.ornate-border:hover::before,
+.ornate-border:hover::after {
   width: 20px;
   height: 20px;
   opacity: 1;
@@ -201,20 +226,23 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Shimmering Gradient --- */
 @keyframes goldShimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
 }
 
 .gold-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--gold-dark) 0%,
-    var(--gold-primary) 20%,
-    #FFF 40%,
-    var(--gold-primary) 60%,
-    var(--gold-dark) 80%,
-    var(--gold-dark) 100%
-  );
+  background: linear-gradient(90deg,
+      var(--gold-dark) 0%,
+      var(--gold-primary) 20%,
+      #FFF 40%,
+      var(--gold-primary) 60%,
+      var(--gold-dark) 80%,
+      var(--gold-dark) 100%);
   background-size: 200% auto;
   color: transparent;
   -webkit-background-clip: text;
@@ -248,8 +276,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Marquee --- */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee {
@@ -264,9 +297,17 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Float --- */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
@@ -320,7 +361,8 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 0 3px rgba(209, 77, 126, 0.1);
 }
 
-.form-select option, select option {
+.form-select option,
+select option {
   background-color: var(--background) !important;
   color: var(--foreground) !important;
 }
@@ -342,6 +384,7 @@ h1, h2, h3, h4, h5, h6 {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -376,4 +419,3 @@ h1, h2, h3, h4, h5, h6 {
 .font-script {
   font-family: var(--font-script);
 }
-

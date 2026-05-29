@@ -96,15 +96,15 @@ export default async function PreBookingWindow() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center relative overflow-hidden">
-      {/* Desktop Side Patterns (Gold Animated Borders) */}
-      <div className="hidden lg:block absolute top-0 left-0 bottom-0 w-[15vw] pointer-events-none opacity-40 mix-blend-overlay z-0">
+      {/* Gold Animated Side Patterns (Restored for mobile with safe performance) */}
+      <div className="absolute top-0 left-0 bottom-0 w-[15vw] pointer-events-none opacity-10 md:opacity-40 mix-blend-overlay z-0">
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at center, #B88F54 3px, transparent 3px)', backgroundSize: '40px 40px' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_4s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_6s_ease-in-out_infinite] md:animate-[pulse_4s_ease-in-out_infinite]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[var(--background)] via-[var(--background)]/80 to-transparent" />
       </div>
-      <div className="hidden lg:block absolute top-0 right-0 bottom-0 w-[15vw] pointer-events-none opacity-40 mix-blend-overlay z-0">
+      <div className="absolute top-0 right-0 bottom-0 w-[15vw] pointer-events-none opacity-10 md:opacity-40 mix-blend-overlay z-0">
         <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at center, #B88F54 3px, transparent 3px)', backgroundSize: '40px 40px' }} />
-        <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_4s_ease-in-out_infinite_1s]" />
+        <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_6s_ease-in-out_infinite_1s] md:animate-[pulse_4s_ease-in-out_infinite_1s]" />
         <div className="absolute inset-0 bg-gradient-to-l from-[var(--background)] via-[var(--background)]/80 to-transparent" />
       </div>
 
