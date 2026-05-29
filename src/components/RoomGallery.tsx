@@ -76,8 +76,11 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || "staynjoy@okaxis"
   const DEPOSIT_AMOUNT = 300
 
-  // Unique types and floors for filters
-  const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
+  // Custom display groups for dropdown filtering (Merge 4BHK House into Premium Suite)
+  const displayGroups = useMemo(() => {
+    const rawGroups = displayRooms.map((r: any) => r.type === "4BHK House" ? "Premium Suite" : r.type)
+    return [...new Set(rawGroups)].sort()
+  }, [displayRooms])
 
   // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
@@ -430,8 +433,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               key={num}
                               onClick={() => setSelectedContact(num)}
                               className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${selectedContact === num
-                                  ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                                  : "bg-white/5 text-white/50 hover:bg-white/10"
+                                ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                                : "bg-white/5 text-white/50 hover:bg-white/10"
                                 }`}
                             >
                               {num}
@@ -534,16 +537,25 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               required
                             >
                               <option value="">— Choose an available suite —</option>
-                              {suiteTypes.map((type: any) => {
-                                const roomsOfType = availableRoomsForBooking.filter((r: any) => r.type === type);
+                              {displayGroups.map((groupTitle: any) => {
+                                // Find available rooms that map to this group
+                                const roomsOfType = availableRoomsForBooking.filter((r: any) => {
+                                  const rGroup = r.type === "4BHK House" ? "Premium Suite" : r.type;
+                                  return rGroup === groupTitle;
+                                });
+
                                 if (roomsOfType.length === 0) return null;
                                 return (
-                                  <optgroup key={type} label={type}>
-                                    {roomsOfType.map((r: any) => (
-                                      <option key={r.id} value={r.id}>
-                                        {r.name} {"\u20B9"}{r.price}
-                                      </option>
-                                    ))}
+                                  <optgroup key={groupTitle} label={groupTitle}>
+                                    {roomsOfType.map((r: any) => {
+                                      // Prefix description like floor or what house type
+                                      const prefixText = r.floor ? `${r.floor} • ` : (r.type === '4BHK House' ? 'House • ' : '');
+                                      return (
+                                        <option key={r.id} value={r.id}>
+                                          {prefixText}{r.name} - {"\u20B9"}{r.price}
+                                        </option>
+                                      );
+                                    })}
                                   </optgroup>
                                 );
                               })}
