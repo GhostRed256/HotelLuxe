@@ -26,10 +26,16 @@ export default function PreBookingClient({
 }: PreBookingClientProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCat, setSelectedCat] = useState<Category | null>(null)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
 
   const handleBookNow = (cat: Category) => {
+    setLoadingId(`${cat.type}-${cat.price}`)
     setSelectedCat(cat)
-    setIsOpen(true)
+    // Small delay to ensure the UI updates before the heavy modal or navigation logic hits the main thread
+    setTimeout(() => {
+      setIsOpen(true)
+      setLoadingId(null)
+    }, 100)
   }
 
   return (
@@ -100,7 +106,14 @@ export default function PreBookingClient({
                     {cat.description}
                   </p>
                   <div className={`inline-flex items-center justify-center w-full py-4 rounded-full font-bold uppercase tracking-[0.2em] text-[10px] active:scale-98 transition-all duration-300 shadow-lg ${btnClass}`}>
-                    Book Now
+                    {loadingId === `${cat.type}-${cat.price}` ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Opening...
+                      </div>
+                    ) : (
+                      "Book Now"
+                    )}
                   </div>
                 </div>
               </div>

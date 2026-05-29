@@ -224,7 +224,7 @@ export default function OpeningBookingModal({
           </div>
 
           {successMsg ? (
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="text-center py-12 flex flex-col items-center justify-center"
@@ -244,11 +244,10 @@ export default function OpeningBookingModal({
                     <button
                       key={num}
                       onClick={() => setSelectedContact(num)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${
-                        selectedContact === num
+                      className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${selectedContact === num
                           ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
                           : "bg-white/5 text-white/50 hover:bg-white/10"
-                      }`}
+                        }`}
                     >
                       {num}
                     </button>
@@ -283,7 +282,7 @@ export default function OpeningBookingModal({
                 <div className="bg-white/10 rounded-full" />
                 <div className="opacity-20 bg-white/5 rounded-full" />
               </div>
-              
+
               {/* Select Suite Skeleton */}
               <div className="space-y-2">
                 <div className="h-3 bg-white/10 rounded w-1/4" />
@@ -326,7 +325,7 @@ export default function OpeningBookingModal({
             /* Form matching screenshot visually */
             <form onSubmit={handleBookingSubmit} className="flex flex-col gap-5">
               {bookingError && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-500 text-xs font-bold"
@@ -341,22 +340,20 @@ export default function OpeningBookingModal({
                 <button
                   type="button"
                   onClick={() => setBookingFor("myself")}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
-                    bookingFor === "myself" 
-                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20" 
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "myself"
+                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
                       : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
-                  }`}
+                    }`}
                 >
                   Booking For Myself
                 </button>
                 <button
                   type="button"
                   onClick={() => setBookingFor("others")}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
-                    bookingFor === "others" 
-                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20" 
+                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "others"
+                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
                       : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
-                  }`}
+                    }`}
                 >
                   For Someone Else
                 </button>
@@ -406,13 +403,13 @@ export default function OpeningBookingModal({
                 </label>
                 <div className="relative">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
-                    value={customerName} 
+                  <input
+                    type="text"
+                    required
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                    value={customerName}
                     onChange={e => setCustomerName(e.target.value)}
-                    placeholder="Full name" 
+                    placeholder="Full name"
                   />
                 </div>
               </div>
@@ -425,7 +422,7 @@ export default function OpeningBookingModal({
                   </label>
                   <div className="flex gap-2">
                     <div className="relative w-20 flex-shrink-0">
-                      <select 
+                      <select
                         value={countryCode}
                         onChange={e => setCountryCode(e.target.value)}
                         className="w-full h-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-4 text-[var(--foreground)] text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
@@ -439,16 +436,16 @@ export default function OpeningBookingModal({
                     </div>
                     <div className="relative flex-1">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                      <input 
-                        type="tel" 
-                        required 
-                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
-                        value={customerPhone} 
+                      <input
+                        type="tel"
+                        required
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                        value={customerPhone}
                         onChange={e => {
                           const val = e.target.value.replace(/\D/g, "").slice(0, 10)
                           setCustomerPhone(val)
                         }}
-                        placeholder="10-dig" 
+                        placeholder="10-dig"
                       />
                     </div>
                   </div>
@@ -460,13 +457,13 @@ export default function OpeningBookingModal({
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
                       required
-                      className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
-                      value={customerEmail} 
+                      className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                      value={customerEmail}
                       onChange={e => setCustomerEmail(e.target.value)}
-                      placeholder="your@email.com" 
+                      placeholder="your@email.com"
                     />
                   </div>
                 </div>
@@ -478,10 +475,10 @@ export default function OpeningBookingModal({
                   <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     Check In
                   </label>
-                  <input 
-                    type="date" 
-                    required 
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]" 
+                  <input
+                    type="date"
+                    required
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
                     value={checkIn}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={e => setCheckIn(e.target.value)}
@@ -491,10 +488,10 @@ export default function OpeningBookingModal({
                   <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     Check Out
                   </label>
-                  <input 
-                    type="date" 
-                    required 
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]" 
+                  <input
+                    type="date"
+                    required
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
                     value={checkOut}
                     min={checkIn || new Date().toISOString().split("T")[0]}
                     onChange={e => setCheckOut(e.target.value)}
@@ -504,7 +501,7 @@ export default function OpeningBookingModal({
 
               {/* Pricing Estimation banner */}
               {computedPrice > 0 && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   className="p-4 bg-[#D14D7E]/10 border border-[#D14D7E]/20 rounded-2xl text-center shadow-inner"
@@ -520,9 +517,14 @@ export default function OpeningBookingModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
-                className="w-full py-4 rounded-full bg-[#451624] text-white/80 hover:bg-[#D14D7E] hover:text-white font-bold transition-all duration-300 disabled:opacity-30 border border-[#D14D7E]/20 mt-2 text-xs uppercase tracking-wider cursor-pointer active:scale-98"
+                className="w-full py-4 rounded-full bg-[#451624] text-white/80 hover:bg-[#D14D7E] hover:text-white font-bold transition-all duration-300 disabled:opacity-30 border border-[#D14D7E]/20 mt-2 text-xs uppercase tracking-wider cursor-pointer active:scale-98 flex items-center justify-center gap-2"
               >
-                {isSubmitting ? "Confirming..." : "Confirm Reservation"}
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : "Confirm Reservation"}
               </button>
             </form>
           )}
