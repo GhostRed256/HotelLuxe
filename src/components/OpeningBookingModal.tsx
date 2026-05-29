@@ -355,10 +355,20 @@ export default function OpeningBookingModal({
                     required
                   >
                     <option value="" className="bg-[#0A0307]">— Choose an available suite —</option>
-                    {rooms.filter(r => !isRoomBooked(r.id)).map((r: any) => (
-                      <option key={r.id} value={r.id} className="bg-[#0A0307]">
-                        {r.type} ({r.name}) — ₹{r.price}
-                      </option>
+                    {Object.entries(
+                      rooms.filter((r: any) => !isRoomBooked(r.id)).reduce((acc: any, r: any) => {
+                        if (!acc[r.type]) acc[r.type] = []
+                        acc[r.type].push(r)
+                        return acc
+                      }, {})
+                    ).map(([type, groupRooms]: any) => (
+                      <optgroup key={type} label={type} className="bg-[#0A0307] text-white font-bold">
+                        {groupRooms.map((r: any) => (
+                          <option key={r.id} value={r.id} className="bg-[#0A0307] text-white font-normal">
+                            {r.name} ₹{r.price}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                   <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D14D7E] text-xs">

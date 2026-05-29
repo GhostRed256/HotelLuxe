@@ -1,7 +1,6 @@
 import { getAdminSession } from "@/lib/server-auth"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/firebase-admin"
-import { Parser } from "json2csv"
 
 export async function GET() {
   const session = await getAdminSession()
@@ -24,8 +23,22 @@ export async function GET() {
   })
 
   const fields = ['id', 'customerName', 'customerEmail', 'checkIn', 'checkOut', 'status', 'room.name', 'createdAt']
-  const json2csvParser = new Parser({ fields })
-  const csv = json2csvParser.parse(bookings)
+  
+  const csvRows = []
+  csvRows.push(fields.join(','))
+  for (const row of bookings) {
+    const values = fields.map(field => {
+      const fieldParts = field.split('.')
+      let val = row
+      for (const part of fieldParts) {
+        val = val ? val[part] : ''
+      }
+      const stringVal = String(val ?? '')
+      return `"${stringVal.replace(/"/g, '""')}"`
+    })
+    csvRows.push(values.join(','))
+  }
+  const csv = csvRows.join('\n')
 
   return new NextResponse(csv, {
     headers: {

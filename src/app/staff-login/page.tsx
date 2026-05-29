@@ -7,10 +7,14 @@ import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function Login() {
   const { user, isAdmin, loading, signOut } = useAuth()
-  
+  const searchParams = useSearchParams()
+  // When coming from a signout action, skip auto-redirect to prevent loop
+  const justSignedOut = searchParams.get("signed_out") === "1"
+
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
@@ -19,6 +23,8 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
+    // Do NOT auto-redirect if we just signed out — that's what caused the loop
+    if (justSignedOut) return
     if (user && !loading) {
       if (isAdmin) {
         window.location.assign("/admin")
@@ -27,7 +33,7 @@ export default function Login() {
         signOut()
       }
     }
-  }, [user, isAdmin, loading, signOut])
+  }, [user, isAdmin, loading, signOut, justSignedOut])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,7 +46,7 @@ export default function Login() {
     }
 
     let loginIdentifier = ""
-    
+
     if (loginMethod === "phone") {
       let cleanPhone = phone.trim().replace(/\D/g, "")
       if (cleanPhone.length === 10) {
@@ -48,13 +54,13 @@ export default function Login() {
       } else if (!cleanPhone.startsWith("+")) {
         cleanPhone = `+${cleanPhone}`
       }
-      
+
       const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
         .split(",")
         .map(p => p.trim())
-      
+
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").split(",")[0].trim().toLowerCase()
-      
+
       if (adminPhones.includes(cleanPhone)) {
         // Map phone to the primary admin email for Firebase Auth login
         loginIdentifier = adminEmailStr
@@ -69,16 +75,16 @@ export default function Login() {
 
     try {
       const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
-      
+
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").trim().toLowerCase()
-      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr || 
-                          cred.user.email?.trim().toLowerCase().includes("admin")
-      
+      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr ||
+        cred.user.email?.trim().toLowerCase().includes("admin")
+
       await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: cred.user.email, 
+        body: JSON.stringify({
+          email: cred.user.email,
           uid: cred.user.uid,
           isAdmin: isUserAdmin
         })
@@ -108,7 +114,7 @@ export default function Login() {
       </div>
 
       {user && isAdmin ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-panel w-full max-w-md p-12 border-2 border-rose-500/30 text-center bg-black/40"
@@ -120,7 +126,7 @@ export default function Login() {
           <p className="text-[10px] text-white/40 uppercase tracking-[0.3em] font-black">Opening Management Portal</p>
         </motion.div>
       ) : user && !isAdmin ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-panel w-full max-w-md p-10 border-2 border-rose-500/20 text-center bg-black/40"
@@ -134,12 +140,12 @@ export default function Login() {
           </p>
         </motion.div>
       ) : (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-panel relative"
-          style={{ 
-            width: "100%", maxWidth: "460px", padding: "4rem 3.5rem", 
+          style={{
+            width: "100%", maxWidth: "460px", padding: "4rem 3.5rem",
             border: "2px solid rgba(225, 29, 72, 0.2)",
             background: "linear-gradient(165deg, #0A0A0A 0%, #111 100%)",
             boxShadow: "0 0 100px rgba(225, 29, 72, 0.1)"
@@ -162,26 +168,24 @@ export default function Login() {
 
           {/* Login Method Toggle */}
           <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10 mb-8 shadow-inner">
-            <button 
+            <button
               onClick={() => setLoginMethod("email")}
-              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                loginMethod === "email" ? "bg-rose-600 text-white shadow-lg" : "opacity-30 hover:opacity-100"
-              }`}
+              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${loginMethod === "email" ? "bg-rose-600 text-white shadow-lg" : "opacity-30 hover:opacity-100"
+                }`}
             >
               Staff ID
             </button>
-            <button 
+            <button
               onClick={() => setLoginMethod("phone")}
-              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                loginMethod === "phone" ? "bg-rose-600 text-white shadow-lg" : "opacity-30 hover:opacity-100"
-              }`}
+              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${loginMethod === "phone" ? "bg-rose-600 text-white shadow-lg" : "opacity-30 hover:opacity-100"
+                }`}
             >
               Phone
             </button>
           </div>
-          
+
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="p-4 bg-rose-600/10 border border-rose-600/30 rounded-xl text-rose-500 text-[10px] font-black uppercase tracking-widest text-center mb-8"
@@ -194,8 +198,8 @@ export default function Login() {
             {loginMethod === "email" ? (
               <div className="flex flex-col gap-2">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Official Email ID</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@hotel.com"
@@ -208,8 +212,8 @@ export default function Login() {
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Registered Number</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-500 font-bold">+91</span>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="9876543210"
@@ -219,11 +223,11 @@ export default function Login() {
                 </div>
               </div>
             )}
-            
+
             <div className="flex flex-col gap-2">
               <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Secure Passcode</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -232,9 +236,9 @@ export default function Login() {
               />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={isSubmitting} 
+            <button
+              type="submit"
+              disabled={isSubmitting}
               className="mt-4 bg-rose-600 hover:bg-rose-700 text-white font-black uppercase tracking-[0.3em] py-5 rounded-2xl shadow-2xl shadow-rose-600/20 active:scale-95 transition-all text-[11px]"
             >
               {isSubmitting ? "VERIFYING..." : "INITIALIZE ENTRY"}

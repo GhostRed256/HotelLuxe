@@ -2,10 +2,10 @@
 
 import { createContext, useContext, useEffect, useState } from "react"
 import { auth, app } from "./firebase"
-import { 
-  onAuthStateChanged, 
-  User, 
-  GoogleAuthProvider, 
+import {
+  onAuthStateChanged,
+  User,
+  GoogleAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
@@ -37,10 +37,10 @@ const AuthContext = createContext<AuthContextType>({
   userData: null,
   isAdmin: false,
   loading: true,
-  signInWithGoogle: async () => {},
-  signIn: async () => {},
-  register: async () => {},
-  signOut: async () => {}
+  signInWithGoogle: async () => { },
+  signIn: async () => { },
+  register: async () => { },
+  signOut: async () => { }
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -51,12 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Helper to check if a user is an admin based on environment variables
   const checkIsAdmin = (u: User | null) => {
     if (!u) return false
-    
+
     // Support multiple admins via comma-separated lists
     const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
       .split(",")
       .map(e => e.trim().toLowerCase())
-    
+
     const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
       .split(",")
       .map(p => p.trim())
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user)
-      
+
       try {
         if (user) {
           // Fetch extended profile
@@ -85,8 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (docSnap.exists()) {
               setUserData(docSnap.data() as UserData)
             } else if (user.displayName || user.phoneNumber) {
-              const newData = { 
-                displayName: user.displayName || "", 
+              const newData = {
+                displayName: user.displayName || "",
                 phoneNumber: user.phoneNumber || "",
                 email: user.email || ""
               }
@@ -101,8 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              email: user.email, 
+            body: JSON.stringify({
+              email: user.email,
               phoneNumber: user.phoneNumber,
               uid: user.uid,
               isAdmin: checkIsAdmin(user)
@@ -154,6 +154,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    // Delete server session FIRST so any redirect after this call lands on a clean state
+    try {
+      await fetch("/api/auth/session", { method: "DELETE" })
+    } catch (_) { }
     await firebaseSignOut(auth)
   }
 
