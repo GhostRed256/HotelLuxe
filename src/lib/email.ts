@@ -52,7 +52,13 @@ export async function sendBookingEmail({
   bookingId?: string
 }) {
   const isApproved = status === "APPROVED" || status === "APPROVED (Manual)";
+  const isAdminReview = status === "PENDING_OWNER_REVIEW";
   const displayBookingId = bookingId || 'PENDING';
+
+  // Base URL resolution for deployment and local testing
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` :
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"));
 
   // Generate Google Calendar Link if Approved
   let calendarLinkHtml = "";
@@ -91,9 +97,11 @@ export async function sendBookingEmail({
       
       <p style="color: #4A3B42; font-size: 16px; line-height: 1.6;">
         Dear <strong>${customerName}</strong>,<br><br>
-        ${isApproved
-      ? `Thank you for your pre-booking payment of ₹300. Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our palace.`
-      : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it and awaiting payment confirmation.`}
+        ${isAdminReview
+      ? `A new booking request has been made for <strong>${roomName}</strong>. Please review the details below and log in to the dashboard to accept or reject.`
+      : isApproved
+        ? `Thank you for your pre-booking payment of ₹300. Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our palace.`
+        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it and awaiting payment confirmation.`}
       </p>
       
       ${calendarLinkHtml}
@@ -119,6 +127,21 @@ export async function sendBookingEmail({
           </tr>
         </table>
       </div>
+
+      ${isAdminReview ? `
+        <div style="text-align: center; margin: 30px 0; padding-top: 20px; border-top: 1px dashed #eee;">
+          <h4 style="margin-bottom: 20px; color: #1A0811;">Admin Dashboard Actions</h4>
+          <a href="${baseUrl}/admin?bookingId=${displayBookingId}" target="_blank" style="background-color: #10B981; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin-right: 15px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">
+            ✅ Accept Request
+          </a>
+          <a href="${baseUrl}/admin?bookingId=${displayBookingId}" target="_blank" style="background-color: #EF4444; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);">
+            ❌ Reject Request
+          </a>
+          <p style="color: #999; font-size: 11px; margin-top: 15px; font-style: italic;">
+            Clicking these buttons will take you to the Staff Panel to process the reservation.
+          </p>
+        </div>
+      ` : ""}
       
       <div style="text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
         <p style="color: #999; font-size: 12px;">
