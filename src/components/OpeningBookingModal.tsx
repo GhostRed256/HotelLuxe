@@ -509,7 +509,7 @@ export default function OpeningBookingModal({
                   animate={{ opacity: 1, height: "auto" }}
                   className="p-4 bg-[#D14D7E]/10 border border-[#D14D7E]/20 rounded-2xl text-center shadow-inner"
                 >
-                  <span className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-55 block mb-1 text-white">Estimated Total Stay Price</span>
+                  <span className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-55 block mb-1 text-[var(--foreground)]">Estimated Total Stay Price</span>
                   <span className="text-2xl font-heading font-black text-[#D14D7E]">
                     ₹{computedPrice.toLocaleString('en-IN')}
                   </span>
