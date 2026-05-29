@@ -253,6 +253,7 @@ function LoginContent() {
           </div>
         </motion.div>
       )}
+    </div>
   )
 }
 
