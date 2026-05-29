@@ -196,15 +196,15 @@ export default function OpeningBookingModal({
           exit={{ scale: 0.95, opacity: 0, y: 30 }}
           transition={{ type: "spring", damping: 25, stiffness: 220 }}
           onClick={e => e.stopPropagation()}
-          className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto scrollbar-hide rounded-[2rem] border border-white/10 bg-[#0A0307] shadow-3xl p-8 md:p-10"
+          className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto scrollbar-hide rounded-[2rem] border border-black/10 dark:border-white/10 bg-[var(--background)] shadow-3xl p-8 md:p-10"
         >
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h3 className="text-3xl font-heading font-extrabold tracking-tight text-white leading-tight">
+              <h3 className="text-3xl font-heading font-extrabold tracking-tight text-[var(--foreground)] leading-tight">
                 Reserve <span className="text-[#D14D7E]">Suite</span>
               </h3>
-              <p className="text-xs text-white/40 mt-1 font-light">
+              <p className="text-xs text-[var(--foreground)] opacity-60 mt-1 font-light">
                 Select preferences and complete your request.
               </p>
             </div>
@@ -217,7 +217,7 @@ export default function OpeningBookingModal({
                   setCheckOut("")
                 }
               }}
-              className="p-1 rounded-full text-white/30 hover:text-white transition-colors"
+              className="p-1 rounded-full text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors"
             >
               <X size={20} />
             </button>
@@ -337,14 +337,14 @@ export default function OpeningBookingModal({
               )}
 
               {/* BOOKING FOR Toggle */}
-              <div className="flex p-1 bg-black/60 rounded-full border border-white/10 w-full">
+              <div className="flex p-1 bg-black/5 dark:bg-black/60 rounded-full border border-black/10 dark:border-white/10 w-full">
                 <button
                   type="button"
                   onClick={() => setBookingFor("myself")}
                   className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
                     bookingFor === "myself" 
                       ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20" 
-                      : "text-white/40 hover:text-white bg-transparent"
+                      : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
                   }`}
                 >
                   Booking For Myself
@@ -355,7 +355,7 @@ export default function OpeningBookingModal({
                   className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${
                     bookingFor === "others" 
                       ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20" 
-                      : "text-white/40 hover:text-white bg-transparent"
+                      : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
                   }`}
                 >
                   For Someone Else
@@ -364,17 +364,17 @@ export default function OpeningBookingModal({
 
               {/* SELECT SUITE Dropdown */}
               <div>
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                   Select Suite
                 </label>
                 <div className="relative">
                   <select
-                    className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50"
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50"
                     value={bookingRoomId}
                     onChange={e => setBookingRoomId(e.target.value)}
                     required
                   >
-                    <option value="" className="bg-[#0A0307]">— Choose an available suite —</option>
+                    <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
                     {Object.entries(
                       rooms.filter((r: any) => !isRoomBooked(r.id)).reduce((acc: any, r: any) => {
                         if (!acc[r.type]) acc[r.type] = []
@@ -382,9 +382,9 @@ export default function OpeningBookingModal({
                         return acc
                       }, {})
                     ).map(([type, groupRooms]: any) => (
-                      <optgroup key={type} label={type} className="bg-[#0A0307] text-white font-bold">
+                      <optgroup key={type} label={type} className="bg-[var(--background)] text-[var(--foreground)] font-bold">
                         {groupRooms.map((r: any) => (
-                          <option key={r.id} value={r.id} className="bg-[#0A0307] text-white font-normal">
+                          <option key={r.id} value={r.id} className="bg-[var(--background)] text-[var(--foreground)] font-normal">
                             {r.name} ₹{r.price}
                           </option>
                         ))}
@@ -401,15 +401,15 @@ export default function OpeningBookingModal({
 
               {/* CONFIRM NAME */}
               <div>
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                   {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
                   <input 
                     type="text" 
                     required 
-                    className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/30" 
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
                     value={customerName} 
                     onChange={e => setCustomerName(e.target.value)}
                     placeholder="Full name" 
@@ -420,7 +420,7 @@ export default function OpeningBookingModal({
               {/* CONFIRM PHONE & EMAIL */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
                   </label>
                   <div className="flex gap-2">
@@ -428,21 +428,21 @@ export default function OpeningBookingModal({
                       <select 
                         value={countryCode}
                         onChange={e => setCountryCode(e.target.value)}
-                        className="w-full h-full bg-black/60 border border-white/10 rounded-2xl px-4 text-white text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
+                        className="w-full h-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-4 text-[var(--foreground)] text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
                       >
-                        <option value="+91" className="bg-[#0A0307]">+91</option>
-                        <option value="+1" className="bg-[#0A0307]">+1</option>
-                        <option value="+44" className="bg-[#0A0307]">+44</option>
-                        <option value="+971" className="bg-[#0A0307]">+971</option>
+                        <option value="+91" className="bg-[var(--background)]">+91</option>
+                        <option value="+1" className="bg-[var(--background)]">+1</option>
+                        <option value="+44" className="bg-[var(--background)]">+44</option>
+                        <option value="+971" className="bg-[var(--background)]">+971</option>
                       </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 text-[8px]">▼</div>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--foreground)] opacity-40 text-[8px]">▼</div>
                     </div>
                     <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
                       <input 
                         type="tel" 
                         required 
-                        className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/30" 
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
                         value={customerPhone} 
                         onChange={e => {
                           const val = e.target.value.replace(/\D/g, "").slice(0, 10)
@@ -455,15 +455,15 @@ export default function OpeningBookingModal({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     Email <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
                     <input 
                       type="email" 
                       required
-                      className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/30" 
+                      className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40" 
                       value={customerEmail} 
                       onChange={e => setCustomerEmail(e.target.value)}
                       placeholder="your@email.com" 
@@ -475,26 +475,26 @@ export default function OpeningBookingModal({
               {/* CHECK IN & CHECK OUT */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     Check In
                   </label>
                   <input 
                     type="date" 
                     required 
-                    className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 [color-scheme:dark]" 
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]" 
                     value={checkIn}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={e => setCheckIn(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
+                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                     Check Out
                   </label>
                   <input 
                     type="date" 
                     required 
-                    className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 [color-scheme:dark]" 
+                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]" 
                     value={checkOut}
                     min={checkIn || new Date().toISOString().split("T")[0]}
                     onChange={e => setCheckOut(e.target.value)}
