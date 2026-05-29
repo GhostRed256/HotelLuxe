@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
     .split(",")
     .map(e => e.trim().toLowerCase())
-  
+
   const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
     .split(",")
     .map(p => p.trim())
@@ -32,18 +32,26 @@ export async function POST(req: Request) {
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  // Ensure strict match - removed userEmail.includes("admin") security hole
+  // Ensure strict match - no more "includes admin" loophole
   const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
-  
+
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
 
+  if (!isServerVerifiedAdmin) {
+    // Return 403 if they are authenticated but NOT an authorized admin
+    return NextResponse.json({
+      error: "Access Denied: Not an authorized staff member.",
+      isAdmin: false
+    }, { status: 403 })
+  }
+
   const cookieStore = await cookies()
-  cookieStore.set("admin_session", JSON.stringify({ 
-    email, 
-    phoneNumber, 
-    uid, 
-    isAdmin: isServerVerifiedAdmin 
+  cookieStore.set("admin_session", JSON.stringify({
+    email,
+    phoneNumber,
+    uid,
+    isAdmin: true
   }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -52,7 +60,7 @@ export async function POST(req: Request) {
     maxAge: 60 * 60 * 24 * 7 // 1 week
   })
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true, isAdmin: true })
 }
 
 export async function DELETE() {

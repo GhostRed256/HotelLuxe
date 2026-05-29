@@ -71,14 +71,22 @@ export default function Login() {
       const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
       const idToken = await cred.user.getIdToken(true)
 
-      await fetch("/api/auth/session", {
+      const res = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken })
       })
 
-      // The auth state change in auth-context.tsx will handle the redirect
-      // to /admin once the user is confirmed as admin in checkIsAdmin.
+      const data = await res.json()
+
+      if (!res.ok || !data.isAdmin) {
+        await signOut() // Use the signOut from useAuth hook to log out non-admins
+        setError(data.error || "AUTHORIZED PERSONNEL ONLY: Your account does not have admin privileges.")
+        setIsSubmitting(false)
+        return
+      }
+
+      // Successful login will be handled by auth-context redirect
     } catch (err: any) {
       setError("INVALID CREDENTIALS: Identification failed.")
       setIsSubmitting(false)

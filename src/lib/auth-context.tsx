@@ -98,12 +98,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Update server session cookie with verified admin status
-          const idToken = await user.getIdToken(true)
-          await fetch("/api/auth/session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idToken })
-          })
+          const isUserAdmin = checkIsAdmin(user)
+          if (isUserAdmin) {
+            const idToken = await user.getIdToken(true)
+            await fetch("/api/auth/session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken })
+            })
+          } else {
+            // Ensure any stale admin session is cleared for non-admin users
+            await fetch("/api/auth/session", { method: "DELETE" })
+          }
         } else {
           setUserData(null)
           await fetch("/api/auth/session", { method: "DELETE" })
