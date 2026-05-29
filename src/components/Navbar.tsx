@@ -24,8 +24,8 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 w-full z-[100] transition-all duration-500 py-3 backdrop-blur-sm ${scrolled
-          ? "bg-[#E5B8AD] dark:bg-[#0A0307]/95 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg"
-          : "bg-[#E5B8AD] dark:bg-transparent border-b border-[var(--gold-primary)]/20"
+        ? "bg-[#E5B8AD] dark:bg-[#0A0307]/95 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-lg"
+        : "bg-[#E5B8AD] dark:bg-transparent border-b border-[var(--gold-primary)]/20"
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -97,7 +97,10 @@ export default function Navbar() {
                     Staff
                   </button>
                   <button
-                    onClick={() => signOut()}
+                    onClick={async () => {
+                      await signOut()
+                      window.location.assign("/staff-login")
+                    }}
                     className={`text-[9px] font-bold tracking-[0.2em] uppercase transition-colors ${scrolled ? "text-rose-500 hover:text-rose-600" : "text-[#1A0811] hover:text-rose-600 dark:text-rose-400"}`}
                   >
                     Sign Out
@@ -170,18 +173,14 @@ export default function Navbar() {
               </>
             ) : user ? (
               <>
-                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-black dark:text-white hover:text-[var(--accent-primary)] transition-colors">My Stays</Link>
                 <button
                   onClick={async () => {
                     await signOut()
                     setMobileMenuOpen(false)
                     window.location.assign("/staff-login")
                   }}
-                  className="text-left text-[12px] font-black uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
-                >
-                  Staff Portal
-                </button>
-                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
+                  className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity"
+                >Sign Out</button>
               </>
             ) : (
               <>
