@@ -16,7 +16,7 @@ const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
 const smtpPort = Number(process.env.SMTP_PORT) || 465;
-const smtpSecure = process.env.SMTP_SECURE !== "false"; // default to true
+const smtpSecure = smtpPort === 465 || process.env.SMTP_SECURE === "true" && smtpPort !== 587; // strict check to prevent OpenSSL version errors on 587
 
 const transporter = smtpUser && smtpPass
   ? nodemailer.createTransport({
