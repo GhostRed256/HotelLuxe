@@ -164,8 +164,16 @@ export async function notifyNewBooking(booking: {
   await sendTelegramAlert(telegramMsg);
 
   // 4. Notify Owner via SMS (Fast2SMS)
-  const smsMsg = `StayNjoy Palace Alert:\nNew request from ${booking.customerName} for ${room.name} from ${checkInDate} to ${checkOutDate}. Log in to Admin panel to verify.`;
-  await sendSMSAlert(ownerPhones, smsMsg);
+  const ownerSmsMsg = `StayNjoy Palace Alert:\nNew request from ${booking.customerName} for ${room.name} from ${checkInDate} to ${checkOutDate}. Log in to Admin panel to verify.`;
+  await sendSMSAlert(ownerPhones, ownerSmsMsg);
+
+  // 5. Notify Customer via SMS
+  if (booking.customerPhone) {
+    const customerSmsMsg = `StayNjoy: We received your booking request for ${room.name} (${checkInDate} to ${checkOutDate}). Our team is reviewing it. ID: ${booking.id?.toUpperCase().substring(0, 8) || 'PENDING'}`;
+    let cleanPhone = booking.customerPhone.trim().replace(/\D/g, "");
+    if (cleanPhone.length > 10) cleanPhone = cleanPhone.substring(cleanPhone.length - 10);
+    await sendSMSAlert([cleanPhone], customerSmsMsg);
+  }
 }
 
 /**

@@ -54,7 +54,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [bookingSuiteType, setBookingSuiteType] = useState("")
   const [bookingRoomId, setBookingRoomId] = useState("")
   const [showBookingModal, setShowBookingModal] = useState(false)
-  
+
   const [checkIn, setCheckIn] = useState("")
   const [checkOut, setCheckOut] = useState("")
 
@@ -91,7 +91,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       if (filterType === "2BHK_4400") return r.type === "2BHK House" && Number(r.price) === 4400
       return r.type === filterType
     })
-    
+
     // Sort: available rooms first
     return filtered.sort((a: any, b: any) => {
       const aBooked = isRoomBooked(a.id) ? 1 : 0
@@ -116,10 +116,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     if (!checkIn || !checkOut || !selectedRoomPrice) return 0
     const d1 = new Date(checkIn)
     const d2 = new Date(checkOut)
-    
+
     // Defensive check for invalid dates
     if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0
-    
+
     const diffTime = d2.getTime() - d1.getTime()
     if (diffTime <= 0) return 0
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -186,7 +186,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=StayNJoy&am=${DEPOSIT_AMOUNT}&cu=INR&tn=BookingDeposit`
   const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiDeepLink)}`
 
-  const handleStep1Continue = (e: React.FormEvent) => {
+  const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!bookingRoomId) return
     if (customerPhone.length !== 10) {
@@ -197,8 +197,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       setBookingError("Please enter a valid email address.")
       return
     }
-    setBookingError("")
-    setBookingStep(2)
+
+    // Skip Step 2 and submit directly
+    await handleBookingSubmit(e);
   }
 
   const [bookingError, setBookingError] = useState("")
@@ -208,11 +209,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     if (!bookingRoomId) return
     setBookingError("")
 
-    // Validate payment proof
-    if (!upiTxnId && !paymentScreenshot) {
-      setBookingError("Please provide your UPI Transaction ID or upload a payment screenshot.")
-      return
-    }
+    // Payment validation removed to keep it dormant/optional
+    // if (!upiTxnId && !paymentScreenshot) { ... }
 
     setIsSubmitting(true)
     const formData = new FormData()
@@ -226,7 +224,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     // Append payment proof
     if (upiTxnId) formData.append("upiTxnId", upiTxnId)
     if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot)
-    
+
     await requestBooking(formData)
     setIsSubmitting(false)
     setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
@@ -249,7 +247,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -258,7 +256,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
           >
             Find Your <span className="text-[var(--accent-primary)]">Haven</span>
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -315,7 +313,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
               </div>
             </div>
 
-            <div 
+            <div
               ref={scrollRef}
               className="flex gap-8 overflow-x-auto pb-6 snap-x snap-mandatory"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -347,7 +345,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
               <h3 className="text-2xl font-heading font-bold opacity-40">Currently <span className="text-rose-400">Reserved</span></h3>
               <p className="text-sm opacity-20 font-light italic mt-1">These suites are occupied and will become available soon.</p>
             </div>
-            
+
             <div className="flex gap-8 overflow-x-auto pb-6 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {bookedRooms.map((room: any, i: number) => (
                 <motion.div
@@ -431,11 +429,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                             <button
                               key={num}
                               onClick={() => setSelectedContact(num)}
-                              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${
-                                selectedContact === num
+                              className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${selectedContact === num
                                   ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
                                   : "bg-white/5 text-white/50 hover:bg-white/10"
-                              }`}
+                                }`}
                             >
                               {num}
                             </button>
@@ -465,7 +462,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                   ) : (
                     <>
                       {bookingError && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           className="p-4 mb-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-[10px] font-bold uppercase tracking-widest text-center"
@@ -474,30 +471,28 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                         </motion.div>
                       )}
 
-                      {/* Step Indicator */}
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${
-                          bookingStep === 1 ? 'text-[var(--accent-primary)]' : 'opacity-40'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${
-                            bookingStep === 1 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
-                          }`}>1</div>
-                          Details
+                      {/* Step Indicator - Hidden while payment is dormant */}
+                      {false && (
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${bookingStep === 1 ? 'text-[var(--accent-primary)]' : 'opacity-40'
+                            }`}>
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${bookingStep === 1 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
+                              }`}>1</div>
+                            Details
+                          </div>
+                          <div className="flex-1 h-[1px] bg-white/10" />
+                          <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${bookingStep === 2 ? 'text-[var(--accent-primary)]' : 'opacity-40'
+                            }`}>
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${bookingStep === 2 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
+                              }`}>2</div>
+                            Payment
+                          </div>
                         </div>
-                        <div className="flex-1 h-[1px] bg-white/10" />
-                        <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${
-                          bookingStep === 2 ? 'text-[var(--accent-primary)]' : 'opacity-40'
-                        }`}>
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${
-                            bookingStep === 2 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
-                          }`}>2</div>
-                          Payment
-                        </div>
-                      </div>
+                      )}
 
                       {/* === STEP 1: Guest Details === */}
                       {bookingStep === 1 && (
-                        <form onSubmit={handleStep1Continue} className="flex flex-col gap-6">
+                        <form onSubmit={handleStep1Submit} className="flex flex-col gap-6">
                           {/* Booking For Toggle */}
                           <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
                             <button
@@ -510,9 +505,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                                 const code = userData?.phoneNumber?.match(/^\+\d+/)?.[0] || "+91"
                                 setCountryCode(code)
                               }}
-                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
-                                bookingFor === "myself" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
-                              }`}
+                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${bookingFor === "myself" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                                }`}
                             >
                               Booking for Myself
                             </button>
@@ -523,9 +517,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                                 setCustomerName("")
                                 setCustomerPhone("")
                               }}
-                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
-                                bookingFor === "others" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
-                              }`}
+                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${bookingFor === "others" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                                }`}
                             >
                               For Someone Else
                             </button>
@@ -571,10 +564,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                             </label>
                             <div className="relative">
                               <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                              <input 
-                                type="text" required className="form-input !pl-12" 
+                              <input
+                                type="text" required className="form-input !pl-12"
                                 value={customerName} onChange={e => setCustomerName(e.target.value)}
-                                placeholder="Full name" 
+                                placeholder="Full name"
                               />
                             </div>
                           </div>
@@ -586,7 +579,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               </label>
                               <div className="flex gap-2">
                                 <div className="relative w-24">
-                                  <select 
+                                  <select
                                     value={countryCode}
                                     onChange={e => setCountryCode(e.target.value)}
                                     className="form-input !pr-8 appearance-none cursor-pointer text-xs"
@@ -601,14 +594,14 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                                 </div>
                                 <div className="relative flex-1">
                                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                                  <input 
-                                    type="tel" required className="form-input !pl-12" 
-                                    value={customerPhone} 
+                                  <input
+                                    type="tel" required className="form-input !pl-12"
+                                    value={customerPhone}
                                     onChange={e => {
                                       const val = e.target.value.replace(/\D/g, "").slice(0, 10)
                                       setCustomerPhone(val)
                                     }}
-                                    placeholder="10-digit number" 
+                                    placeholder="10-digit number"
                                   />
                                 </div>
                               </div>
@@ -617,10 +610,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email <span className="text-rose-400">*</span></label>
                               <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                                <input 
-                                  type="email" required className="form-input !pl-12" 
+                                <input
+                                  type="email" required className="form-input !pl-12"
                                   value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
-                                  placeholder="your@email.com" 
+                                  placeholder="your@email.com"
                                 />
                               </div>
                             </div>
@@ -629,10 +622,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check In</label>
-                              <input 
-                                type="date" 
-                                required 
-                                className="form-input" 
+                              <input
+                                type="date"
+                                required
+                                className="form-input"
                                 value={checkIn}
                                 min={new Date().toISOString().split("T")[0]}
                                 onChange={e => setCheckIn(e.target.value)}
@@ -640,10 +633,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                             </div>
                             <div>
                               <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check Out</label>
-                              <input 
-                                type="date" 
-                                required 
-                                className="form-input" 
+                              <input
+                                type="date"
+                                required
+                                className="form-input"
                                 value={checkOut}
                                 min={checkIn || new Date().toISOString().split("T")[0]}
                                 onChange={e => setCheckOut(e.target.value)}
@@ -660,10 +653,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
                           <button
                             type="submit"
-                            disabled={!bookingRoomId || !checkIn || !checkOut}
+                            disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
                             className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
                           >
-                            Continue to Payment →
+                            {isSubmitting ? "Processing..." : "Confirm Reservation"}
                           </button>
                         </form>
                       )}
@@ -693,10 +686,10 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                           {/* QR Code */}
                           <div className="flex flex-col items-center gap-4 py-4">
                             <div className="relative p-3 bg-white rounded-2xl shadow-[0_0_40px_rgba(209,77,126,0.15)]">
-                              <img 
-                                src={upiQrUrl} 
-                                alt="UPI QR Code" 
-                                width={180} 
+                              <img
+                                src={upiQrUrl}
+                                alt="UPI QR Code"
+                                width={180}
                                 height={180}
                                 className="rounded-lg"
                               />
@@ -710,8 +703,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40 block">UPI ID</span>
                               <span className="text-sm font-mono font-bold">{UPI_ID}</span>
                             </div>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={copyUpiId}
                               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[10px] font-bold"
                             >
@@ -733,11 +726,11 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                           {/* Payment Proof Section */}
                           <div>
                             <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-3 block">Payment Proof</label>
-                            
+
                             {/* UTR / Transaction ID */}
                             <div className="mb-3">
                               <label className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-30 mb-1.5 block">12-Digit UTR / Txn ID</label>
-                              <input 
+                              <input
                                 type="text"
                                 value={upiTxnId}
                                 onChange={e => setUpiTxnId(e.target.value.replace(/\s/g, "").slice(0, 22))}
@@ -754,9 +747,9 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                                 <span className="text-sm opacity-50">
                                   {paymentFileName || "Tap to upload payment screenshot"}
                                 </span>
-                                <input 
-                                  type="file" 
-                                  accept="image/*" 
+                                <input
+                                  type="file"
+                                  accept="image/*"
                                   className="hidden"
                                   onChange={handleScreenshotUpload}
                                 />
@@ -778,7 +771,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                           </button>
 
                           <p className="text-[9px] text-center opacity-30 font-light leading-relaxed">
-                            Your booking will be confirmed once our team verifies the payment. 
+                            Your booking will be confirmed once our team verifies the payment.
                             A confirmation email will be sent to <strong className="opacity-60">{customerEmail}</strong>.
                           </p>
                         </form>
