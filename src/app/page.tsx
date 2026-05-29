@@ -91,13 +91,14 @@ export default async function PreBookingWindow() {
   }).filter(Boolean) as any[];
 
   // Only show categories that have available rooms
-  const availableCategories = categories.filter(c => c.available > 0);
+  // Exclude 4BHK HOUSE from showing as its own category card — it's a combination of the 3 sub-units
+  const availableCategories = categories.filter(c => c.available > 0 && !c.type.toLowerCase().includes('4bhk'));
 
   return (
     <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center">
       <div className="max-w-5xl w-full">
         <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
-          <h1 className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white [text-shadow:0_0_30px_rgba(255,255,255,1),0_0_20px_rgba(255,255,255,0.8)] dark:[text-shadow:none]">
+          <h1 className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight text-black dark:text-white">
             <span>Stay</span>
             <span className="text-[var(--accent-primary)] italic mx-0.5">N</span>
             <span>Joy</span>

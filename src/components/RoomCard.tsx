@@ -86,7 +86,7 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
 
       <div className="p-10 flex-grow flex flex-col relative bg-white/5">
         <div className="mb-4">
-          <h3 className="text-3xl font-heading font-black mb-2 leading-tight">
+          <h3 className="text-3xl font-heading font-black mb-2 leading-tight text-[var(--foreground)] drop-shadow-sm">
             {room.type || room.name}
           </h3>
         </div>

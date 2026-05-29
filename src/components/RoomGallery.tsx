@@ -18,7 +18,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const scrollRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
 
-  const displayRooms = rooms.length > 0 ? rooms : []
+  // Exclude 4BHK HOUSE — it's a virtual combo of the 3 sub-units, not directly bookable
+  const displayRooms = (rooms.length > 0 ? rooms : []).filter((r: any) => !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
 
   // Check if room is booked
   const isRoomBooked = (roomId: string) => {
@@ -265,7 +266,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white [text-shadow:0_0_30px_rgba(255,255,255,1),0_0_20px_rgba(255,255,255,0.8)] dark:[text-shadow:none]"
+            className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight text-black dark:text-white"
           >
             Find Your <span className="text-[var(--accent-primary)]">Haven</span>
           </motion.h2>
