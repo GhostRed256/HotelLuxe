@@ -245,8 +245,8 @@ export default function OpeningBookingModal({
                       key={num}
                       onClick={() => setSelectedContact(num)}
                       className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${selectedContact === num
-                          ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                          : "bg-white/5 text-white/50 hover:bg-white/10"
+                        ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                        : "bg-white/5 text-white/50 hover:bg-white/10"
                         }`}
                     >
                       {num}
@@ -341,8 +341,8 @@ export default function OpeningBookingModal({
                   type="button"
                   onClick={() => setBookingFor("myself")}
                   className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "myself"
-                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                      : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
+                    ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                    : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
                     }`}
                 >
                   Booking For Myself
@@ -351,8 +351,8 @@ export default function OpeningBookingModal({
                   type="button"
                   onClick={() => setBookingFor("others")}
                   className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "others"
-                      ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                      : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
+                    ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                    : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
                     }`}
                 >
                   For Someone Else
@@ -373,11 +373,13 @@ export default function OpeningBookingModal({
                   >
                     <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
                     {Object.entries(
-                      rooms.filter((r: any) => !isRoomBooked(r.id)).reduce((acc: any, r: any) => {
-                        if (!acc[r.type]) acc[r.type] = []
-                        acc[r.type].push(r)
-                        return acc
-                      }, {})
+                      rooms
+                        .filter((r: any) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
+                        .reduce((acc: any, r: any) => {
+                          if (!acc[r.type]) acc[r.type] = []
+                          acc[r.type].push(r)
+                          return acc
+                        }, {})
                     ).map(([type, groupRooms]: any) => (
                       <optgroup key={type} label={type} className="bg-[var(--background)] text-[var(--foreground)] font-bold">
                         {groupRooms.map((r: any) => (

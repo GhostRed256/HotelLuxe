@@ -42,8 +42,8 @@ export default async function PreBookingWindow() {
 
   for (const r of rooms) {
     const key = r.type;
-    if (!seen.has(key)) {
-      seen.add(key);
+    const existingIndex = uniqueCategories.findIndex(c => c.type === key);
+    if (existingIndex === -1) {
       uniqueCategories.push({
         type: r.type,
         price: r.price,
@@ -51,6 +51,15 @@ export default async function PreBookingWindow() {
         images: r.images,
         id: r.id
       });
+    } else {
+      // Always pick the minimum price for the "Starts from" label
+      if (Number(r.price) < Number(uniqueCategories[existingIndex].price)) {
+        uniqueCategories[existingIndex].price = r.price;
+        // Optionally update other fields to match the cheapest room if desired
+        uniqueCategories[existingIndex].id = r.id;
+        uniqueCategories[existingIndex].description = r.description;
+        uniqueCategories[existingIndex].images = r.images;
+      }
     }
   }
 
