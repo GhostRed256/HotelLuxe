@@ -244,7 +244,7 @@ export async function notifyBookingStatusChange(booking: {
 
   // 5. Notify Customer via SMS if Approved
   if (status === "APPROVED" && booking.customerPhone) {
-    const customerSmsMsg = `StayNjoy: Your preboooking of Rs 300 is confirmed! Booking ID: ${bookingIdStr}. Dates: ${checkInDate}-${checkOutDate}. Check Email for Calendar & details.`;
+    const customerSmsMsg = `StayNjoy: Your booking for ${room.name} is confirmed! Booking ID: ${bookingIdStr}. Dates: ${checkInDate} to ${checkOutDate}. Check your Email for full details.`;
 
     let cleanPhone = booking.customerPhone.trim().replace(/\D/g, "");
     if (cleanPhone.length > 10) cleanPhone = cleanPhone.substring(cleanPhone.length - 10);

@@ -98,10 +98,10 @@ export async function sendBookingEmail({
       <p style="color: #4A3B42; font-size: 16px; line-height: 1.6;">
         Dear <strong>${customerName}</strong>,<br><br>
         ${isAdminReview
-      ? `A new booking request has been made for <strong>${roomName}</strong>. Please review the details below and log in to the dashboard to accept or reject.`
+      ? `A new booking request has been received for <strong>${roomName}</strong>. Please review the details below.`
       : isApproved
-        ? `Thank you for your pre-booking payment of ₹300. Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our palace.`
-        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it and awaiting payment confirmation.`}
+        ? `Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our palace.`
+        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it.`}
       </p>
       
       ${calendarLinkHtml}
