@@ -97,14 +97,14 @@ export default async function PreBookingWindow() {
     <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center">
       <div className="max-w-5xl w-full">
         <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
-          <h1 className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white">
+          <h1 className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white [text-shadow:0_0_30px_rgba(255,255,255,1),0_0_20px_rgba(255,255,255,0.8)] dark:[text-shadow:none]">
             <span>Stay</span>
             <span className="text-[var(--accent-primary)] italic mx-0.5">N</span>
             <span>Joy</span>
           </h1>
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
-            <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80">
+            <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
               Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
             </p>
             <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />

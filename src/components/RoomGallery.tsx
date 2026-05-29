@@ -102,7 +102,6 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       if (filterType === "Cozy Pink Room") return r.type === "Cozy Pink Room"
       if (filterType === "Deluxe Room") return r.type === "Deluxe Room"
       if (filterType === "Premium Suite") return r.type === "Premium Suite"
-      if (filterType === "4BHK House") return r.type === "4BHK House"
       return r.type === filterType
     })
 
@@ -266,7 +265,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight"
+            className="text-5xl md:text-7xl font-body font-normal tracking-tight mb-3 text-black dark:text-white [text-shadow:0_0_30px_rgba(255,255,255,1),0_0_20px_rgba(255,255,255,0.8)] dark:[text-shadow:none]"
           >
             Find Your <span className="text-[var(--accent-primary)]">Haven</span>
           </motion.h2>
@@ -294,7 +293,6 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
                 <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
                 <option value="Premium Suite">Premium Suite</option>
-                <option value="4BHK House">4BHK House {"\u20B9"}5400</option>
               </select>
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>
