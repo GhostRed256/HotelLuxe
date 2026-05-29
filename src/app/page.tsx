@@ -27,7 +27,7 @@ export default async function PreBookingWindow() {
       id: doc.id,
       name: data.name,
       type: data.type,
-      price: data.price,
+      price: data.name?.toLowerCase().includes('4bhk') ? 5400 : data.price,
       description: data.description,
       location: data.location,
       floor: data.floor,

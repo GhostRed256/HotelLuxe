@@ -11,9 +11,16 @@ export default async function RoomsPage() {
     db.collection("bookings").where("status", "==", "APPROVED").get()
   ]);
 
-  const rooms = roomsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
+  const rooms = roomsSnapshot.docs.map((doc: any) => {
+    const data = doc.data();
+    return serializeFirestoreData({
+      id: doc.id,
+      ...data,
+      price: data.name?.toLowerCase().includes('4bhk') ? 5400 : data.price
+    });
+  });
   const bookings = bookingsSnapshot.docs.map((doc: any) => serializeFirestoreData({ id: doc.id, ...doc.data() }));
-  
+
   return (
     <div className="pt-8">
       <Suspense fallback={<div className="h-screen flex items-center justify-center opacity-20 italic">Loading Registry...</div>}>
