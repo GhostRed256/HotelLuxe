@@ -140,7 +140,8 @@ export async function notifyNewBooking(booking: {
       checkIn: booking.checkIn,
       checkOut: booking.checkOut,
       status: "PENDING_OWNER_REVIEW",
-      price: totalPrice
+      price: totalPrice,
+      bookingId: booking.id
     }).catch(err => console.error("Error notifying owner via email:", err))
   );
 
@@ -249,3 +250,4 @@ export async function notifyBookingStatusChange(booking: {
     await sendSMSAlert([cleanPhone], customerSmsMsg);
   }
 }
+
