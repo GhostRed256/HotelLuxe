@@ -179,15 +179,11 @@ export default function LoginPage() {
         });
 
         // 3. Register server session cookie
+        const idToken = await auth.currentUser!.getIdToken(true);
         await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            email: auth.currentUser!.email, 
-            phoneNumber: auth.currentUser!.phoneNumber,
-            uid: auth.currentUser!.uid,
-            isAdmin: false
-          })
+          body: JSON.stringify({ idToken })
         });
 
         router.refresh();

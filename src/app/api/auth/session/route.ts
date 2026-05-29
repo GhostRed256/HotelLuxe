@@ -1,8 +1,24 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
+import { adminAuth } from "@/lib/firebase-admin"
+
 export async function POST(req: Request) {
-  const { email, phoneNumber, uid } = await req.json()
+  const { idToken } = await req.json()
+
+  if (!idToken) {
+    return NextResponse.json({ error: "Missing idToken" }, { status: 401 })
+  }
+
+  let decodedToken;
+  try {
+    decodedToken = await adminAuth.verifyIdToken(idToken)
+  } catch (error) {
+    console.error("Error verifying Firebase ID token:", error)
+    return NextResponse.json({ error: "Unauthorized or invalid token" }, { status: 401 })
+  }
+
+  const { email, phone_number: phoneNumber, uid } = decodedToken
 
   // SECURITY: Independently verify admin status on the server
   const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
@@ -16,7 +32,8 @@ export async function POST(req: Request) {
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  const isEmailAdmin = adminEmails.includes(userEmail) || userEmail.includes("admin")
+  // Ensure strict match - removed userEmail.includes("admin") security hole
+  const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
   
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin

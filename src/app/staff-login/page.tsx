@@ -77,17 +77,15 @@ function LoginContent() {
       const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
 
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").trim().toLowerCase()
-      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr ||
-        cred.user.email?.trim().toLowerCase().includes("admin")
+      // Strict match for admin email on the client to determine redirection
+      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr
+
+      const idToken = await cred.user.getIdToken(true)
 
       await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cred.user.email,
-          uid: cred.user.uid,
-          isAdmin: isUserAdmin
-        })
+        body: JSON.stringify({ idToken })
       })
 
       if (isUserAdmin) {
