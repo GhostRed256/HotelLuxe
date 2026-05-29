@@ -107,6 +107,54 @@ export default function AdminBookingsTable({ bookings }: { bookings: any[] }) {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Payment Verification Proof */}
+                  {(b.upiTxnId || b.paymentScreenshot) && (
+                    <div className="mt-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs max-w-xs">
+                      <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent-primary)] mb-2">
+                        UPI Verification Proof (Demo)
+                      </div>
+                      {b.upiTxnId && (
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="opacity-40 text-[10px] uppercase font-semibold">UTR / Txn ID:</span>
+                          <code className="bg-black/60 px-2 py-0.5 rounded text-[11px] font-mono text-white select-all">{b.upiTxnId}</code>
+                        </div>
+                      )}
+                      {b.paymentScreenshot && (
+                        <div className="mt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newWindow = window.open();
+                              if (newWindow) {
+                                newWindow.document.title = `Payment Screenshot - ${b.customerName}`;
+                                newWindow.document.body.style.margin = "0";
+                                newWindow.document.body.style.background = "#0e080c";
+                                newWindow.document.body.style.display = "flex";
+                                newWindow.document.body.style.alignItems = "center";
+                                newWindow.document.body.style.justifyContent = "center";
+                                newWindow.document.body.style.height = "100vh";
+                                
+                                const img = newWindow.document.createElement("img");
+                                img.src = b.paymentScreenshot;
+                                img.style.maxWidth = "90%";
+                                img.style.maxHeight = "95vh";
+                                img.style.objectFit = "contain";
+                                img.style.boxShadow = "0 20px 50px rgba(0,0,0,0.5)";
+                                img.style.borderRadius = "12px";
+                                img.style.border = "1px solid rgba(255,255,255,0.1)";
+                                
+                                newWindow.document.body.appendChild(img);
+                              }
+                            }}
+                            className="w-full text-center px-3 py-1.5 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border border-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)] hover:text-white rounded-lg text-[9px] font-bold uppercase tracking-widest transition-colors cursor-pointer"
+                          >
+                            View Payment Screenshot Proof
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="p-5 md:p-6 font-medium block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Suite Selection</div>

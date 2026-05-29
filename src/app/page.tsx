@@ -110,9 +110,23 @@ export default async function PreBookingWindow() {
             <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
           </div>
         </div>
-        <p className="opacity-50 text-center text-xs md:text-sm font-light italic mb-12 max-w-2xl mx-auto">
+        <p className="opacity-50 text-center text-xs md:text-sm font-light italic mb-6 max-w-2xl mx-auto">
           Select a suite category below to begin your premium homestay experience.
         </p>
+
+        <div className="flex justify-center mb-12 animate-in fade-in duration-1000 delay-200">
+          <a
+            href="https://airbnb.co.in/h/staynjoytinsukia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-6 py-3.5 bg-[#FF5A5F]/15 border border-[#FF5A5F]/30 text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <svg viewBox="0 0 32 32" className="w-4 h-4 fill-current">
+              <path d="M16 1c-2.007 0-3.666 1.488-3.957 3.42C9.489 8.283 5 15.65 5 21.053c0 5.485 4.433 9.947 9.9 9.947 2.007 0 3.666-1.488 3.957-3.42 2.554-3.863 7.043-11.23 7.043-16.633C25.9 5.462 21.467 1 16 1zm0 2.21c4.27 0 7.733 3.479 7.733 7.766 0 4.148-3.714 10.457-6.076 14.07a3.972 3.972 0 0 1-3.314 1.764c-2.207 0-4-1.797-4-4.004 0-4.148 3.714-10.457 6.076-14.07A3.972 3.972 0 0 1 16 3.21zm0 6.643a1.996 1.996 0 0 0-2 2c0 1.102.898 2 2 2s2-.898 2-2c0-1.102-.898-2-2-2z" />
+            </svg>
+            Book via Airbnb Listing
+          </a>
+        </div>
 
         <PreBookingClient 
           categories={availableCategories} 

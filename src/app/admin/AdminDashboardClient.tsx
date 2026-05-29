@@ -212,7 +212,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
                 <select name="type" className="form-select" disabled={isSubmittingRoom}>
                   <option value="Cozy Pink Room">Cozy Pink Room</option>
                   <option value="Deluxe Room">Deluxe Room</option>
-                  <option value="Premium 1BHK Suite">Premium 1BHK Suite</option>
+                  <option value="Premium Suite">Premium Suite</option>
                   <option value="2BHK House">2BHK House</option>
                   <option value="1BHK">1BHK</option>
                 </select>

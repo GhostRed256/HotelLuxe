@@ -128,11 +128,16 @@ export default function OpeningBookingModal({
       return
     }
 
+    if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      setBookingError("Please enter a valid email address.")
+      return
+    }
+
     setIsSubmitting(true)
     const formData = new FormData()
     formData.append("roomId", bookingRoomId)
     formData.append("customerName", customerName)
-    formData.append("customerEmail", customerEmail || "N/A")
+    formData.append("customerEmail", customerEmail)
     formData.append("customerPhone", `${countryCode}${customerPhone}`)
     formData.append("checkIn", checkIn)
     formData.append("checkOut", checkOut)
@@ -421,12 +426,13 @@ export default function OpeningBookingModal({
 
                 <div>
                   <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-2 block">
-                    Email <span className="opacity-40 italic">(Optional)</span>
+                    Email <span className="text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30" size={16} />
                     <input 
                       type="email" 
+                      required
                       className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 pl-12 text-white text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/30" 
                       value={customerEmail} 
                       onChange={e => setCustomerEmail(e.target.value)}

@@ -2,11 +2,20 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Phone, Mail, Lock, User, Globe, ChevronDown, LogIn, UserPlus, ShieldAlert, LogOut, CheckCircle2 } from "lucide-react"
+import { Phone, Mail, Lock, User, Globe, ChevronDown, LogIn, UserPlus, ShieldAlert, LogOut, CheckCircle2, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { normalizeGuestIdentifier, formatGuestIdentifierForDisplay } from "@/lib/utils"
+import { formatGuestIdentifierForDisplay } from "@/lib/utils"
+import { 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber, 
+  PhoneAuthProvider, 
+  linkWithCredential,
+  createUserWithEmailAndPassword
+} from "firebase/auth";
+import { auth, app } from "@/lib/firebase";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const countryCodes = [
   { code: "+91", country: "India" },
@@ -17,7 +26,7 @@ const countryCodes = [
 ]
 
 export default function LoginPage() {
-  const { user, userData, isAdmin, signIn, register, signInWithGoogle, signOut, loading } = useAuth()
+  const { user, userData, isAdmin, signIn, signInWithGoogle, signOut, loading } = useAuth()
   const router = useRouter()
   
   const [isRegister, setIsRegister] = useState(false)
@@ -30,6 +39,37 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // OTP Verification States
+  const [otpStep, setOtpStep] = useState<"none" | "register_otp" | "login_otp">("none")
+  const [otpCode, setOtpCode] = useState("")
+  const [otpVerificationId, setOtpVerificationId] = useState<string | null>(null)
+  const [confirmationResult, setConfirmationResult] = useState<any | null>(null)
+
+  // Clear reCAPTCHA widget if switching modes
+  useEffect(() => {
+    return () => {
+      if ((window as any).recaptchaWidgetId !== undefined) {
+        try {
+          (window as any).recaptchaVerifier?.clear();
+          delete (window as any).recaptchaVerifier;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+  }, [isRegister, loginMethod]);
+
+  const initRecaptcha = () => {
+    if (!(window as any).recaptchaVerifier) {
+      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+        callback: () => {
+          console.log("reCAPTCHA solved");
+        }
+      });
+    }
+  }
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -37,7 +77,7 @@ export default function LoginPage() {
 
     if (isRegister) {
       if (phone.length < 10) {
-        setError("Please enter a valid phone number")
+        setError("Please enter a valid 10-digit phone number")
         setIsSubmitting(false)
         return
       }
@@ -46,47 +86,147 @@ export default function LoginPage() {
         setIsSubmitting(false)
         return
       }
+      if (!email.trim() || !email.includes("@")) {
+        setError("Please enter a valid email address")
+        setIsSubmitting(false)
+        return
+      }
     } else {
       if (loginMethod === "phone" && phone.length < 10) {
-        setError("Please enter your phone number")
+        setError("Please enter your 10-digit phone number")
         setIsSubmitting(false)
         return
       }
     }
 
     try {
-      // Normalize: if it's a phone login/registration, use the normalization helper
-      let finalEmail = ""
       if (isRegister) {
-        finalEmail = email || normalizeGuestIdentifier(`${countryCode}${phone}`)
+        // Create user with email and password first
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Initialize reCAPTCHA and send verification OTP
+        initRecaptcha();
+        const appVerifier = (window as any).recaptchaVerifier;
+        const provider = new PhoneAuthProvider(auth);
+        
+        const verificationId = await provider.verifyPhoneNumber(
+          `${countryCode}${phone}`,
+          appVerifier
+        );
+        
+        setOtpVerificationId(verificationId);
+        setOtpStep("register_otp");
+        setIsSubmitting(false);
       } else {
-        finalEmail = loginMethod === "email" ? email : normalizeGuestIdentifier(`${countryCode}${phone}`)
+        if (loginMethod === "email") {
+          await signIn(email, password)
+        } else {
+          // Direct Phone Login via OTP
+          initRecaptcha();
+          const appVerifier = (window as any).recaptchaVerifier;
+          const result = await signInWithPhoneNumber(auth, `${countryCode}${phone}`, appVerifier);
+          setConfirmationResult(result);
+          setOtpStep("login_otp");
+          setIsSubmitting(false);
+        }
       }
-      
-      if (isRegister) {
-        await register(finalEmail, password, {
-          displayName: name,
-          phoneNumber: `${countryCode}${phone}`,
-          email: email
-        })
-      } else {
-        await signIn(finalEmail, password)
-      }
-      
-      // NO AUTOMATIC REDIRECT - User stays on page until they click a button
-      // This is handled by the "user && !isAdmin" view below
     } catch (err: any) {
+      console.error(err);
       const msg = err.message || ""
       if (msg.includes("auth/user-not-found")) {
         setError("Account not found. Please register first.")
       } else if (msg.includes("auth/wrong-password")) {
         setError("Incorrect password. Please try again.")
       } else if (msg.includes("email-already-in-use")) {
-        setError("This account already exists. Please sign in instead.")
+        setError("This email account already exists. Please sign in instead.")
+      } else if (msg.includes("invalid-phone-number")) {
+        setError("Invalid phone number format. Please check the code and digits.")
       } else {
-        setError("Authentication failed. Please check your details.")
+        setError("Authentication request failed. Please check details and try again.")
       }
+      setIsSubmitting(false);
+    }
+  }
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError("")
+
+    if (otpCode.length !== 6) {
+      setError("Please enter a 6-digit OTP code")
       setIsSubmitting(false)
+      return
+    }
+
+    try {
+      if (otpStep === "register_otp") {
+        if (!otpVerificationId) throw new Error("Verification reference lost. Please refresh and try again.");
+        
+        // 1. Link phone number to current email account
+        const credential = PhoneAuthProvider.credential(otpVerificationId, otpCode);
+        await linkWithCredential(auth.currentUser!, credential);
+        
+        // 2. Save profile details in Firestore
+        const db = getFirestore(app);
+        await setDoc(doc(db, "customers", auth.currentUser!.uid), {
+          uid: auth.currentUser!.uid,
+          displayName: name,
+          phoneNumber: `${countryCode}${phone}`,
+          email: email,
+          phoneVerified: true,
+          createdAt: new Date()
+        });
+
+        // 3. Register server session cookie
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            email: auth.currentUser!.email, 
+            phoneNumber: auth.currentUser!.phoneNumber,
+            uid: auth.currentUser!.uid,
+            isAdmin: false
+          })
+        });
+
+        router.refresh();
+        window.location.assign("/");
+      } else if (otpStep === "login_otp") {
+        if (!confirmationResult) throw new Error("Login session lost. Please request a new code.");
+        
+        const userCredential = await confirmationResult.confirm(otpCode);
+        const user = userCredential.user;
+        
+        // Verify Firestore profile exists, create if missing
+        const db = getFirestore(app);
+        const docRef = doc(db, "customers", user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+          await setDoc(docRef, {
+            uid: user.uid,
+            displayName: user.displayName || "Guest",
+            phoneNumber: user.phoneNumber || `${countryCode}${phone}`,
+            email: user.email || "",
+            phoneVerified: true,
+            createdAt: new Date()
+          });
+        }
+
+        router.refresh();
+        window.location.assign("/");
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === "auth/invalid-verification-code") {
+        setError("The verification code you entered is invalid. Please try again.");
+      } else if (err.code === "auth/credential-already-in-use") {
+        setError("This phone number is already linked to another account.");
+      } else {
+        setError(err.message || "OTP verification failed. Please try again.");
+      }
+      setIsSubmitting(false);
     }
   }
 
@@ -96,7 +236,6 @@ export default function LoginPage() {
   }
 
   const navigateToStaff = async () => {
-    // Force logout before entering staff portal to clear guest session confusion
     await signOut()
     window.location.assign("/staff-login")
   }
@@ -107,11 +246,14 @@ export default function LoginPage() {
     <div 
       className="min-h-screen flex items-center justify-center p-6 bg-[var(--background)] relative overflow-hidden"
       onClick={() => {
-        if (user && !isAdmin) {
+        if (user && !isAdmin && otpStep === "none") {
           window.location.assign("/")
         }
       }}
     >
+      {/* Invisible reCAPTCHA container for Firebase Phone Verification */}
+      <div id="recaptcha-container" className="absolute invisible"></div>
+
       {/* IDENTITY BANNER */}
       <div className="fixed top-0 left-0 w-full bg-[#E5B8AD] text-[#1A0811] py-3 text-center text-[11px] font-black tracking-[0.4em] uppercase z-[110] shadow-2xl border-b-2 border-black/10">
         GUEST & CUSTOMER RESERVATION PORTAL
@@ -124,7 +266,7 @@ export default function LoginPage() {
         className="glass-panel w-full max-w-md p-10 border-white/10 relative z-10"
         style={{ background: "rgba(229, 184, 173, 0.08)", backdropFilter: "blur(40px)" }}
       >
-        {user && !isAdmin ? (
+        {user && !isAdmin && otpStep === "none" ? (
           <div className="text-center">
             <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-8">
               <CheckCircle2 className="text-emerald-500" size={32} />
@@ -134,7 +276,7 @@ export default function LoginPage() {
               Welcome back, {userData?.displayName || "Guest"}
             </p>
             <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] mb-10 font-bold">
-              {formatGuestIdentifierForDisplay(userData?.email || user?.email || "")}
+              {userData?.email || user?.email || userData?.phoneNumber || ""}
             </p>
             <div className="flex flex-col gap-4">
               <Link href="/bookings" className="btn-primary !py-5 shadow-2xl font-black tracking-[0.3em] uppercase text-[11px]">
@@ -158,6 +300,64 @@ export default function LoginPage() {
                 Go to Staff Portal →
               </button>
             </div>
+          </div>
+        ) : otpStep !== "none" ? (
+          /* OTP VERIFICATION STEP SCREEN */
+          <div className="animate-in fade-in duration-500">
+            <div className="text-center mb-10">
+              <div className="w-20 h-20 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <ShieldCheck className="text-amber-500" size={32} />
+              </div>
+              <h2 className="text-3xl font-heading font-black tracking-tighter mb-3 text-white">
+                Verify <span className="text-[var(--accent-primary)]">OTP Code</span>
+              </h2>
+              <p className="text-[10px] uppercase tracking-[0.25em] opacity-40 font-black leading-relaxed">
+                Enter the 6-digit code sent to<br />
+                <span className="text-white opacity-80 font-mono tracking-widest">{countryCode} {phone}</span>
+              </p>
+            </div>
+
+            {error && (
+              <div className="p-4 bg-rose-500/10 border-l-4 border-rose-500 rounded-r-xl text-rose-500 text-[10px] font-black uppercase tracking-widest mb-8">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp} className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Verification Code</label>
+                <input 
+                  type="text" 
+                  maxLength={6} 
+                  required 
+                  pattern="\d{6}"
+                  value={otpCode}
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  placeholder="0 0 0 0 0 0" 
+                  className="form-input !text-center !text-2xl !tracking-[0.5em] !font-black !py-4" 
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="btn-primary !py-5 shadow-2xl font-black tracking-[0.3em] uppercase text-[12px] mt-4"
+              >
+                {isSubmitting ? "VERIFYING..." : "CONFIRM & VERIFY"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setOtpStep("none");
+                  setOtpCode("");
+                  setError("");
+                }}
+                className="text-[10px] text-center uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity font-bold mt-2"
+              >
+                ← Back to Login / Register
+              </button>
+            </form>
           </div>
         ) : (
           <>
@@ -190,7 +390,7 @@ export default function LoginPage() {
                     loginMethod === "phone" ? "bg-[var(--accent-primary)] text-white shadow-xl scale-105" : "opacity-30 hover:opacity-100"
                   }`}
                 >
-                  Phone Number
+                  Phone OTP
                 </button>
               </div>
             )}
@@ -227,7 +427,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Phone Number (Mandatory)</label>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Phone Number</label>
                       <div className="flex gap-2">
                         <div className="relative w-28">
                           <select 
@@ -252,17 +452,16 @@ export default function LoginPage() {
                     <div className="flex flex-col gap-2">
                       <div className="flex justify-between items-center ml-2">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30">Email Address</label>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-emerald-500/60 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/10">Optional</span>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-rose-500/80 bg-rose-500/5 px-2.5 py-0.5 rounded-full border border-rose-500/10">Required</span>
                       </div>
                       <div className="relative group">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" size={18} />
                         <input 
-                          type="email" 
+                          type="email" required
                           value={email} onChange={e => setEmail(e.target.value)}
-                          placeholder="Leave empty if you prefer" className="form-input !pl-12 !py-4" 
+                          placeholder="your@email.com" className="form-input !pl-12 !py-4" 
                         />
                       </div>
-                      <p className="text-[8px] uppercase tracking-widest opacity-20 ml-2 mt-1">You can register and login with just your phone number</p>
                     </div>
                   </motion.div>
                 ) : (
@@ -312,19 +511,21 @@ export default function LoginPage() {
                 )}
               </AnimatePresence>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Password</label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" size={18} />
-                  <input 
-                    type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••" className="form-input !pl-12 !py-4" 
-                  />
+              {!(loginMethod === "phone" && !isRegister) && (
+                <div className="flex flex-col gap-2 animate-in fade-in duration-300">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 ml-2">Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" size={18} />
+                    <input 
+                      type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••" className="form-input !pl-12 !py-4" 
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button type="submit" disabled={isSubmitting} className="btn-primary !py-5 shadow-2xl hover:shadow-rose-500/20 active:scale-95 transition-all font-black tracking-[0.3em] uppercase text-[12px] mt-4">
-                {isSubmitting ? "PROCESSING..." : (isRegister ? "CREATE GUEST PROFILE" : "SIGN IN TO GUEST ACCOUNT")}
+                {isSubmitting ? "PROCESSING..." : (isRegister ? "VERIFY PHONE & REGISTER" : (loginMethod === "phone" ? "SEND OTP CODE" : "SIGN IN TO GUEST ACCOUNT"))}
               </button>
             </form>
 
@@ -370,3 +571,4 @@ export default function LoginPage() {
     </div>
   )
 }
+

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/firebase-admin"
 import { revalidatePath } from "next/cache"
-import { sendBookingEmail } from "@/lib/email"
+import { notifyNewBooking } from "@/lib/notifications"
 
 export async function requestBooking(formData: FormData) {
   const roomId = formData.get("roomId") as string
@@ -11,12 +11,16 @@ export async function requestBooking(formData: FormData) {
   const phone = formData.get("customerPhone") as string
   const checkIn = formData.get("checkIn") as string
   const checkOut = formData.get("checkOut") as string
+  
+  // Retrieve payment transaction details if present (from the step 2 demo payment)
+  const upiTxnId = formData.get("upiTxnId") as string || ""
+  const paymentScreenshot = formData.get("paymentScreenshot") as string || ""
 
   try {
     const roomDoc = await db.collection("rooms").doc(roomId).get()
-    const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite" }
+    const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
 
-    await db.collection("bookings").add({
+    const bookingData = {
       roomId,
       customerName: name,
       customerEmail: email || "N/A",
@@ -24,44 +28,19 @@ export async function requestBooking(formData: FormData) {
       checkIn,
       checkOut,
       status: "PENDING",
+      upiTxnId,
+      paymentScreenshot,
       createdAt: new Date(),
       updatedAt: new Date()
-    })
-    
-    // Send email notifications in parallel using Promise.all to prevent sequential waiting and speed up execution
-    const emailPromises: Promise<any>[] = [];
-
-    // Notify Customer
-    if (email && email.trim() !== "" && email !== "N/A") {
-      emailPromises.push(
-        sendBookingEmail({
-          to: email,
-          subject: `Your Palace Reservation Request: ${room.name}`,
-          customerName: name,
-          roomName: room.name,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          status: "PENDING"
-        }).catch(err => console.error("Error sending customer email:", err))
-      );
     }
 
-    // Notify Owners
-    const ownerEmails = ["GhostRed256@gmail.com"]; // User specified earlier or common owner email
-    emailPromises.push(
-      sendBookingEmail({
-        to: ownerEmails,
-        subject: `[ACTION REQUIRED] New Request from ${name}`,
-        customerName: name,
-        roomName: room.name,
-        checkIn: checkIn,
-        checkOut: checkOut,
-        status: "PENDING_OWNER_REVIEW"
-      }).catch(err => console.error("Error sending owner email:", err))
-    );
-
-    // Run parallel dispatches and wait for them to finish concurrently
-    await Promise.all(emailPromises);
+    const docRef = await db.collection("bookings").add(bookingData)
+    
+    // Call the notifications orchestrator to alert both guest and owners
+    await notifyNewBooking(
+      { id: docRef.id, ...bookingData },
+      { name: room.name || "Unknown Suite", price: room.price || 0 }
+    )
 
     revalidatePath("/rooms")
     revalidatePath("/admin")
@@ -72,3 +51,4 @@ export async function requestBooking(formData: FormData) {
     return { error: "Failed to request booking" }
   }
 }
+

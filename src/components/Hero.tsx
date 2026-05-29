@@ -128,12 +128,23 @@
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.6 }}
-               className="flex flex-col sm:flex-row gap-8 justify-center items-center"
+               className="flex flex-col md:flex-row gap-6 md:gap-8 justify-center items-center"
              >
-               <Link href="/rooms" className="btn-primary min-w-[260px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.3)] hover:scale-105 active:scale-95 text-[12px] font-bold tracking-[0.2em] uppercase border-none">
+               <Link href="/rooms" className="btn-primary min-w-[240px] !py-5 !bg-[var(--accent-primary)] shadow-[0_20px_50px_rgba(209,77,126,0.3)] hover:scale-105 active:scale-95 text-[11px] md:text-[12px] font-bold tracking-[0.2em] uppercase border-none">
                  Reserve Your Stay
                </Link>
-               <Link href="/about" className={`btn-outline min-w-[260px] !py-5 backdrop-blur-xl text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/10' : '!text-[var(--foreground)] !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/5'}`}>
+               <a 
+                 href="https://airbnb.co.in/h/staynjoytinsukia" 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 className="btn-outline min-w-[240px] !py-5 backdrop-blur-xl text-[11px] md:text-[12px] font-bold tracking-[0.2em] uppercase transition-all !text-[#FF5A5F] !border-[#FF5A5F]/40 hover:!bg-[#FF5A5F]/10 flex items-center justify-center gap-2.5 cursor-pointer"
+               >
+                 <svg viewBox="0 0 32 32" className="w-4 h-4 fill-current">
+                   <path d="M16 1c-2.007 0-3.666 1.488-3.957 3.42C9.489 8.283 5 15.65 5 21.053c0 5.485 4.433 9.947 9.9 9.947 2.007 0 3.666-1.488 3.957-3.42 2.554-3.863 7.043-11.23 7.043-16.633C25.9 5.462 21.467 1 16 1zm0 2.21c4.27 0 7.733 3.479 7.733 7.766 0 4.148-3.714 10.457-6.076 14.07a3.972 3.972 0 0 1-3.314 1.764c-2.207 0-4-1.797-4-4.004 0-4.148 3.714-10.457 6.076-14.07A3.972 3.972 0 0 1 16 3.21zm0 6.643a1.996 1.996 0 0 0-2 2c0 1.102.898 2 2 2s2-.898 2-2c0-1.102-.898-2-2-2z"/>
+                 </svg>
+                 Book via Airbnb
+               </a>
+               <Link href="/about" className={`btn-outline min-w-[240px] !py-5 backdrop-blur-xl text-[11px] md:text-[12px] font-bold tracking-[0.2em] uppercase transition-all ${isDark ? '!text-white !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/10' : '!text-[var(--foreground)] !border-[var(--gold-primary)]/40 hover:!bg-[var(--gold-primary)]/5'}`}>
                  Explore More
                </Link>
              </motion.div>

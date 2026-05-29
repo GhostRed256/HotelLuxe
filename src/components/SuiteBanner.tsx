@@ -14,7 +14,7 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Group by type - pick one representative per type
-  const suiteTypes = ["Cozy Pink Room", "Deluxe Room", "Premium 1BHK Suite", "2BHK House"]
+  const suiteTypes = ["Cozy Pink Room", "Deluxe Room", "Premium Suite", "2BHK House"]
   
   const categories = suiteTypes.map(type => {
     const typeRooms = rooms.filter((r: any) => r.type === type)

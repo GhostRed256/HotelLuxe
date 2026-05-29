@@ -1,11 +1,11 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo, useRef, useEffect, Suspense } from "react"
+import { useState, useMemo, useRef, useEffect, Suspense, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { requestBooking } from "@/app/actions"
 import RoomCard from "./RoomCard"
-import { ChevronLeft, ChevronRight, User, Phone, Mail } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail, Upload, ArrowLeft, QrCode, IndianRupee, ShieldCheck, Copy, Check } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any[], bookings?: any[] }) {
@@ -65,6 +65,17 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [customerEmail, setCustomerEmail] = useState("")
   const [countryCode, setCountryCode] = useState("+91")
 
+  // Multi-step booking flow
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1)
+
+  // UPI payment state
+  const [upiTxnId, setUpiTxnId] = useState("")
+  const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(null)
+  const [paymentFileName, setPaymentFileName] = useState("")
+  const [copiedUpi, setCopiedUpi] = useState(false)
+  const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || "staynjoy@okaxis"
+  const DEPOSIT_AMOUNT = 300
+
   // Unique types and floors for filters
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
 
@@ -74,7 +85,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       if (filterType === "ALL") return true
       if (filterType === "Cozy Pink Room") return r.type === "Cozy Pink Room"
       if (filterType === "Deluxe Room") return r.type === "Deluxe Room"
-      if (filterType === "Premium 1BHK Suite") return r.type === "Premium 1BHK Suite"
+      if (filterType === "Premium Suite") return r.type === "Premium Suite"
       if (filterType === "2BHK_2700") return r.type === "2BHK House" && Number(r.price) === 2700
       if (filterType === "2BHK_3600") return r.type === "2BHK House" && Number(r.price) === 3600
       if (filterType === "2BHK_4400") return r.type === "2BHK House" && Number(r.price) === 4400
@@ -135,9 +146,59 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     setCountryCode(code)
     setCustomerEmail(userData?.email || "")
 
+    // Reset payment state
+    setBookingStep(1)
+    setUpiTxnId("")
+    setPaymentScreenshot(null)
+    setPaymentFileName("")
+    setCopiedUpi(false)
+
     setBookingError("")
     setShowBookingModal(true)
     setSuccessMsg("")
+  }
+
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setBookingError("Screenshot must be under 5MB.")
+      return
+    }
+    setPaymentFileName(file.name)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPaymentScreenshot(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const copyUpiId = async () => {
+    try {
+      await navigator.clipboard.writeText(UPI_ID)
+      setCopiedUpi(true)
+      setTimeout(() => setCopiedUpi(false), 2000)
+    } catch {
+      // fallback
+    }
+  }
+
+  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=StayNJoy&am=${DEPOSIT_AMOUNT}&cu=INR&tn=BookingDeposit`
+  const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiDeepLink)}`
+
+  const handleStep1Continue = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!bookingRoomId) return
+    if (customerPhone.length !== 10) {
+      setBookingError("Please enter a valid 10-digit phone number.")
+      return
+    }
+    if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      setBookingError("Please enter a valid email address.")
+      return
+    }
+    setBookingError("")
+    setBookingStep(2)
   }
 
   const [bookingError, setBookingError] = useState("")
@@ -147,22 +208,24 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     if (!bookingRoomId) return
     setBookingError("")
 
-    const formData = new FormData(e.target as HTMLFormElement)
-    const phoneNumber = formData.get("customerPhone") as string
-    
-    if (phoneNumber.length !== 10) {
-      setBookingError("Please enter a valid 10-digit phone number.")
+    // Validate payment proof
+    if (!upiTxnId && !paymentScreenshot) {
+      setBookingError("Please provide your UPI Transaction ID or upload a payment screenshot.")
       return
     }
 
     setIsSubmitting(true)
+    const formData = new FormData()
     formData.append("roomId", bookingRoomId)
-    
-    // Combine phone with country code
-    const countryCode = formData.get("countryCode")
-    if (countryCode && phoneNumber) {
-      formData.set("customerPhone", `${countryCode}${phoneNumber}`)
-    }
+    formData.append("customerName", customerName)
+    formData.append("customerEmail", customerEmail)
+    formData.append("customerPhone", `${countryCode}${customerPhone}`)
+    formData.append("checkIn", checkIn)
+    formData.append("checkOut", checkOut)
+
+    // Append payment proof
+    if (upiTxnId) formData.append("upiTxnId", upiTxnId)
+    if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot)
     
     await requestBooking(formData)
     setIsSubmitting(false)
@@ -218,7 +281,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 <option value="ALL">All Suite Types</option>
                 <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
                 <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
-                <option value="Premium 1BHK Suite">Premium 1BHK Suite {"\u20B9"}2200</option>
+                <option value="Premium Suite">Premium Suite {"\u20B9"}2200</option>
                 <option value="2BHK_2700">2BHK House {"\u20B9"}2700</option>
                 <option value="2BHK_3600">2BHK House {"\u20B9"}3600</option>
                 <option value="2BHK_4400">2BHK House {"\u20B9"}4400</option>
@@ -400,187 +463,327 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                       </div>
                     </div>
                   ) : (
-                    <form onSubmit={handleBookingSubmit} className="flex flex-col gap-6">
+                    <>
                       {bookingError && (
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
-                          className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-[10px] font-bold uppercase tracking-widest text-center"
+                          className="p-4 mb-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-[10px] font-bold uppercase tracking-widest text-center"
                         >
                           {bookingError}
                         </motion.div>
                       )}
-                      {/* Booking For Toggle */}
-                      <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setBookingFor("myself")
-                            setCustomerName(userData?.displayName || "")
-                            const phoneOnly = userData?.phoneNumber?.replace(/^\+\d+/, "") || ""
-                            setCustomerPhone(phoneOnly)
-                            const code = userData?.phoneNumber?.match(/^\+\d+/)?.[0] || "+91"
-                            setCountryCode(code)
-                          }}
-                          className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
-                            bookingFor === "myself" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
-                          }`}
-                        >
-                          Booking for Myself
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setBookingFor("others")
-                            setCustomerName("")
-                            setCustomerPhone("")
-                          }}
-                          className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
-                            bookingFor === "others" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
-                          }`}
-                        >
-                          For Someone Else
-                        </button>
-                      </div>
 
-                      {/* Simplified Single Room Selection */}
-                      <div>
-                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Suite</label>
-                        <select
-                          className="form-select"
-                          value={bookingRoomId}
-                          onChange={e => setBookingRoomId(e.target.value)}
-                          required
-                        >
-                          <option value="">— Choose an available suite —</option>
-                          {suiteTypes.map((type: any) => {
-                            const roomsOfType = availableRoomsForBooking.filter((r: any) => r.type === type);
-                            if (roomsOfType.length === 0) return null;
-                            return (
-                              <optgroup key={type} label={type}>
-                                {roomsOfType.map((r: any) => (
-                                  <option key={r.id} value={r.id}>
-                                    {r.name} {"\u20B9"}{r.price}
-                                  </option>
-                                ))}
-                              </optgroup>
-                            );
-                          })}
-                        </select>
-                        {availableRoomsForBooking.length === 0 && (
-                          <p className="text-rose-400 text-[10px] mt-2 font-bold uppercase tracking-widest">
-                            No suites currently available.
-                          </p>
-                        )}
-                      </div>
-
-
-                      <div className="h-[1px] bg-white/5" />
-
-                      {/* Guest Info */}
-                      <div>
-                        <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
-                          {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                          <input 
-                            type="text" name="customerName" required className="form-input !pl-12" 
-                            value={customerName} onChange={e => setCustomerName(e.target.value)}
-                            placeholder="Full name" 
-                          />
+                      {/* Step Indicator */}
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${
+                          bookingStep === 1 ? 'text-[var(--accent-primary)]' : 'opacity-40'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${
+                            bookingStep === 1 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
+                          }`}>1</div>
+                          Details
+                        </div>
+                        <div className="flex-1 h-[1px] bg-white/10" />
+                        <div className={`flex items-center gap-2 text-[9px] font-bold tracking-[0.15em] uppercase ${
+                          bookingStep === 2 ? 'text-[var(--accent-primary)]' : 'opacity-40'
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border ${
+                            bookingStep === 2 ? 'bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]' : 'border-white/20 bg-white/5'
+                          }`}>2</div>
+                          Payment
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
-                            {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
-                          </label>
-                          <div className="flex gap-2">
-                            <div className="relative w-24">
-                              <select 
-                                name="countryCode"
-                                value={countryCode}
-                                onChange={e => setCountryCode(e.target.value)}
-                                className="form-input !pr-8 appearance-none cursor-pointer text-xs"
-                              >
-                                <option value="+91">+91</option>
-                                <option value="+1">+1</option>
-                                <option value="+44">+44</option>
-                                <option value="+971">+971</option>
-                                <option value="+61">+61</option>
-                              </select>
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 text-[8px]">▼</div>
-                            </div>
-                            <div className="relative flex-1">
-                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                      {/* === STEP 1: Guest Details === */}
+                      {bookingStep === 1 && (
+                        <form onSubmit={handleStep1Continue} className="flex flex-col gap-6">
+                          {/* Booking For Toggle */}
+                          <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBookingFor("myself")
+                                setCustomerName(userData?.displayName || "")
+                                const phoneOnly = userData?.phoneNumber?.replace(/^\+\d+/, "") || ""
+                                setCustomerPhone(phoneOnly)
+                                const code = userData?.phoneNumber?.match(/^\+\d+/)?.[0] || "+91"
+                                setCountryCode(code)
+                              }}
+                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+                                bookingFor === "myself" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                              }`}
+                            >
+                              Booking for Myself
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBookingFor("others")
+                                setCustomerName("")
+                                setCustomerPhone("")
+                              }}
+                              className={`flex-1 py-2 text-[10px] font-bold tracking-[0.2em] uppercase rounded-xl transition-all ${
+                                bookingFor === "others" ? "bg-[var(--accent-primary)] text-white shadow-lg" : "opacity-40 hover:opacity-100"
+                              }`}
+                            >
+                              For Someone Else
+                            </button>
+                          </div>
+
+                          {/* Suite Selection */}
+                          <div>
+                            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Select Suite</label>
+                            <select
+                              className="form-select"
+                              value={bookingRoomId}
+                              onChange={e => setBookingRoomId(e.target.value)}
+                              required
+                            >
+                              <option value="">— Choose an available suite —</option>
+                              {suiteTypes.map((type: any) => {
+                                const roomsOfType = availableRoomsForBooking.filter((r: any) => r.type === type);
+                                if (roomsOfType.length === 0) return null;
+                                return (
+                                  <optgroup key={type} label={type}>
+                                    {roomsOfType.map((r: any) => (
+                                      <option key={r.id} value={r.id}>
+                                        {r.name} {"\u20B9"}{r.price}
+                                      </option>
+                                    ))}
+                                  </optgroup>
+                                );
+                              })}
+                            </select>
+                            {availableRoomsForBooking.length === 0 && (
+                              <p className="text-rose-400 text-[10px] mt-2 font-bold uppercase tracking-widest">
+                                No suites currently available.
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="h-[1px] bg-white/5" />
+
+                          {/* Guest Info */}
+                          <div>
+                            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                              {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
+                            </label>
+                            <div className="relative">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
                               <input 
-                                type="tel" name="customerPhone" required className="form-input !pl-12" 
-                                value={customerPhone} 
-                                onChange={e => {
-                                  const val = e.target.value.replace(/\D/g, "").slice(0, 10)
-                                  setCustomerPhone(val)
-                                }}
-                                placeholder="10-digit number" 
+                                type="text" required className="form-input !pl-12" 
+                                value={customerName} onChange={e => setCustomerName(e.target.value)}
+                                placeholder="Full name" 
                               />
                             </div>
                           </div>
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email <span className="opacity-40 italic">(Optional)</span></label>
-                          <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
-                            <input 
-                              type="email" name="customerEmail" className="form-input !pl-12" 
-                              value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
-                              placeholder="your@email.com" 
-                            />
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">
+                                {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
+                              </label>
+                              <div className="flex gap-2">
+                                <div className="relative w-24">
+                                  <select 
+                                    value={countryCode}
+                                    onChange={e => setCountryCode(e.target.value)}
+                                    className="form-input !pr-8 appearance-none cursor-pointer text-xs"
+                                  >
+                                    <option value="+91">+91</option>
+                                    <option value="+1">+1</option>
+                                    <option value="+44">+44</option>
+                                    <option value="+971">+971</option>
+                                    <option value="+61">+61</option>
+                                  </select>
+                                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-30 text-[8px]">▼</div>
+                                </div>
+                                <div className="relative flex-1">
+                                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                                  <input 
+                                    type="tel" required className="form-input !pl-12" 
+                                    value={customerPhone} 
+                                    onChange={e => {
+                                      const val = e.target.value.replace(/\D/g, "").slice(0, 10)
+                                      setCustomerPhone(val)
+                                    }}
+                                    placeholder="10-digit number" 
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Email <span className="text-rose-400">*</span></label>
+                              <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" size={16} />
+                                <input 
+                                  type="email" required className="form-input !pl-12" 
+                                  value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
+                                  placeholder="your@email.com" 
+                                />
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check In</label>
-                          <input 
-                            type="date" 
-                            name="checkIn" 
-                            required 
-                            className="form-input" 
-                            value={checkIn}
-                            onChange={e => setCheckIn(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check Out</label>
-                          <input 
-                            type="date" 
-                            name="checkOut" 
-                            required 
-                            className="form-input" 
-                            value={checkOut}
-                            min={checkIn}
-                            onChange={e => setCheckOut(e.target.value)}
-                          />
-                        </div>
-                      </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check In</label>
+                              <input 
+                                type="date" 
+                                required 
+                                className="form-input" 
+                                value={checkIn}
+                                min={new Date().toISOString().split("T")[0]}
+                                onChange={e => setCheckIn(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Check Out</label>
+                              <input 
+                                type="date" 
+                                required 
+                                className="form-input" 
+                                value={checkOut}
+                                min={checkIn || new Date().toISOString().split("T")[0]}
+                                onChange={e => setCheckOut(e.target.value)}
+                              />
+                            </div>
+                          </div>
 
-                      {computedPrice > 0 && (
-                        <div className="mt-4 p-4 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded-xl text-center animate-in fade-in zoom-in duration-300">
-                          <span className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 block mb-1">Estimated Total</span>
-                          <span className="text-2xl font-black text-[var(--accent-primary)]">₹{computedPrice.toLocaleString('en-IN')}</span>
-                        </div>
+                          {computedPrice > 0 && (
+                            <div className="p-4 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded-xl text-center animate-in fade-in zoom-in duration-300">
+                              <span className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-60 block mb-1">Estimated Total</span>
+                              <span className="text-2xl font-black text-[var(--accent-primary)]">₹{computedPrice.toLocaleString('en-IN')}</span>
+                            </div>
+                          )}
+
+                          <button
+                            type="submit"
+                            disabled={!bookingRoomId || !checkIn || !checkOut}
+                            className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
+                          >
+                            Continue to Payment →
+                          </button>
+                        </form>
                       )}
 
-                      <button
-                        type="submit"
-                        disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
-                        className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
-                      >
-                        {isSubmitting ? "Request Received - Awaiting Staff Confirmation" : "Confirm Reservation"}
-                      </button>
-                    </form>
+                      {/* === STEP 2: UPI Payment === */}
+                      {bookingStep === 2 && (
+                        <form onSubmit={handleBookingSubmit} className="flex flex-col gap-5">
+                          {/* Back Button */}
+                          <button
+                            type="button"
+                            onClick={() => { setBookingStep(1); setBookingError("") }}
+                            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity self-start"
+                          >
+                            <ArrowLeft size={14} /> Back to Details
+                          </button>
+
+                          {/* Deposit Banner */}
+                          <div className="p-5 bg-gradient-to-br from-[var(--accent-primary)]/15 to-[var(--accent-primary)]/5 border border-[var(--accent-primary)]/20 rounded-2xl text-center">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <ShieldCheck size={16} className="text-emerald-400" />
+                              <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-emerald-400">Secure Booking Deposit</span>
+                            </div>
+                            <span className="text-3xl font-black text-[var(--accent-primary)]">₹{DEPOSIT_AMOUNT}</span>
+                            <p className="text-[10px] opacity-40 mt-1 font-light">Refundable deposit • Deducted from total stay</p>
+                          </div>
+
+                          {/* QR Code */}
+                          <div className="flex flex-col items-center gap-4 py-4">
+                            <div className="relative p-3 bg-white rounded-2xl shadow-[0_0_40px_rgba(209,77,126,0.15)]">
+                              <img 
+                                src={upiQrUrl} 
+                                alt="UPI QR Code" 
+                                width={180} 
+                                height={180}
+                                className="rounded-lg"
+                              />
+                            </div>
+                            <p className="text-[10px] opacity-40 font-light italic">Scan with any UPI app to pay</p>
+                          </div>
+
+                          {/* UPI ID + Copy */}
+                          <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                            <div>
+                              <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40 block">UPI ID</span>
+                              <span className="text-sm font-mono font-bold">{UPI_ID}</span>
+                            </div>
+                            <button 
+                              type="button" 
+                              onClick={copyUpiId}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[10px] font-bold"
+                            >
+                              {copiedUpi ? <><Check size={12} className="text-emerald-400" /> Copied</> : <><Copy size={12} /> Copy</>}
+                            </button>
+                          </div>
+
+                          {/* Pay via UPI App - Mobile Deep Link */}
+                          <a
+                            href={upiDeepLink}
+                            className="flex items-center justify-center gap-2 py-4 rounded-xl bg-[#5f259f]/20 hover:bg-[#5f259f]/30 border border-[#5f259f]/30 text-[#b87dff] font-bold text-sm transition-colors"
+                          >
+                            <IndianRupee size={16} />
+                            Pay ₹{DEPOSIT_AMOUNT} via UPI App
+                          </a>
+
+                          <div className="h-[1px] bg-white/5" />
+
+                          {/* Payment Proof Section */}
+                          <div>
+                            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-3 block">Payment Proof</label>
+                            
+                            {/* UTR / Transaction ID */}
+                            <div className="mb-3">
+                              <label className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-30 mb-1.5 block">12-Digit UTR / Txn ID</label>
+                              <input 
+                                type="text"
+                                value={upiTxnId}
+                                onChange={e => setUpiTxnId(e.target.value.replace(/\s/g, "").slice(0, 22))}
+                                placeholder="Enter UPI Transaction Reference"
+                                className="form-input text-sm font-mono"
+                              />
+                            </div>
+
+                            {/* Screenshot Upload */}
+                            <div>
+                              <label className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-30 mb-1.5 block">Or Upload Screenshot</label>
+                              <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/15 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors">
+                                <Upload size={18} className="opacity-40" />
+                                <span className="text-sm opacity-50">
+                                  {paymentFileName || "Tap to upload payment screenshot"}
+                                </span>
+                                <input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  className="hidden"
+                                  onChange={handleScreenshotUpload}
+                                />
+                              </label>
+                              {paymentScreenshot && (
+                                <div className="mt-3 relative rounded-xl overflow-hidden border border-white/10 max-h-40">
+                                  <img src={paymentScreenshot} alt="Payment proof" className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={isSubmitting || (!upiTxnId && !paymentScreenshot)}
+                            className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
+                          >
+                            {isSubmitting ? "Confirming Reservation..." : "Submit Reservation with Payment Proof"}
+                          </button>
+
+                          <p className="text-[9px] text-center opacity-30 font-light leading-relaxed">
+                            Your booking will be confirmed once our team verifies the payment. 
+                            A confirmation email will be sent to <strong className="opacity-60">{customerEmail}</strong>.
+                          </p>
+                        </form>
+                      )}
+                    </>
                   )}
                 </div>
               </motion.div>

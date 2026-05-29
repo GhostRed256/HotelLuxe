@@ -2,16 +2,16 @@
 
 import { db } from "@/lib/firebase-admin"
 import { revalidatePath } from "next/cache"
-import { sendBookingEmail } from "@/lib/email"
+import { notifyBookingStatusChange } from "@/lib/notifications"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 async function validateAdminSession() {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get("admin_session")
-  
+
   if (!sessionCookie) throw new Error("Unauthorized: No session found")
-  
+
   try {
     const session = JSON.parse(sessionCookie.value)
     if (!session.isAdmin) throw new Error("Unauthorized: Not an admin")
@@ -44,7 +44,7 @@ export async function addRoom(formData: FormData) {
   const type = formData.get("type") as string || "Cozy Pink Room"
   const roomNumber = formData.get("roomNumber") as string || "000"
   const location = formData.get("location") as string || "Chaliha Nagar"
-  
+
   const files = formData.getAll("images") as File[]
   const uploadedImages: string[] = []
 
@@ -54,24 +54,24 @@ export async function addRoom(formData: FormData) {
     try {
       const dataUri = await fileToDataUri(file)
       uploadedImages.push(dataUri)
-    } catch(e) {
+    } catch (e) {
       console.error("Failed to process image", e)
     }
   }
 
   await db.collection("rooms").add({
-    name, 
-    description, 
-    price, 
-    floor, 
-    type, 
+    name,
+    description,
+    price,
+    floor,
+    type,
     roomNumber,
     location,
     images: uploadedImages,
     createdAt: new Date(),
     updatedAt: new Date()
   })
-  
+
   revalidatePath("/admin")
   revalidatePath("/")
   revalidatePath("/rooms")
@@ -81,14 +81,14 @@ export async function uploadRoomImages(roomId: string, formData: FormData) {
   await validateAdminSession()
   const files = formData.getAll("images") as File[]
   const roomDoc = await db.collection("rooms").doc(roomId).get()
-  
+
   if (!roomDoc.exists) return { success: false, error: "Room not found" }
   const room = roomDoc.data()!
 
   let currentImages: string[] = []
   try {
     currentImages = typeof room.images === 'string' ? JSON.parse(room.images) : (room.images || [])
-  } catch(e) {
+  } catch (e) {
     currentImages = []
   }
 
@@ -99,7 +99,7 @@ export async function uploadRoomImages(roomId: string, formData: FormData) {
     try {
       const dataUri = await fileToDataUri(file)
       newImages.push(dataUri)
-    } catch(e) {
+    } catch (e) {
       console.error("Failed to process image", e)
     }
   }
@@ -110,7 +110,7 @@ export async function uploadRoomImages(roomId: string, formData: FormData) {
     images: allImages,
     updatedAt: new Date()
   })
-  
+
   revalidatePath("/admin")
   revalidatePath("/rooms")
   revalidatePath("/")
@@ -122,11 +122,11 @@ export async function removeRoomImage(roomId: string, imageIndex: number) {
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   if (!roomDoc.exists) return
   const room = roomDoc.data()!
-  
+
   let images: string[] = []
   try {
     images = typeof room.images === 'string' ? JSON.parse(room.images) : (room.images || [])
-  } catch(e) {
+  } catch (e) {
     images = []
   }
 
@@ -144,17 +144,17 @@ export async function removeRoomImage(roomId: string, imageIndex: number) {
 
 export async function deleteRoom(roomId: string) {
   await validateAdminSession()
-  
+
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   if (!roomDoc.exists) return { success: false, error: "Room not found" }
-  
+
   // Delete the room document
   await db.collection("rooms").doc(roomId).delete()
-  
+
   revalidatePath("/admin")
   revalidatePath("/rooms")
   revalidatePath("/")
-  
+
   return { success: true }
 }
 
@@ -169,36 +169,30 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
   const bookingDoc = await db.collection("bookings").doc(bookingId).get()
   if (!bookingDoc.exists) return
   const booking = bookingDoc.data()!
-  
+
   const roomDoc = await db.collection("rooms").doc(booking.roomId).get()
-  const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite" }
+  const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
 
   await db.collection("bookings").doc(bookingId).update({
     status,
     updatedAt: new Date()
   })
 
-  await sendBookingEmail({
-    to: booking.customerEmail,
-    subject: `Your Royal Stay is ${status === 'APPROVED' ? 'Confirmed' : 'Cancelled'}`,
-    customerName: booking.customerName,
-    roomName: room.name,
-    checkIn: booking.checkIn,
-    checkOut: booking.checkOut,
-    status: status,
-    price: room.price
-  })
-
-  const ownerEmails = ["GhostRed256@gmail.com"]
-  await sendBookingEmail({
-    to: ownerEmails,
-    subject: `[ADMIN ALERT] Booking ${status}: ${booking.customerName}`,
-    customerName: booking.customerName,
-    roomName: room.name,
-    checkIn: booking.checkIn,
-    checkOut: booking.checkOut,
-    status: status
-  })
+  await notifyBookingStatusChange(
+    {
+      id: bookingId,
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+    },
+    {
+      name: room.name || "Unknown Suite",
+      price: room.price || 0,
+    },
+    status
+  )
 
   revalidatePath("/admin")
   revalidatePath("/")
