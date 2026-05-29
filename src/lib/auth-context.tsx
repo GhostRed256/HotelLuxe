@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userEmail = u.email?.trim().toLowerCase() || ""
     const userPhone = u.phoneNumber?.trim() || ""
 
-    const isEmailAdmin = adminEmails.includes(userEmail) || userEmail.includes("admin")
+    const isEmailAdmin = adminEmails.includes(userEmail)
     const isPhoneAdmin = adminPhones.includes(userPhone)
 
     return isEmailAdmin || isPhoneAdmin
@@ -98,15 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Update server session cookie with verified admin status
+          const idToken = await user.getIdToken(true)
           await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: user.email,
-              phoneNumber: user.phoneNumber,
-              uid: user.uid,
-              isAdmin: checkIsAdmin(user)
-            })
+            body: JSON.stringify({ idToken })
           })
         } else {
           setUserData(null)
