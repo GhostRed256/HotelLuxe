@@ -71,7 +71,7 @@ export default function PreBookingClient({
                     {cat.available} Available Now
                   </span>
                 </div>
-                <h3 className="text-3xl font-heading font-black text-white mb-2 leading-tight tracking-tight" style={{textShadow: '0 2px 12px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,1)'}}>
+                <h3 className="text-3xl font-heading font-black mb-2 leading-tight tracking-tight" style={{color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,1)'}}>
                   {cat.type}
                 </h3>
                 <p className="text-white/70 font-light text-sm mb-6 leading-relaxed max-w-md">
