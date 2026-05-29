@@ -127,7 +127,7 @@ export default async function PreBookingWindow() {
             <div className="flex items-center justify-center gap-3">
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
               <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
-                Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
+                Book <span className="text-[#B88F54] font-extrabold gold-shimmer">your</span> Stay
               </p>
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
             </div>

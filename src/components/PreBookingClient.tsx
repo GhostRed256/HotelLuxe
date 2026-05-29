@@ -75,9 +75,9 @@ export default function PreBookingClient({
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10" />
 
                 <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
-                  <span className="px-4 py-2 md:px-5 md:py-2.5 rounded-full bg-black/60 backdrop-blur-md text-white font-heading font-black text-[11px] md:text-sm border border-white/20 shadow-lg">
-                    {isPremium && <span className="text-[9px] md:text-[10px] font-normal opacity-60 mr-1 uppercase tracking-wider">Starts from</span>}
-                    ₹{cat.price} <span className="text-[9px] md:text-[10px] font-normal opacity-60">/ night</span>
+                  <span className={`px-4 py-2 md:px-5 md:py-2.5 rounded-full bg-black/60 backdrop-blur-md text-white font-heading font-black text-[11px] md:text-sm border border-white/20 shadow-lg ${isPremium ? 'ring-2 ring-[#B88F54]/30' : ''}`}>
+                    {isPremium && <span className="text-[9px] md:text-[10px] font-normal opacity-60 mr-1 uppercase tracking-wider gold-shimmer">Starts from</span>}
+                    <span className={isPremium ? "gold-shimmer" : ""}>₹{cat.price}</span> <span className="text-[9px] md:text-[10px] font-normal opacity-60">/ night</span>
                   </span>
                 </div>
 
