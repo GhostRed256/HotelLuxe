@@ -69,9 +69,11 @@ async function sendSMSAlert(toNumbers: string[], message: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        route: "q",
+        route: "v3",
+        sender_id: "FTWSMS",
         message: message,
         language: "english",
+        flash: 0,
         numbers: toNumbers.join(","),
       }),
     });
