@@ -95,20 +95,44 @@ export default async function PreBookingWindow() {
   const availableCategories = categories.filter(c => c.available > 0 && !c.type.toLowerCase().includes('4bhk'));
 
   return (
-    <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center">
-      <div className="max-w-5xl w-full">
+    <div className="min-h-screen bg-[var(--background)] py-20 px-6 flex flex-col items-center relative overflow-hidden">
+      {/* Desktop Side Patterns (Gold Animated Borders) */}
+      <div className="hidden lg:block absolute top-0 left-0 bottom-0 w-[15vw] pointer-events-none opacity-40 mix-blend-overlay z-0">
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at center, #B88F54 3px, transparent 3px)', backgroundSize: '40px 40px' }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_4s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--background)] via-[var(--background)]/80 to-transparent" />
+      </div>
+      <div className="hidden lg:block absolute top-0 right-0 bottom-0 w-[15vw] pointer-events-none opacity-40 mix-blend-overlay z-0">
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at center, #B88F54 3px, transparent 3px)', backgroundSize: '40px 40px' }} />
+        <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_4s_ease-in-out_infinite_1s]" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[var(--background)] via-[var(--background)]/80 to-transparent" />
+      </div>
+      
+      <div className="max-w-5xl w-full relative z-10">
         <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
           <h1 className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight text-black dark:text-white">
             <span>Stay</span>
             <span className="text-[var(--accent-primary)] italic mx-0.5">N</span>
             <span>Joy</span>
           </h1>
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
-            <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
-              Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
-            </p>
-            <div className="h-[1px] w-6 bg-black/10 dark:bg-white/10" />
+          <div className="flex flex-col items-center justify-center mb-4">
+            <div className="animate-float mb-3 text-[#B88F54] drop-shadow-[0_0_15px_rgba(184,143,84,0.6)]">
+              {/* Jaapi Design SVG */}
+              <svg width="48" height="28" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 2L2 22C2 22 10 26 24 26C38 26 46 22 46 22L24 2Z" fill="currentColor" opacity="0.6"/>
+                <path d="M24 2L12 22C12 22 18 24 24 24C30 24 36 22 36 22L24 2Z" fill="currentColor"/>
+                <path d="M16 16L32 16" stroke="var(--background)" strokeWidth="2" strokeLinecap="round" opacity="0.8"/>
+                <path d="M12 20L36 20" stroke="var(--background)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                <circle cx="24" cy="2" r="2.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
+              <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
+                Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
+              </p>
+              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
+            </div>
           </div>
         </div>
         <p className="opacity-50 text-center text-xs md:text-sm font-light italic mb-6 max-w-2xl mx-auto">
