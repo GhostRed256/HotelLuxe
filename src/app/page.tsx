@@ -52,13 +52,10 @@ export default async function PreBookingWindow() {
         id: r.id
       });
     } else {
-      // Always pick the minimum price for the "Starts from" label
+      // Find the minimum price but DON'T override images/description 
+      // as the first room usually has the best assets.
       if (Number(r.price) < Number(uniqueCategories[existingIndex].price)) {
         uniqueCategories[existingIndex].price = r.price;
-        // Optionally update other fields to match the cheapest room if desired
-        uniqueCategories[existingIndex].id = r.id;
-        uniqueCategories[existingIndex].description = r.description;
-        uniqueCategories[existingIndex].images = r.images;
       }
     }
   }

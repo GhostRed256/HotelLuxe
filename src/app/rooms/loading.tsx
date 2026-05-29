@@ -13,7 +13,7 @@ export default function RoomsLoading() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="rounded-3xl border border-[var(--border-color)] overflow-hidden bg-[var(--card-bg)]">
-                            <div className="aspect-[16/10] bg-[var(--foreground)]/5 animate-pulse" />
+                            <div className="aspect-[16/10] bg-[#B88F54]/5 animate-pulse" />
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between">
                                     <div className="h-6 w-32 bg-[var(--foreground)]/5 rounded animate-pulse" />

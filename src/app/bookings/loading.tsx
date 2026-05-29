@@ -10,7 +10,7 @@ export default function BookingsLoading() {
                 <div className="space-y-6">
                     {[...Array(3)].map((_, i) => (
                         <div key={i} className="p-8 rounded-3xl border border-[var(--border-color)] bg-[var(--card-bg)] flex flex-col md:flex-row gap-8 items-center">
-                            <div className="w-full md:w-32 aspect-square rounded-2xl bg-[var(--foreground)]/5 animate-pulse" />
+                            <div className="w-full md:w-32 aspect-square rounded-2xl bg-[#B88F54]/5 animate-pulse" />
                             <div className="flex-1 space-y-4 w-full">
                                 <div className="flex justify-between">
                                     <div className="h-6 w-40 bg-[var(--foreground)]/5 rounded animate-pulse" />
