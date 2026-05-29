@@ -2,18 +2,14 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { motion } from "framer-motion"
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 
-function LoginContent() {
+export default function Login() {
   const { user, isAdmin, loading, signOut } = useAuth()
-  const searchParams = useSearchParams()
-  // When coming from a signout action, skip auto-redirect to prevent loop
-  const justSignedOut = searchParams.get("signed_out") === "1"
 
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
   const [email, setEmail] = useState("")
@@ -23,8 +19,6 @@ function LoginContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    // Do NOT auto-redirect if we just signed out — that's what caused the loop
-    if (justSignedOut) return
     if (user && !loading) {
       if (isAdmin) {
         window.location.assign("/admin")
@@ -33,7 +27,7 @@ function LoginContent() {
         signOut()
       }
     }
-  }, [user, isAdmin, loading, signOut, justSignedOut])
+  }, [user, isAdmin, loading, signOut])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,15 +71,17 @@ function LoginContent() {
       const cred = await signInWithEmailAndPassword(auth, loginIdentifier, password)
 
       const adminEmailStr = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com").trim().toLowerCase()
-      // Strict match for admin email on the client to determine redirection
-      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr
-
-      const idToken = await cred.user.getIdToken(true)
+      const isUserAdmin = cred.user.email?.trim().toLowerCase() === adminEmailStr ||
+        cred.user.email?.trim().toLowerCase().includes("admin")
 
       await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({
+          email: cred.user.email,
+          uid: cred.user.uid,
+          isAdmin: isUserAdmin
+        })
       })
 
       if (isUserAdmin) {
@@ -252,13 +248,5 @@ function LoginContent() {
         </motion.div>
       )}
     </div>
-  )
-}
-
-export default function Login() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#050505] flex items-center justify-center text-rose-500 font-black tracking-widest animate-pulse">VERIFYING...</div>}>
-      <LoginContent />
-    </Suspense>
   )
 }

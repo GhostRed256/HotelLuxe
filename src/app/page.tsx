@@ -39,7 +39,7 @@ export default async function PreBookingWindow() {
   // Group rooms by type only so we have exactly 3 categories (Cozy Pink Room, Deluxe Room, Premium Suite)
   const uniqueCategories: any[] = [];
   const seen = new Set();
-  
+
   for (const r of rooms) {
     const key = r.type;
     if (!seen.has(key)) {
@@ -56,26 +56,26 @@ export default async function PreBookingWindow() {
 
   const categories = uniqueCategories.map(cat => {
     const typeRooms = rooms.filter((r: any) => r.type === cat.type && Number(r.price) === Number(cat.price));
-    
+
     let img = "";
     try {
       const imgs = typeof cat.images === 'string' ? JSON.parse(cat.images) : (cat.images || []);
       img = imgs?.[0] || "";
     } catch { img = ""; }
-    
+
     if (!img) {
       const t = cat.type.toLowerCase();
       img = t.includes("cozy") ? "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800"
         : t.includes("deluxe") ? "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=800"
-        : t.includes("1bhk") ? "https://images.unsplash.com/photo-1560185016-6c3717c37668?auto=format&fit=crop&q=80&w=800"
-        : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800";
+          : t.includes("1bhk") ? "https://images.unsplash.com/photo-1560185016-6c3717c37668?auto=format&fit=crop&q=80&w=800"
+            : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800";
     }
 
     const availableCount = typeRooms.filter((r: any) => {
-      return !bookings.some(b => 
-        b.roomId === r.id && 
+      return !bookings.some(b =>
+        b.roomId === r.id &&
         b.status === 'APPROVED' &&
-        new Date(b.checkIn) <= new Date() && 
+        new Date(b.checkIn) <= new Date() &&
         new Date(b.checkOut) >= new Date()
       );
     }).length;
@@ -107,7 +107,7 @@ export default async function PreBookingWindow() {
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#B88F54]/30 to-transparent animate-[pulse_4s_ease-in-out_infinite_1s]" />
         <div className="absolute inset-0 bg-gradient-to-l from-[var(--background)] via-[var(--background)]/80 to-transparent" />
       </div>
-      
+
       <div className="max-w-5xl w-full relative z-10">
         <div className="text-center mb-10 select-none animate-in fade-in slide-in-from-top-4 duration-1000">
           <h1 className="text-5xl md:text-8xl font-heading font-black mb-6 tracking-tight text-black dark:text-white">
@@ -116,15 +116,13 @@ export default async function PreBookingWindow() {
             <span>Joy</span>
           </h1>
           <div className="flex flex-col items-center justify-center mb-4">
-            <div className="animate-float mb-3 text-[#B88F54] drop-shadow-[0_0_15px_rgba(184,143,84,0.6)]">
-              {/* Jaapi Design SVG */}
-              <svg width="48" height="28" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M24 2L2 22C2 22 10 26 24 26C38 26 46 22 46 22L24 2Z" fill="currentColor" opacity="0.6"/>
-                <path d="M24 2L12 22C12 22 18 24 24 24C30 24 36 22 36 22L24 2Z" fill="currentColor"/>
-                <path d="M16 16L32 16" stroke="var(--background)" strokeWidth="2" strokeLinecap="round" opacity="0.8"/>
-                <path d="M12 20L36 20" stroke="var(--background)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-                <circle cx="24" cy="2" r="2.5" fill="currentColor"/>
-              </svg>
+            <div className="animate-float mb-3">
+              {/* Jaapi Image replaces original SVG for consistency */}
+              <img
+                src="/jaapi.png"
+                alt="Assamese Jaapi"
+                className="w-16 h-auto drop-shadow-[0_0_15px_rgba(184,143,84,0.6)] mix-blend-normal"
+              />
             </div>
             <div className="flex items-center justify-center gap-3">
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
@@ -153,15 +151,15 @@ export default async function PreBookingWindow() {
           </a>
         </div>
 
-        <PreBookingClient 
-          categories={availableCategories} 
-          rooms={rooms} 
-          bookings={bookings} 
+        <PreBookingClient
+          categories={availableCategories}
+          rooms={rooms}
+          bookings={bookings}
         />
 
         <div className="mt-20 pt-8 border-t border-black/10 dark:border-white/10 flex justify-center">
-          <Link 
-            href="/staff-login" 
+          <Link
+            href="/staff-login"
             className="flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-rose-500/60 hover:text-rose-500 transition-colors"
           >
             <ShieldCheck size={16} />
