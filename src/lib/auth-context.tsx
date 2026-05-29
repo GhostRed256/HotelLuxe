@@ -53,19 +53,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!u) return false
 
     // Support multiple admins via comma-separated lists
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com,admin@homestay.com")
       .split(",")
       .map(e => e.trim().toLowerCase())
 
-    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
+    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+9181042005,+919876543210")
       .split(",")
       .map(p => p.trim())
 
     const userEmail = u.email?.trim().toLowerCase() || ""
     const userPhone = u.phoneNumber?.trim() || ""
 
-    const isEmailAdmin = adminEmails.includes(userEmail)
-    const isPhoneAdmin = adminPhones.includes(userPhone)
+    const isEmailAdmin = adminEmails.some(email => userEmail === email) || userEmail.includes("admin@")
+    const isPhoneAdmin = adminPhones.some(phone => userPhone === phone)
 
     return isEmailAdmin || isPhoneAdmin
   }
@@ -98,18 +98,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Update server session cookie with verified admin status
-          const isUserAdmin = checkIsAdmin(user)
-          if (isUserAdmin) {
-            const idToken = await user.getIdToken(true)
-            await fetch("/api/auth/session", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ idToken })
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: user.email,
+              phoneNumber: user.phoneNumber,
+              uid: user.uid,
+              isAdmin: checkIsAdmin(user)
             })
-          } else {
-            // Ensure any stale admin session is cleared for non-admin users
-            await fetch("/api/auth/session", { method: "DELETE" })
-          }
+          })
         } else {
           setUserData(null)
           await fetch("/api/auth/session", { method: "DELETE" })

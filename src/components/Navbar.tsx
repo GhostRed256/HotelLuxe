@@ -97,10 +97,7 @@ export default function Navbar() {
                     Staff
                   </button>
                   <button
-                    onClick={async () => {
-                      await signOut()
-                      window.location.assign("/staff-login")
-                    }}
+                    onClick={() => signOut()}
                     className={`text-[9px] font-bold tracking-[0.2em] uppercase transition-colors ${scrolled ? "text-rose-500 hover:text-rose-600" : "text-[#1A0811] hover:text-rose-600 dark:text-rose-400"}`}
                   >
                     Sign Out
@@ -173,14 +170,18 @@ export default function Navbar() {
               </>
             ) : user ? (
               <>
+                <Link href="/bookings" onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black uppercase text-black dark:text-white hover:text-[var(--accent-primary)] transition-colors">My Stays</Link>
                 <button
                   onClick={async () => {
                     await signOut()
                     setMobileMenuOpen(false)
                     window.location.assign("/staff-login")
                   }}
-                  className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity"
-                >Sign Out</button>
+                  className="text-left text-[12px] font-black uppercase text-rose-500/80 hover:text-rose-500 transition-colors"
+                >
+                  Staff Portal
+                </button>
+                <button onClick={() => { signOut(); setMobileMenuOpen(false); }} className="text-left text-[12px] font-black uppercase text-black dark:text-white opacity-80 hover:opacity-100 transition-opacity">Sign Out</button>
               </>
             ) : (
               <>

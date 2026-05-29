@@ -116,18 +116,20 @@ export default async function PreBookingWindow() {
             <span>Joy</span>
           </h1>
           <div className="flex flex-col items-center justify-center mb-4">
-            <div className="animate-float mb-3">
-              {/* Jaapi Image replaces original SVG for consistency */}
+            <div className="animate-float mb-3 text-[#B88F54] drop-shadow-[0_0_20px_rgba(184,143,84,0.6)]">
+              {/* Jaapi Image Design */}
               <img
                 src="/jaapi.png"
-                alt="Assamese Jaapi"
-                className="w-16 h-auto drop-shadow-[0_0_15px_rgba(184,143,84,0.6)] mix-blend-normal"
+                alt="Jaapi Design"
+                width={80}
+                height={80}
+                className="w-20 md:w-24 h-auto drop-shadow-[0_10px_15px_rgba(184,143,84,0.4)]"
               />
             </div>
             <div className="flex items-center justify-center gap-3">
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
               <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
-                Book <span className="text-[#B88F54] font-extrabold gold-shimmer">your</span> Stay
+                Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
               </p>
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
             </div>

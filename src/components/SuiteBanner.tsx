@@ -15,31 +15,31 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
 
   // Group by type - pick one representative per type
   const suiteTypes = ["Cozy Pink Room", "Deluxe Room", "Premium Suite", "2BHK House"]
-  
+
   const categories = suiteTypes.map(type => {
     const typeRooms = rooms.filter((r: any) => r.type === type)
     if (typeRooms.length === 0) return null
     const rep = typeRooms[0]
-    
+
     let img = ""
     try {
       const imgs = typeof rep.images === 'string' ? JSON.parse(rep.images) : (rep.images || [])
       img = imgs?.[0] || ""
     } catch { img = "" }
-    
+
     if (!img) {
       const t = type.toLowerCase()
       img = t.includes("cozy") ? "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800"
         : t.includes("deluxe") ? "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=800"
-        : t.includes("1bhk") ? "https://images.unsplash.com/photo-1560185016-6c3717c37668?auto=format&fit=crop&q=80&w=800"
-        : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800"
+          : t.includes("1bhk") ? "https://images.unsplash.com/photo-1560185016-6c3717c37668?auto=format&fit=crop&q=80&w=800"
+            : "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800"
     }
 
     const availableCount = typeRooms.filter((r: any) => {
-      return !bookings.some(b => 
-        b.roomId === r.id && 
+      return !bookings.some(b =>
+        b.roomId === r.id &&
         b.status === 'APPROVED' &&
-        new Date(b.checkIn) <= new Date() && 
+        new Date(b.checkIn) <= new Date() &&
         new Date(b.checkOut) >= new Date()
       )
     }).length
@@ -77,7 +77,7 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
             </motion.h2>
             <p className="opacity-50 font-light text-lg italic">Scroll to explore our curated categories.</p>
           </div>
-          
+
           {/* Navigation Arrows */}
           <div className="hidden md:flex gap-3">
             <button
@@ -96,7 +96,7 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
         </div>
 
         {/* Horizontal Scroll Tiles */}
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-8 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -113,22 +113,24 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
               <Link href={`/rooms?suite=${encodeURIComponent(cat.type)}`} className="block group">
                 <div className="relative h-[50vh] md:h-[60vh] rounded-3xl overflow-hidden border border-white/5 bg-black">
                   {/* Background Image */}
-                  <img 
-                    src={cat.image} 
+                  <img
+                    src={cat.image}
                     alt={cat.type}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[4000ms]"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "low"}
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  
+
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                   {/* Availability Badge */}
                   <div className="absolute top-6 left-6 flex gap-3">
-                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase backdrop-blur-xl border ${
-                      cat.available > 0 
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20' 
+                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase backdrop-blur-xl border ${cat.available > 0
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20'
                         : 'bg-rose-500/20 text-rose-300 border-rose-500/20'
-                    }`}>
+                      }`}>
                       {cat.available > 0 ? `${cat.available} Available` : 'Fully Booked'}
                     </span>
                   </div>

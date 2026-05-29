@@ -24,7 +24,7 @@ async function validateAdminSession() {
 export async function logoutAdmin() {
   const cookieStore = await cookies()
   cookieStore.delete("admin_session")
-  redirect("/staff-login")
+  redirect("/login")
 }
 
 // Convert file to base64 data URI for Firestore storage

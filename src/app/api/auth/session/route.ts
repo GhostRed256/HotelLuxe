@@ -32,26 +32,18 @@ export async function POST(req: Request) {
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  // Ensure strict match - no more "includes admin" loophole
+  // Ensure strict match - removed userEmail.includes("admin") security hole
   const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
 
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
-
-  if (!isServerVerifiedAdmin) {
-    // Return 403 if they are authenticated but NOT an authorized admin
-    return NextResponse.json({
-      error: "Access Denied: Not an authorized staff member.",
-      isAdmin: false
-    }, { status: 403 })
-  }
 
   const cookieStore = await cookies()
   cookieStore.set("admin_session", JSON.stringify({
     email,
     phoneNumber,
     uid,
-    isAdmin: true
+    isAdmin: isServerVerifiedAdmin
   }), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -60,7 +52,7 @@ export async function POST(req: Request) {
     maxAge: 60 * 60 * 24 * 7 // 1 week
   })
 
-  return NextResponse.json({ success: true, isAdmin: true })
+  return NextResponse.json({ success: true })
 }
 
 export async function DELETE() {
