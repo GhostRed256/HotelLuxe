@@ -96,7 +96,7 @@ export async function sendBookingEmail({
       </h2>
       
       <p style="color: #4A3B42; font-size: 16px; line-height: 1.6;">
-        Dear <strong>${isAdminReview ? 'Admin' : customerName}</strong>,<br><br>
+        Dear <strong>${customerName}</strong>,<br><br>
         ${isAdminReview
       ? `A new booking request has been received for <strong>${roomName}</strong>. Please review the details below.`
       : isApproved
