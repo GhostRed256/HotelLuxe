@@ -2,14 +2,14 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
-export default function Login() {
+function LoginContent() {
   const { user, isAdmin, loading, signOut } = useAuth()
   const searchParams = useSearchParams()
   // When coming from a signout action, skip auto-redirect to prevent loop
@@ -253,6 +253,13 @@ export default function Login() {
           </div>
         </motion.div>
       )}
-    </div>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050505] flex items-center justify-center text-rose-500 font-black tracking-widest animate-pulse">VERIFYING...</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
