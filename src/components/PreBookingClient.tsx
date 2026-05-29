@@ -51,7 +51,7 @@ export default function PreBookingClient({
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
               />
               
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10" />
 
               {/* Price Tag */}
               <div className="absolute top-6 right-6 z-10">
@@ -71,7 +71,7 @@ export default function PreBookingClient({
                     {cat.available} Available Now
                   </span>
                 </div>
-                <h3 className="text-3xl font-heading font-black text-white mb-2 leading-tight tracking-tight">
+                <h3 className="text-3xl font-heading font-black text-white mb-2 leading-tight tracking-tight" style={{textShadow: '0 2px 12px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,1)'}}>
                   {cat.type}
                 </h3>
                 <p className="text-white/70 font-light text-sm mb-6 leading-relaxed max-w-md">
