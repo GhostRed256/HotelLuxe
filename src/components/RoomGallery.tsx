@@ -22,21 +22,37 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
   // Check if room is booked
   const isRoomBooked = (roomId: string) => {
-    return bookings?.some(b =>
-      b.roomId === roomId &&
+    const isBooked = (id: string) => bookings?.some(b =>
+      b.roomId === id &&
       new Date(b.checkIn) <= new Date() &&
       new Date(b.checkOut) >= new Date()
     )
+
+    const IT1_1BHK = 'Ne0oPUF4KDRdp0bG5ogj'
+    const IT2_2BHK = 'GJh1ksOcIVhs12SixISd'
+    const IT3_3BHK = 'f3fJhWTuCDGwhxlxIQaD'
+    const HOUSE_4BHK = '6rluzPaGTH1YT0kYfj0T'
+
+    if (roomId === HOUSE_4BHK) {
+      if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true;
+    }
+    if (roomId === IT3_3BHK) {
+      if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true;
+    }
+    if (roomId === IT2_2BHK) {
+      if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true;
+    }
+    if (roomId === IT1_1BHK) {
+      if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true;
+    }
+
+    return isBooked(roomId);
   }
 
   useEffect(() => {
     const suiteParam = searchParams.get("suite")
     if (suiteParam && displayRooms.length > 0) {
       const matchingRoom = displayRooms.find((r: any) => {
-        if (suiteParam.startsWith("2BHK_")) {
-          const [typePrefix, expectedPrice] = suiteParam.split("_");
-          return r.type === "2BHK House" && Number(r.price) === Number(expectedPrice) && !isRoomBooked(r.id);
-        }
         return r.type === suiteParam && !isRoomBooked(r.id);
       })
       if (matchingRoom) {
@@ -86,9 +102,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       if (filterType === "Cozy Pink Room") return r.type === "Cozy Pink Room"
       if (filterType === "Deluxe Room") return r.type === "Deluxe Room"
       if (filterType === "Premium Suite") return r.type === "Premium Suite"
-      if (filterType === "2BHK_2700") return r.type === "2BHK House" && Number(r.price) === 2700
-      if (filterType === "2BHK_3600") return r.type === "2BHK House" && Number(r.price) === 3600
-      if (filterType === "2BHK_4400") return r.type === "2BHK House" && Number(r.price) === 4400
+      if (filterType === "4BHK House") return r.type === "4BHK House"
       return r.type === filterType
     })
 
@@ -279,10 +293,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 <option value="ALL">All Suite Types</option>
                 <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
                 <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
-                <option value="Premium Suite">Premium Suite {"\u20B9"}2200</option>
-                <option value="2BHK_2700">2BHK House {"\u20B9"}2700</option>
-                <option value="2BHK_3600">2BHK House {"\u20B9"}3600</option>
-                <option value="2BHK_4400">2BHK House {"\u20B9"}4400</option>
+                <option value="Premium Suite">Premium Suite</option>
+                <option value="4BHK House">4BHK House {"\u20B9"}5400</option>
               </select>
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>

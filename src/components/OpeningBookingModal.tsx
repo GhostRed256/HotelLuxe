@@ -47,11 +47,31 @@ export default function OpeningBookingModal({
 
   // Check if room is booked
   const isRoomBooked = (roomId: string) => {
-    return bookings?.some(b =>
-      b.roomId === roomId &&
+    const isBooked = (id: string) => bookings?.some(b =>
+      b.roomId === id &&
       new Date(b.checkIn) <= new Date() &&
       new Date(b.checkOut) >= new Date()
     )
+
+    const IT1_1BHK = 'Ne0oPUF4KDRdp0bG5ogj'
+    const IT2_2BHK = 'GJh1ksOcIVhs12SixISd'
+    const IT3_3BHK = 'f3fJhWTuCDGwhxlxIQaD'
+    const HOUSE_4BHK = '6rluzPaGTH1YT0kYfj0T'
+
+    if (roomId === HOUSE_4BHK) {
+      if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true;
+    }
+    if (roomId === IT3_3BHK) {
+      if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true;
+    }
+    if (roomId === IT2_2BHK) {
+      if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true;
+    }
+    if (roomId === IT1_1BHK) {
+      if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true;
+    }
+
+    return isBooked(roomId);
   }
 
   // Filter physical rooms for category
