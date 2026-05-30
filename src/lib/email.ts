@@ -39,7 +39,9 @@ export async function sendBookingEmail({
   checkOut,
   status,
   price,
-  bookingId
+  bookingId,
+  upiTxnId,
+  paymentScreenshot
 }: {
   to: string | string[],
   subject: string,
@@ -49,7 +51,9 @@ export async function sendBookingEmail({
   checkOut: string,
   status: string,
   price?: number,
-  bookingId?: string
+  bookingId?: string,
+  upiTxnId?: string,
+  paymentScreenshot?: string
 }) {
   const isApproved = status === "APPROVED" || status === "APPROVED (Manual)";
   const isAdminReview = status === "PENDING_OWNER_REVIEW";
@@ -98,10 +102,10 @@ export async function sendBookingEmail({
       <p style="color: #4A3B42; font-size: 16px; line-height: 1.6;">
         Dear <strong>${isAdminReview ? 'Admin' : customerName}</strong>,<br><br>
         ${isAdminReview
-      ? `A new booking request has been received for <strong>${roomName}</strong>. Please review the details below.`
+      ? `A new booking request has been received for <strong>${roomName}</strong>. The guest has provided a ₹300 booking fee via UPI. <strong>Please verify the payment in your bank account before authorizing the stay.</strong>`
       : isApproved
-        ? `Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
-        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it.`}
+        ? `Great news! Your payment has been verified and your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
+        : `We have received your reservation request and the ₹300 booking fee for <strong>${roomName}</strong>. Our team is currently verifying the payment. You will receive a final confirmation email once the verification is complete.`}
       </p>
       
       ${calendarLinkHtml}
@@ -126,6 +130,18 @@ export async function sendBookingEmail({
             <td style="padding: 8px 0; color: #D14D7E; font-weight: bold;">₹${price || 'N/A'}</td>
           </tr>
         </table>
+
+        ${(upiTxnId || paymentScreenshot) ? `
+          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(209, 77, 126, 0.1);">
+            <h4 style="color: #D14D7E; margin-top: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Payment Proof</h4>
+            ${upiTxnId ? `<p style="margin: 5px 0; font-size: 14px; color: #4A3B42;"><strong>Transaction ID:</strong> <span style="font-family: monospace;">${upiTxnId}</span></p>` : ""}
+            ${paymentScreenshot ? `
+              <p style="margin: 10px 0;">
+                <a href="${paymentScreenshot}" style="color: #D14D7E; font-size: 13px; font-weight: bold; text-decoration: underline;">View Uploaded Screenshot Proof</a>
+              </p>
+            ` : ""}
+          </div>
+        ` : ""}
       </div>
 
       ${isAdminReview ? `

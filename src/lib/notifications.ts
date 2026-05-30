@@ -127,7 +127,9 @@ export async function notifyNewBooking(booking: {
         checkIn: booking.checkIn,
         checkOut: booking.checkOut,
         status: "PENDING",
-        price: totalPrice
+        price: totalPrice,
+        upiTxnId: booking.upiTxnId,
+        paymentScreenshot: (booking as any).paymentScreenshot
       }).catch(err => console.error("Error notifying customer via email:", err))
     );
   }
@@ -143,7 +145,9 @@ export async function notifyNewBooking(booking: {
       checkOut: booking.checkOut,
       status: "PENDING_OWNER_REVIEW",
       price: totalPrice,
-      bookingId: booking.id
+      bookingId: booking.id,
+      upiTxnId: booking.upiTxnId,
+      paymentScreenshot: (booking as any).paymentScreenshot
     }).catch(err => console.error("Error notifying owner via email:", err))
   );
 

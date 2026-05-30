@@ -198,7 +198,7 @@ function AdminBookingsTableInner({ bookings }: { bookings: any[] }) {
                           disabled={isPending}
                           className="flex-1 md:flex-none px-6 py-4 md:py-2 border border-emerald-500/20 md:border-0 rounded-xl md:rounded-none bg-emerald-500/10 md:bg-transparent text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 text-center active:scale-95"
                         >
-                          Authorize
+                          Approve
                         </button>
                         <button
                           onClick={() => handleAction(b.id, 'REJECTED')}

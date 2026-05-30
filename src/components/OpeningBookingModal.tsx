@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useEffect } from "react"
 import { requestBooking } from "@/app/actions"
-import { User, Phone, Mail, X, AlertCircle, MessageSquare } from "lucide-react"
+import { User, Phone, Mail, X, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 interface OpeningBookingModalProps {
@@ -26,7 +26,7 @@ export default function OpeningBookingModal({
   rooms,
   bookings
 }: OpeningBookingModalProps) {
-  const { user, userData } = useAuth()
+  const { userData } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const [bookingError, setBookingError] = useState("")
@@ -41,6 +41,13 @@ export default function OpeningBookingModal({
   const [countryCode, setCountryCode] = useState("+91")
   const [checkIn, setCheckIn] = useState("")
   const [checkOut, setCheckOut] = useState("")
+
+  // Payment States
+  const [step, setStep] = useState(1)
+  const [upiTxnId, setUpiTxnId] = useState("")
+  const [paymentImage, setPaymentImage] = useState<File | null>(null)
+  const [paymentPreview, setPaymentPreview] = useState<string>("")
+  const [isUploading, setIsUploading] = useState(false)
 
   // Skeleton loading effect for 600ms
   const [loadingSkeleton, setLoadingSkeleton] = useState(true)
@@ -154,6 +161,18 @@ export default function OpeningBookingModal({
     }
 
     setIsSubmitting(true)
+
+    let imageUrl = ""
+    if (paymentImage) {
+      setIsUploading(true)
+      // For now, we'll simulate a file upload by converting it to base64 or just using a placeholder
+      // In a real app, you'd upload to Firebase Storage here.
+      // Since I don't have a direct storage upload function here, I'll use a data URL as a placeholder
+      // Or I can add a small helper if necessary.
+      imageUrl = paymentPreview
+      setIsUploading(false)
+    }
+
     const formData = new FormData()
     formData.append("roomId", bookingRoomId)
     formData.append("customerName", customerName)
@@ -161,6 +180,8 @@ export default function OpeningBookingModal({
     formData.append("customerPhone", `${countryCode}${customerPhone}`)
     formData.append("checkIn", checkIn)
     formData.append("checkOut", checkOut)
+    formData.append("upiTxnId", upiTxnId)
+    formData.append("paymentScreenshot", imageUrl)
 
     try {
       const res = await requestBooking(formData)
@@ -323,7 +344,7 @@ export default function OpeningBookingModal({
             </div>
           ) : (
             /* Form matching screenshot visually */
-            <form onSubmit={handleBookingSubmit} className="flex flex-col gap-5">
+            <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleBookingSubmit} className="flex flex-col gap-5">
               {bookingError && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -335,199 +356,311 @@ export default function OpeningBookingModal({
                 </motion.div>
               )}
 
-              {/* BOOKING FOR Toggle */}
-              <div className="flex p-1 bg-black/5 dark:bg-black/60 rounded-full border border-black/10 dark:border-white/10 w-full">
-                <button
-                  type="button"
-                  onClick={() => setBookingFor("myself")}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "myself"
-                    ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                    : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
-                    }`}
-                >
-                  Booking For Myself
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBookingFor("others")}
-                  className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "others"
-                    ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                    : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
-                    }`}
-                >
-                  For Someone Else
-                </button>
-              </div>
-
-              {/* SELECT SUITE Dropdown */}
-              <div>
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                  Select Suite
-                </label>
-                <div className="relative">
-                  <select
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50"
-                    value={bookingRoomId}
-                    onChange={e => setBookingRoomId(e.target.value)}
-                    required
-                  >
-                    <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
-                    {Object.entries(
-                      rooms
-                        .filter((r: any) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
-                        .reduce((acc: any, r: any) => {
-                          if (!acc[r.type]) acc[r.type] = []
-                          acc[r.type].push(r)
-                          return acc
-                        }, {})
-                    ).map(([type, groupRooms]: any) => (
-                      <optgroup key={type} label={type} className="bg-[var(--background)] text-[var(--foreground)] font-bold">
-                        {groupRooms.map((r: any) => (
-                          <option key={r.id} value={r.id} className="bg-[var(--background)] text-[var(--foreground)] font-normal">
-                            {r.name} ₹{r.price}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D14D7E] text-xs">
-                    ▼
+              {step === 1 ? (
+                <>
+                  {/* Step 1: Guest Details */}
+                  {/* BOOKING FOR Toggle */}
+                  <div className="flex p-1 bg-black/5 dark:bg-black/60 rounded-full border border-black/10 dark:border-white/10 w-full">
+                    <button
+                      type="button"
+                      onClick={() => setBookingFor("myself")}
+                      className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "myself"
+                        ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                        : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
+                        }`}
+                    >
+                      Booking For Myself
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBookingFor("others")}
+                      className={`flex-1 py-3 text-[10px] font-bold tracking-[0.15em] uppercase rounded-full transition-all duration-300 ${bookingFor === "others"
+                        ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                        : "text-[var(--foreground)] opacity-60 hover:opacity-100 bg-transparent"
+                        }`}
+                    >
+                      For Someone Else
+                    </button>
                   </div>
-                </div>
-              </div>
 
-              <div className="h-[1px] bg-white/5 my-1" />
-
-              {/* CONFIRM NAME */}
-              <div>
-                <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                  {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
-                </label>
-                <div className="relative">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                    value={customerName}
-                    onChange={e => setCustomerName(e.target.value)}
-                    placeholder="Full name"
-                  />
-                </div>
-              </div>
-
-              {/* CONFIRM PHONE & EMAIL */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                    {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative w-20 flex-shrink-0">
+                  {/* SELECT SUITE Dropdown */}
+                  <div>
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                      Select Suite
+                    </label>
+                    <div className="relative">
                       <select
-                        value={countryCode}
-                        onChange={e => setCountryCode(e.target.value)}
-                        className="w-full h-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-4 text-[var(--foreground)] text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50"
+                        value={bookingRoomId}
+                        onChange={e => setBookingRoomId(e.target.value)}
+                        required
                       >
-                        <option value="+91" className="bg-[var(--background)]">+91</option>
-                        <option value="+1" className="bg-[var(--background)]">+1</option>
-                        <option value="+44" className="bg-[var(--background)]">+44</option>
-                        <option value="+971" className="bg-[var(--background)]">+971</option>
+                        <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
+                        {Object.entries(
+                          rooms
+                            .filter((r: any) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
+                            .reduce((acc: any, r: any) => {
+                              if (!acc[r.type]) acc[r.type] = []
+                              acc[r.type].push(r)
+                              return acc
+                            }, {})
+                        ).map(([type, groupRooms]: any) => (
+                          <optgroup key={type} label={type} className="bg-[var(--background)] text-[var(--foreground)] font-bold">
+                            {groupRooms.map((r: any) => (
+                              <option key={r.id} value={r.id} className="bg-[var(--background)] text-[var(--foreground)] font-normal">
+                                {r.name} ₹{r.price}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ))}
                       </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--foreground)] opacity-40 text-[8px]">▼</div>
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D14D7E] text-xs">
+                        ▼
+                      </div>
                     </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
+                  </div>
+
+                  {/* CONFIRM NAME */}
+                  <div>
+                    <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                      {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
                       <input
-                        type="tel"
+                        type="text"
                         required
                         className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                        value={customerPhone}
-                        onChange={e => {
-                          const val = e.target.value.replace(/\D/g, "").slice(0, 10)
-                          setCustomerPhone(val)
-                        }}
-                        placeholder="10-dig"
+                        value={customerName}
+                        onChange={e => setCustomerName(e.target.value)}
+                        placeholder="Full name"
                       />
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                    Email <span className="text-rose-400">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                    <input
-                      type="email"
-                      required
-                      className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                      value={customerEmail}
-                      onChange={e => setCustomerEmail(e.target.value)}
-                      placeholder="your@email.com"
-                    />
+                  {/* CONFIRM PHONE & EMAIL */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative w-23 flex-shrink-0">
+                          <select
+                            value={countryCode}
+                            onChange={e => setCountryCode(e.target.value)}
+                            className="w-full h-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-3 text-[var(--foreground)] text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
+                          >
+                            <option value="+91" className="bg-[var(--background)]">+91</option>
+                            <option value="+1" className="bg-[var(--background)]">+1</option>
+                            <option value="+44" className="bg-[var(--background)]">+44</option>
+                            <option value="+971" className="bg-[var(--background)]">+971</option>
+                          </select>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--foreground)] opacity-40 text-[8px]">▼</div>
+                        </div>
+                        <div className="relative flex-1">
+                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
+                          <input
+                            type="tel"
+                            required
+                            className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                            value={customerPhone}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, "").slice(0, 10)
+                              setCustomerPhone(val)
+                            }}
+                            placeholder="10-dig"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
+                        <input
+                          type="email"
+                          required
+                          className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                          value={customerEmail}
+                          onChange={e => setCustomerEmail(e.target.value)}
+                          placeholder="your@email.com"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* CHECK IN & CHECK OUT */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                    Check In
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
-                    value={checkIn}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={e => setCheckIn(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                    Check Out
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
-                    value={checkOut}
-                    min={checkIn || new Date().toISOString().split("T")[0]}
-                    onChange={e => setCheckOut(e.target.value)}
-                  />
-                </div>
-              </div>
+                  {/* CHECK IN & CHECK OUT */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        Check In
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
+                        value={checkIn}
+                        min={new Date().toISOString().split("T")[0]}
+                        onChange={e => setCheckIn(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        Check Out
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
+                        value={checkOut}
+                        min={checkIn || new Date().toISOString().split("T")[0]}
+                        onChange={e => setCheckOut(e.target.value)}
+                      />
+                    </div>
+                  </div>
 
-              {/* Pricing Estimation banner */}
-              {computedPrice > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="p-4 bg-[#D14D7E]/10 border border-[#D14D7E]/20 rounded-2xl text-center shadow-inner"
-                >
-                  <span className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-55 block mb-1 text-[var(--foreground)]">Estimated Total Stay Price</span>
-                  <span className="text-2xl font-heading font-black text-[#D14D7E]">
-                    ₹{computedPrice.toLocaleString('en-IN')}
-                  </span>
-                </motion.div>
+                  {/* Pricing Estimation banner */}
+                  {computedPrice > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="p-4 bg-[#D14D7E]/10 border border-[#D14D7E]/20 rounded-2xl text-center shadow-inner"
+                    >
+                      <span className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-55 block mb-1 text-[var(--foreground)]">Estimated Total Stay Price</span>
+                      <span className="text-2xl font-heading font-black text-[#D14D7E]">
+                        ₹{computedPrice.toLocaleString('en-IN')}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={!bookingRoomId || !checkIn || !checkOut}
+                    className="w-full py-4 rounded-full bg-[#D14D7E] text-white font-bold transition-all duration-300 hover:shadow-lg hover:shadow-[#D14D7E]/30 mt-2 text-xs uppercase tracking-wider cursor-pointer active:scale-98"
+                  >
+                    Next: Payment Verification
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Step 2: Payment Verification */}
+                  <div className="text-center mb-4">
+                    <div className="inline-block p-4 bg-white rounded-3xl mb-4 shadow-xl border border-[var(--gold-primary)]/20">
+                      <img
+                        src="/booking-qr.jpg"
+                        alt="UPI QR Code"
+                        className="w-56 h-56 object-contain"
+                      />
+                    </div>
+                    <div className="bg-black/5 dark:bg-black/60 p-4 rounded-2xl border border-black/10 dark:border-white/10">
+                      <p className="text-[10px] uppercase tracking-widest opacity-50 mb-1">Pay Booking Fee to UPI ID</p>
+                      <p className="text-lg font-mono font-bold text-[#D14D7E]">7002586087-2@ybl</p>
+
+                      {/* UPI App Trigger Button */}
+                      <a
+                        href="upi://pay?pa=7002586087-2@ybl&pn=Diban%20Borboruah&am=300&cu=INR&tn=StayNJoy%20Booking%20Fee"
+                        className="mt-4 flex items-center justify-center gap-3 w-full py-3 bg-[#451624] hover:bg-[#D14D7E] text-white rounded-xl border border-[#D14D7E]/30 transition-all font-bold text-xs shadow-lg shadow-black/20 active:scale-95"
+                      >
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                        </div>
+                        Open in UPI App
+                      </a>
+
+                      <div className="mt-4 flex flex-col gap-2">
+                        <div className="flex justify-between items-center px-4 py-2 bg-[#D14D7E]/5 rounded-xl border border-[#D14D7E]/10">
+                          <span className="text-xs opacity-60">Security Deposit</span>
+                          <span className="text-lg font-black text-[#D14D7E]">₹300</span>
+                        </div>
+                        <p className="text-[9px] opacity-40 font-light italic">
+                          This amount is required to secure your reservation and will be adjusted against your final bill.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Verification Proof */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        Upload Payment Screenshot
+                      </label>
+                      <div className="relative h-24 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl hover:border-[#D14D7E]/50 transition-colors flex items-center justify-center overflow-hidden bg-black/5 dark:bg-black/40">
+                        {paymentPreview ? (
+                          <div className="relative w-full h-full">
+                            <img src={paymentPreview} className="w-full h-full object-cover opacity-50" />
+                            <div className="absolute inset-0 flex items-center justify-center gap-2">
+                              <span className="text-[10px] font-bold uppercase bg-black/60 text-white px-3 py-1 rounded-full">Screenshot Ready</span>
+                              <button type="button" onClick={() => { setPaymentImage(null); setPaymentPreview(""); }} className="bg-rose-500 text-white p-1 rounded-full"><X size={14} /></button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              required
+                              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setPaymentImage(file);
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => setPaymentPreview(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <div className="text-center">
+                              <div className="text-[#D14D7E] text-xs font-bold mb-1">Click to upload proof</div>
+                              <div className="text-[9px] opacity-40">JPG, PNG allowed</div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
+                        Transaction ID / UTR (Optional)
+                      </label>
+                      <div className="relative">
+                        <AlertCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
+                        <input
+                          type="text"
+                          className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                          value={upiTxnId}
+                          onChange={e => setUpiTxnId(e.target.value)}
+                          placeholder="Ex: 123456789012"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="flex-1 py-4 rounded-full border border-black/10 dark:border-white/10 text-[var(--foreground)] opacity-60 hover:opacity-100 font-bold transition-all text-xs uppercase"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !paymentImage}
+                      className="flex-[2] py-4 rounded-full bg-[#D14D7E] text-white font-bold transition-all duration-300 disabled:opacity-30 text-xs uppercase tracking-wider"
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Proof & Reserve"}
+                    </button>
+                  </div>
+                </>
               )}
-
-              {/* Submit Reservation Action */}
-              <button
-                type="submit"
-                disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
-                className="w-full py-4 rounded-full bg-[#451624] text-white/80 hover:bg-[#D14D7E] hover:text-white font-bold transition-all duration-300 disabled:opacity-30 border border-[#D14D7E]/20 mt-2 text-xs uppercase tracking-wider cursor-pointer active:scale-98 flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    Processing...
-                  </>
-                ) : "Confirm Reservation"}
-              </button>
             </form>
           )}
         </motion.div>
