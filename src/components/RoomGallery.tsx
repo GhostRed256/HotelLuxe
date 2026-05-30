@@ -742,13 +742,24 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                             </div>
                           </div>
 
-                          <button
-                            type="submit"
-                            disabled={isSubmitting || (!upiTxnId && !paymentScreenshot)}
-                            className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 mt-2 text-[8px] sm:text-[10px]"
-                          >
-                            {isSubmitting ? "Confirming Reservation..." : "Submit Reservation with Payment Proof"}
-                          </button>
+                          <div className="flex flex-col gap-3 mt-2">
+                            <button
+                              type="submit"
+                              disabled={isSubmitting || (!upiTxnId && !paymentScreenshot)}
+                              className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 text-[8px] sm:text-[10px]"
+                            >
+                              {isSubmitting ? "Confirming Reservation..." : "Submit Reservation with Payment Proof"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => handleBookingSubmit(e as any)}
+                              disabled={isSubmitting}
+                              className="text-[9px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity py-2"
+                            >
+                              Having trouble? Submit for Manual Review
+                            </button>
+                          </div>
 
                           <p className="text-[9px] text-center opacity-30 font-light leading-relaxed">
                             Your booking will be confirmed once our team verifies the payment.

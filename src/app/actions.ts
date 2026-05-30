@@ -11,7 +11,7 @@ export async function requestBooking(formData: FormData) {
   const phone = formData.get("customerPhone") as string
   const checkIn = formData.get("checkIn") as string
   const checkOut = formData.get("checkOut") as string
-  
+
   // Retrieve payment transaction details if present (from the step 2 demo payment)
   const upiTxnId = formData.get("upiTxnId") as string || ""
   const paymentScreenshot = formData.get("paymentScreenshot") as string || ""
@@ -19,6 +19,8 @@ export async function requestBooking(formData: FormData) {
   try {
     const roomDoc = await db.collection("rooms").doc(roomId).get()
     const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
+
+    const paymentStatus: "PAID" | "PENDING" = (upiTxnId || paymentScreenshot) ? "PAID" : "PENDING"
 
     const bookingData = {
       roomId,
@@ -28,6 +30,7 @@ export async function requestBooking(formData: FormData) {
       checkIn,
       checkOut,
       status: "PENDING",
+      paymentStatus,
       upiTxnId,
       paymentScreenshot,
       createdAt: new Date(),
@@ -35,7 +38,7 @@ export async function requestBooking(formData: FormData) {
     }
 
     const docRef = await db.collection("bookings").add(bookingData)
-    
+
     // Call the notifications orchestrator to alert both guest and owners
     await notifyNewBooking(
       { id: docRef.id, ...bookingData },

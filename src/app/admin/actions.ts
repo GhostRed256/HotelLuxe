@@ -214,14 +214,18 @@ export async function createManualBooking(formData: FormData) {
   const checkIn = formData.get("checkIn") as string
   const checkOut = formData.get("checkOut") as string
 
+  const customerPhone = formData.get("customerPhone") as string
+
   try {
     const docRef = await db.collection("bookings").add({
       roomId,
       customerName,
       customerEmail,
+      customerPhone,
       checkIn,
       checkOut,
       status: "APPROVED",
+      paymentStatus: "MANUAL",
       createdAt: new Date(),
       updatedAt: new Date()
     })

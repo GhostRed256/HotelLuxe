@@ -100,6 +100,7 @@ export async function notifyNewBooking(booking: {
   checkIn: string;
   checkOut: string;
   upiTxnId?: string;
+  paymentStatus?: "PAID" | "PENDING" | "MANUAL";
 }, room: { name: string; price: number }) {
   const ownerEmails = getOwnerEmails();
   const ownerPhones = getOwnerPhones();
@@ -129,7 +130,8 @@ export async function notifyNewBooking(booking: {
         status: "PENDING",
         price: totalPrice,
         upiTxnId: booking.upiTxnId,
-        paymentScreenshot: (booking as any).paymentScreenshot
+        paymentScreenshot: (booking as any).paymentScreenshot,
+        paymentStatus: booking.paymentStatus
       }).catch(err => console.error("Error notifying customer via email:", err))
     );
   }
@@ -147,7 +149,8 @@ export async function notifyNewBooking(booking: {
       price: totalPrice,
       bookingId: booking.id,
       upiTxnId: booking.upiTxnId,
-      paymentScreenshot: (booking as any).paymentScreenshot
+      paymentScreenshot: (booking as any).paymentScreenshot,
+      paymentStatus: booking.paymentStatus
     }).catch(err => console.error("Error notifying owner via email:", err))
   );
 

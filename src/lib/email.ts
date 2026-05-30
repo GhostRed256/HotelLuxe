@@ -41,7 +41,8 @@ export async function sendBookingEmail({
   price,
   bookingId,
   upiTxnId,
-  paymentScreenshot
+  paymentScreenshot,
+  paymentStatus
 }: {
   to: string | string[],
   subject: string,
@@ -53,7 +54,8 @@ export async function sendBookingEmail({
   price?: number,
   bookingId?: string,
   upiTxnId?: string,
-  paymentScreenshot?: string
+  paymentScreenshot?: string,
+  paymentStatus?: "PAID" | "PENDING" | "MANUAL"
 }) {
   const isApproved = status === "APPROVED" || status === "APPROVED (Manual)";
   const isAdminReview = status === "PENDING_OWNER_REVIEW";
@@ -102,10 +104,14 @@ export async function sendBookingEmail({
       <p style="color: #4A3B42; font-size: 16px; line-height: 1.6;">
         Dear <strong>${isAdminReview ? 'Admin' : customerName}</strong>,<br><br>
         ${isAdminReview
-      ? `A new booking request has been received for <strong>${roomName}</strong>. The guest has provided a ₹300 booking fee via UPI. <strong>Please verify the payment in your bank account before authorizing the stay.</strong>`
+      ? (paymentStatus === "MANUAL"
+        ? `A manual booking has been recorded for <strong>${roomName}</strong>. This was added directly by the administrator.`
+        : paymentStatus === "PENDING"
+          ? `A new booking request has been received for <strong>${roomName}</strong>. The guest has opted for <strong>Manual/Offline verification</strong>. Please verify the payment before authorizing.`
+          : `A new booking request has been received for <strong>${roomName}</strong>. The guest has provided a ₹300 booking fee via UPI. <strong>Please verify the payment in your bank account before authorizing the stay.</strong>`)
       : isApproved
-        ? `Great news! Your payment has been verified and your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
-        : `We have received your reservation request and the ₹300 booking fee for <strong>${roomName}</strong>. Our team is currently verifying the payment. You will receive a final confirmation email once the verification is complete.`}
+        ? `Great news! Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
+        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing your details. ${paymentStatus === 'PAID' ? 'We are verifying your ₹300 booking fee.' : 'You will receive a final confirmation email shortly.'}`}
       </p>
       
       ${calendarLinkHtml}
@@ -168,6 +174,26 @@ export async function sendBookingEmail({
     </div>
   `;
 
+  // Attachment handling
+  const attachments: any[] = [];
+  if (paymentScreenshot && paymentScreenshot.includes("base64,")) {
+    try {
+      const parts = paymentScreenshot.split("base64,");
+      const mimeMatch = parts[0].match(/data:(.*?);/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const base64Data = parts[1];
+      const extension = mimeType.split("/")[1] || "jpg";
+
+      attachments.push({
+        filename: `payment_proof_${displayBookingId}.${extension}`,
+        content: Buffer.from(base64Data, "base64"),
+        contentType: mimeType,
+      });
+    } catch (e) {
+      console.error("Error creating email attachment:", e);
+    }
+  }
+
   // 1. Try sending via SMTP if configured
   if (transporter && smtpUser) {
     try {
@@ -176,6 +202,7 @@ export async function sendBookingEmail({
         to: Array.isArray(to) ? to.join(", ") : to,
         subject: subject,
         html: emailHtml,
+        attachments: attachments.length > 0 ? attachments : undefined,
       };
 
       const info = await transporter.sendMail(mailOptions);
@@ -195,6 +222,10 @@ export async function sendBookingEmail({
         to: Array.isArray(to) ? to : [to],
         subject: subject,
         html: emailHtml,
+        attachments: attachments.length > 0 ? attachments.map(a => ({
+          filename: a.filename,
+          content: a.content,
+        })) : undefined,
       });
       console.log(`Email request sent to Resend for ${to}. ID: ${data.data?.id}`);
       if (data.error) {

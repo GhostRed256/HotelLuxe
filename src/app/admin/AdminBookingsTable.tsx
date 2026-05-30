@@ -13,6 +13,7 @@ interface BookingRow {
   checkIn: string
   checkOut: string
   status: string
+  paymentStatus?: "PAID" | "PENDING" | "MANUAL"
   upiTxnId?: string
   paymentScreenshot?: string
   room: { name: string }
@@ -199,6 +200,11 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
                       'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                     }`}>
                     {b.status}
+                    <span className="opacity-40 text-[9px] font-bold block mt-1 tracking-widest text-[#B88F54]">
+                      {b.paymentStatus === 'PAID' ? '✓ PAID ONLINE' :
+                        b.paymentStatus === 'MANUAL' ? '⌨ MANUALLY ADDED' :
+                          '❗ PAYMENT PENDING'}
+                    </span>
                   </span>
                 </td>
                 <td className="p-5 md:p-6 md:text-right block md:table-cell bg-white/5 md:bg-transparent">
