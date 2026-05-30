@@ -1,16 +1,15 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import { useState, useMemo, useRef, useEffect, Suspense, useCallback } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useState, useMemo, useRef, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { requestBooking } from "@/app/actions"
 import RoomCard from "./RoomCard"
-import { ChevronLeft, ChevronRight, User, Phone, Mail, Upload, ArrowLeft, QrCode, IndianRupee, ShieldCheck, Copy, Check } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, Phone, Mail, Upload, ArrowLeft, IndianRupee, ShieldCheck, Copy, Check } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any[], bookings?: any[] }) {
-  const { user, userData } = useAuth()
-  const router = useRouter()
+  const { userData } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState("")
   const [selectedContact, setSelectedContact] = useState("9181042005")
@@ -18,11 +17,34 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const scrollRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
 
-  // Exclude 4BHK HOUSE — it's a virtual combo of the 3 sub-units, not directly bookable
-  const displayRooms = (rooms.length > 0 ? rooms : []).filter((r: any) => !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
+  // 1. Primitive States
+  const [filterType, setFilterType] = useState("ALL")
+  const [bookingRoomId, setBookingRoomId] = useState("")
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [checkIn, setCheckIn] = useState("")
+  const [checkOut, setCheckOut] = useState("")
+  const [bookingFor, setBookingFor] = useState<"myself" | "others">("myself")
+  const [customerName, setCustomerName] = useState("")
+  const [customerPhone, setCustomerPhone] = useState("")
+  const [customerEmail, setCustomerEmail] = useState("")
+  const [countryCode, setCountryCode] = useState("+91")
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1)
+  const [upiTxnId, setUpiTxnId] = useState("")
+  const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(null)
+  const [paymentFileName, setPaymentFileName] = useState("")
+  const [copiedUpi, setCopiedUpi] = useState(false)
+  const [bookingError, setBookingError] = useState("")
 
-  // Check if room is booked
-  const isRoomBooked = (roomId: string) => {
+  const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || "staynjoy@okaxis"
+  const DEPOSIT_AMOUNT = 300
+
+  // 2. Constants & Pure Functions
+  const displayRooms = useMemo(() =>
+    (rooms.length > 0 ? rooms : []).filter((r: any) =>
+      !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk')
+    ), [rooms])
+
+  const isRoomBooked = useCallback((roomId: string) => {
     const isBooked = (id: string) => bookings?.some(b =>
       b.roomId === id &&
       new Date(b.checkIn) <= new Date() &&
@@ -48,55 +70,11 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     }
 
     return isBooked(roomId);
-  }
+  }, [bookings])
 
-  useEffect(() => {
-    const suiteParam = searchParams.get("suite")
-    if (suiteParam && displayRooms.length > 0) {
-      const matchingRoom = displayRooms.find((r: any) => {
-        return r.type === suiteParam && !isRoomBooked(r.id);
-      })
-      if (matchingRoom) {
-        // Wait a beat for the page to settle
-        const timer = setTimeout(() => openBookingModal(matchingRoom), 500)
-        return () => clearTimeout(timer)
-      }
-    }
-  }, [searchParams, displayRooms])
-
-  // Filters
-  const [filterType, setFilterType] = useState("ALL")
-
-  // Booking modal state
-  const [bookingSuiteType, setBookingSuiteType] = useState("")
-  const [bookingRoomId, setBookingRoomId] = useState("")
-  const [showBookingModal, setShowBookingModal] = useState(false)
-
-  const [checkIn, setCheckIn] = useState("")
-  const [checkOut, setCheckOut] = useState("")
-
-  // Form Field States for dynamic auto-fill
-  const [bookingFor, setBookingFor] = useState<"myself" | "others">("myself")
-  const [customerName, setCustomerName] = useState("")
-  const [customerPhone, setCustomerPhone] = useState("")
-  const [customerEmail, setCustomerEmail] = useState("")
-  const [countryCode, setCountryCode] = useState("+91")
-
-  // Multi-step booking flow
-  const [bookingStep, setBookingStep] = useState<1 | 2>(1)
-
-  // UPI payment state
-  const [upiTxnId, setUpiTxnId] = useState("")
-  const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(null)
-  const [paymentFileName, setPaymentFileName] = useState("")
-  const [copiedUpi, setCopiedUpi] = useState(false)
-  const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || "staynjoy@okaxis"
-  const DEPOSIT_AMOUNT = 300
-
-  // Unique types and floors for filters
+  // 3. Memos depending on states/funcs
   const suiteTypes = useMemo(() => [...new Set(displayRooms.map((r: any) => r.type))].sort(), [displayRooms])
 
-  // Filtered rooms — AVAILABLE FIRST, then booked
   const filteredRooms = useMemo(() => {
     const filtered = displayRooms.filter((r: any) => {
       if (filterType === "ALL") return true
@@ -106,20 +84,16 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       return r.type === filterType
     })
 
-    // Sort: available rooms first
     return filtered.sort((a: any, b: any) => {
       const aBooked = isRoomBooked(a.id) ? 1 : 0
       const bBooked = isRoomBooked(b.id) ? 1 : 0
       return aBooked - bBooked
     })
-  }, [displayRooms, filterType, bookings])
+  }, [displayRooms, filterType, isRoomBooked])
 
-  // Rooms available for booking modal selection
   const availableRoomsForBooking = useMemo(() => {
-    return displayRooms.filter((r: any) => {
-      return !isRoomBooked(r.id)
-    })
-  }, [displayRooms, bookings])
+    return displayRooms.filter((r: any) => !isRoomBooked(r.id))
+  }, [displayRooms, isRoomBooked])
 
   const selectedRoomPrice = useMemo(() => {
     const r = availableRoomsForBooking.find((r: any) => r.id === bookingRoomId)
@@ -130,28 +104,23 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     if (!checkIn || !checkOut || !selectedRoomPrice) return 0
     const d1 = new Date(checkIn)
     const d2 = new Date(checkOut)
-
-    // Defensive check for invalid dates
     if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0
-
     const diffTime = d2.getTime() - d1.getTime()
     if (diffTime <= 0) return 0
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays * (Number(selectedRoomPrice) || 0)
   }, [checkIn, checkOut, selectedRoomPrice])
 
-  const openBookingModal = (room?: any) => {
+  // 4. Modal Logic
+  const openBookingModal = useCallback((room?: any) => {
     if (room) {
-      setBookingSuiteType(room.type)
       setBookingRoomId(room.id)
     } else {
-      setBookingSuiteType("")
       setBookingRoomId("")
     }
     setCheckIn("")
     setCheckOut("")
 
-    // Initialize form with user data
     setBookingFor("myself")
     setCustomerName(userData?.displayName || "")
     const phoneOnly = userData?.phoneNumber?.replace(/^\+\d+/, "") || ""
@@ -160,18 +129,31 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     setCountryCode(code)
     setCustomerEmail(userData?.email || "")
 
-    // Reset payment state
     setBookingStep(1)
     setUpiTxnId("")
     setPaymentScreenshot(null)
     setPaymentFileName("")
     setCopiedUpi(false)
-
     setBookingError("")
     setShowBookingModal(true)
     setSuccessMsg("")
-  }
+  }, [userData])
 
+  // 5. Effects
+  useEffect(() => {
+    const suiteParam = searchParams.get("suite")
+    if (suiteParam && displayRooms.length > 0) {
+      const matchingRoom = displayRooms.find((r: any) => {
+        return r.type === suiteParam && !isRoomBooked(r.id);
+      })
+      if (matchingRoom) {
+        const timer = setTimeout(() => openBookingModal(matchingRoom), 500)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [searchParams, displayRooms, isRoomBooked, openBookingModal])
+
+  // 6. Handlers
   const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -192,13 +174,32 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       await navigator.clipboard.writeText(UPI_ID)
       setCopiedUpi(true)
       setTimeout(() => setCopiedUpi(false), 2000)
-    } catch {
-      // fallback
-    }
+    } catch { /* fallback */ }
   }
 
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=StayNJoy&am=${DEPOSIT_AMOUNT}&cu=INR&tn=BookingDeposit`
   const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiDeepLink)}`
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!bookingRoomId) return
+    setBookingError("")
+    setIsSubmitting(true)
+
+    const formData = new FormData()
+    formData.append("roomId", bookingRoomId)
+    formData.append("customerName", customerName)
+    formData.append("customerEmail", customerEmail)
+    formData.append("customerPhone", `${countryCode}${customerPhone}`)
+    formData.append("checkIn", checkIn)
+    formData.append("checkOut", checkOut)
+    if (upiTxnId) formData.append("upiTxnId", upiTxnId)
+    if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot)
+
+    await requestBooking(formData)
+    setIsSubmitting(false)
+    setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
+  }
 
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -211,38 +212,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       setBookingError("Please enter a valid email address.")
       return
     }
-
-    // Skip Step 2 and submit directly
     await handleBookingSubmit(e);
-  }
-
-  const [bookingError, setBookingError] = useState("")
-
-  const handleBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!bookingRoomId) return
-    setBookingError("")
-
-    // Payment validation removed to keep it dormant/optional
-    // if (!upiTxnId && !paymentScreenshot) { ... }
-
-    setIsSubmitting(true)
-    const formData = new FormData()
-    formData.append("roomId", bookingRoomId)
-    formData.append("customerName", customerName)
-    formData.append("customerEmail", customerEmail)
-    formData.append("customerPhone", `${countryCode}${customerPhone}`)
-    formData.append("checkIn", checkIn)
-    formData.append("checkOut", checkOut)
-
-    // Append payment proof
-    if (upiTxnId) formData.append("upiTxnId", upiTxnId)
-    if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot)
-
-    await requestBooking(formData)
-    setIsSubmitting(false)
-    setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
-    // Removed auto-close so the user can interact with contact numbers
   }
 
   const scroll = (dir: "left" | "right") => {
@@ -252,7 +222,6 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     }
   }
 
-  // Split into available and booked
   const availableRooms = filteredRooms.filter((r: any) => !isRoomBooked(r.id))
   const bookedRooms = filteredRooms.filter((r: any) => isRoomBooked(r.id))
 
@@ -441,8 +410,8 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               key={num}
                               onClick={() => setSelectedContact(num)}
                               className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-300 ${selectedContact === num
-                                  ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
-                                  : "bg-white/5 text-white/50 hover:bg-white/10"
+                                ? "bg-[#D14D7E] text-white shadow-lg shadow-[#D14D7E]/20"
+                                : "bg-white/5 text-white/50 hover:bg-white/10"
                                 }`}
                             >
                               {num}

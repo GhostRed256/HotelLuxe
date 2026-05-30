@@ -1,7 +1,18 @@
 "use client"
 
+import React from "react"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
+
+// Pre-compute particle positions outside render to satisfy react-hooks/purity rule
+const LOGO_PARTICLES = [...Array(15)].map(() => ({
+  r: Math.random() * 2 + 1,
+  cx: 150 + Math.random() * 100,
+  cy: 150 + Math.random() * 100,
+  dx: `${(Math.random() - 0.5) * 250}px`,
+  dy: `${(Math.random() - 0.5) * 250}px`,
+  delay: `${Math.random() * 6}s`,
+}))
 
 export default function Logo({ className = "h-14" }: { className?: string }) {
   const { resolvedTheme } = useTheme()
@@ -105,19 +116,19 @@ export default function Logo({ className = "h-14" }: { className?: string }) {
 
       {/* Particles Layer */}
       <g className="particles-layer">
-        {[...Array(15)].map((_, i) => (
+        {LOGO_PARTICLES.map((p, i) => (
           <circle
             key={i}
             className="particle"
-            r={Math.random() * 2 + 1}
+            r={p.r}
             fill={i % 2 === 0 ? goldPrimary : accentPrimary}
-            cx={150 + Math.random() * 100}
-            cy={150 + Math.random() * 100}
+            cx={p.cx}
+            cy={p.cy}
             style={{
-              '--dx': `${(Math.random() - 0.5) * 250}px`,
-              '--dy': `${(Math.random() - 0.5) * 250}px`,
-              animationDelay: `${Math.random() * 6}s`,
-            } as any}
+              '--dx': p.dx,
+              '--dy': p.dy,
+              animationDelay: p.delay,
+            } as React.CSSProperties}
           />
         ))}
       </g>

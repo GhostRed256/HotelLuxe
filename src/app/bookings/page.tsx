@@ -21,10 +21,10 @@ export default function MyBookingsPage() {
     if (!identifier) return
     setIsLoading(true)
     setError("")
-    
+
     // Normalize input (e.g. phone to internal email)
     const normalizedEmail = normalizeGuestIdentifier(identifier)
-    
+
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 10000)
 
@@ -33,13 +33,13 @@ export default function MyBookingsPage() {
         signal: controller.signal
       })
       clearTimeout(timeoutId)
-      
+
       const data = await res.json()
-      
+
       if (!res.ok) {
         throw new Error(data.error || data.message || "Failed to fetch bookings")
       }
-      
+
       setBookings(Array.isArray(data) ? data : [])
       setSearched(true)
     } catch (err: any) {
@@ -59,7 +59,7 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     const targetIdentifier = userData?.email || user?.email
-    
+
     if (targetIdentifier && !hasAutoSearched && !isLoading) {
       // For display, we strip the internal patterns
       setInputValue(formatGuestIdentifierForDisplay(targetIdentifier))
@@ -103,8 +103,8 @@ export default function MyBookingsPage() {
             <label className="absolute -top-3 left-6 bg-[var(--background)] px-3 text-[9px] font-black tracking-[0.2em] uppercase text-[var(--accent-primary)] z-10">
               Booking Lookup
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Enter Phone Number or Email"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -112,9 +112,9 @@ export default function MyBookingsPage() {
               className="w-full bg-transparent border-none py-4 text-lg font-medium focus:ring-0 outline-none placeholder:opacity-20"
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={isLoading} 
+          <button
+            type="submit"
+            disabled={isLoading}
             className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-white p-4 rounded-xl transition-all active:scale-95 shadow-lg flex items-center justify-center min-w-[60px]"
           >
             {isLoading ? <Loader2 className="animate-spin" size={22} /> : <Search size={22} />}
@@ -149,7 +149,7 @@ export default function MyBookingsPage() {
       ) : Array.isArray(bookings) && bookings.length > 0 ? (
         <div className="flex flex-col gap-8">
           {bookings.map((booking, index) => (
-            <motion.div 
+            <motion.div
               key={booking.id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -160,12 +160,12 @@ export default function MyBookingsPage() {
                 <div>
                   <div className="flex items-center gap-3 mb-4">
                     <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase flex items-center gap-2 border
-                      ${booking.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                        booking.status === 'REJECTED' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 
-                        'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
-                      {booking.status === 'APPROVED' ? <CheckCircle size={12} /> : 
-                       booking.status === 'REJECTED' ? <XCircle size={12} /> : 
-                       <Clock size={12} />}
+                      ${booking.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                        booking.status === 'REJECTED' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                          'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
+                      {booking.status === 'APPROVED' ? <CheckCircle size={12} /> :
+                        booking.status === 'REJECTED' ? <XCircle size={12} /> :
+                          <Clock size={12} />}
                       {booking.status || "PENDING"}
                     </span>
                   </div>
@@ -181,11 +181,11 @@ export default function MyBookingsPage() {
                   </div>
                 </div>
               </div>
-              
+
               {booking.status === 'APPROVED' && (
                 <div className="mt-8 p-6 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 text-sm">
                   <p className="text-emerald-600 dark:text-emerald-400 font-medium">
-                    ✨ Your stay is confirmed! A confirmation email has been sent to {booking.customerEmail}. 
+                    ✨ Your stay is confirmed! A confirmation email has been sent to {booking.customerEmail}.
                     Please present it at check-in.
                   </p>
                 </div>
@@ -194,7 +194,7 @@ export default function MyBookingsPage() {
               {booking.status === 'PENDING' && (
                 <div className="mt-8 p-6 bg-amber-500/5 rounded-2xl border border-amber-500/10 text-sm">
                   <p className="text-amber-600 dark:text-amber-400 font-medium">
-                    ⏳ Your request is being reviewed. You'll receive an email confirmation once approved.
+                    ⏳ Your request is being reviewed. You&apos;ll receive an email confirmation once approved.
                   </p>
                 </div>
               )}

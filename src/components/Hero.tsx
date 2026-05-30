@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
@@ -12,23 +12,33 @@ const images = [
   "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=60&w=1200"
 ]
 
+// Pre-compute particle data outside render to satisfy react-hooks/purity rule
+const PARTICLE_DATA = [...Array(8)].map(() => ({
+  initY: Math.random() * 1000,
+  initX: Math.random() * 2000,
+  animY: Math.random() * -1000,
+  scale: Math.random() * 2,
+  duration: Math.random() * 10 + 10,
+  delay: Math.random() * 10,
+}))
+
 // Subtle particle effect — reduced count for mobile performance
 const Particles = ({ theme }: { theme: string | undefined }) => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden z-[5]">
-    {[...Array(8)].map((_, i) => (
+    {PARTICLE_DATA.map((p, i) => (
       <motion.div
         key={i}
-        initial={{ opacity: 0, y: Math.random() * 1000, x: Math.random() * 2000 }}
+        initial={{ opacity: 0, y: p.initY, x: p.initX }}
         animate={{
-          y: [null, Math.random() * -1000],
+          y: [null, p.animY],
           opacity: [0, theme === 'dark' ? 0.4 : 0.2, 0],
-          scale: [0, Math.random() * 2, 0]
+          scale: [0, p.scale, 0]
         }}
         transition={{
-          duration: Math.random() * 10 + 10,
+          duration: p.duration,
           repeat: Infinity,
           ease: "linear",
-          delay: Math.random() * 10
+          delay: p.delay
         }}
         className={`absolute w-1 h-1 rounded-full blur-[1px] ${theme === 'dark' ? 'bg-white' : 'bg-[var(--accent-primary)]'}`}
       />
