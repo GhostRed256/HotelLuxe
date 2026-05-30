@@ -12,7 +12,9 @@ import {
   signInWithPhoneNumber,
   PhoneAuthProvider,
   linkWithCredential,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  getMultiFactorResolver,
+  PhoneMultiFactorGenerator
 } from "firebase/auth";
 import { auth, app } from "@/lib/firebase";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
@@ -44,6 +46,8 @@ export default function LoginPage() {
   const [otpCode, setOtpCode] = useState("")
   const [otpVerificationId, setOtpVerificationId] = useState<string | null>(null)
   const [confirmationResult, setConfirmationResult] = useState<any | null>(null)
+  const [mfaResolver, setMfaResolver] = useState<any>(null)
+  const [mfaVerificationId, setMfaVerificationId] = useState<string | null>(null)
 
   // Clear reCAPTCHA widget if switching modes
   useEffect(() => {
@@ -132,6 +136,29 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error(err);
+      if (err.code === "auth/multi-factor-auth-required") {
+        const resolver = getMultiFactorResolver(auth, err);
+        setMfaResolver(resolver);
+        const hints = resolver.hints;
+
+        if (hints.length > 0) {
+          initRecaptcha();
+          const appVerifier = (window as any).recaptchaVerifier;
+          const phoneOpts = {
+            multiFactorHint: hints[0],
+            session: resolver.session
+          };
+          const provider = new PhoneAuthProvider(auth);
+          const vId = await provider.verifyPhoneNumber(phoneOpts, appVerifier);
+          setMfaVerificationId(vId);
+          setOtpStep("login_otp"); // Reusing login_otp for MFA
+          setIsSubmitting(false);
+          return;
+        } else {
+          setError("This account requires Multi-Factor Authentication, but no verified phone was found.");
+        }
+      }
+
       const msg = err.message || ""
       if (msg.includes("auth/user-not-found")) {
         setError("Account not found. Please register first.")
@@ -189,10 +216,23 @@ export default function LoginPage() {
         router.refresh();
         window.location.assign("/");
       } else if (otpStep === "login_otp") {
-        if (!confirmationResult) throw new Error("Login session lost. Please request a new code.");
+        let idToken = "";
 
-        const userCredential = await confirmationResult.confirm(otpCode);
-        const user = userCredential.user;
+        if (mfaResolver && mfaVerificationId) {
+          // Resolve MFA Challenge
+          const cred = PhoneAuthProvider.credential(mfaVerificationId, otpCode);
+          const mfaAssertion = PhoneMultiFactorGenerator.assertion(cred);
+          const userCredential = await mfaResolver.resolveSignIn(mfaAssertion);
+          idToken = await userCredential.user.getIdToken(true);
+        } else if (confirmationResult) {
+          // Standard Phone Login
+          const userCredential = await confirmationResult.confirm(otpCode);
+          idToken = await userCredential.user.getIdToken(true);
+        } else {
+          throw new Error("Verification session lost. Please try again.");
+        }
+
+        const user = auth.currentUser!;
 
         // Verify Firestore profile exists, create if missing
         const db = getFirestore(app);

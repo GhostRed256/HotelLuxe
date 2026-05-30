@@ -48,29 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Helper to check if a user is an admin based on environment variables
-  const checkIsAdmin = (u: User | null) => {
-    if (!u) return false
-
-    // Support multiple admins via comma-separated lists
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
-      .split(",")
-      .map(e => e.trim().toLowerCase())
-
-    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414")
-      .split(",")
-      .map(p => p.trim())
-
-    const userEmail = u.email?.trim().toLowerCase() || ""
-    const userPhone = u.phoneNumber?.trim() || ""
-
-    const isEmailAdmin = adminEmails.some(email => userEmail === email) || userEmail.includes("admin@")
-    const isPhoneAdmin = adminPhones.some(phone => userPhone === phone)
-
-    return isEmailAdmin || isPhoneAdmin
-  }
-
-  const isAdmin = checkIsAdmin(user)
+  const [serverAdmin, setServerAdmin] = useState(false)
+  const isAdmin = serverAdmin
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -99,13 +78,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Update server session cookie with verified admin status
           const idToken = await user.getIdToken()
-          await fetch("/api/auth/session", {
+          const res = await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idToken })
           })
+
+          if (res.ok) {
+            const data = await res.json()
+            if (data.isAdmin !== undefined) {
+              setServerAdmin(data.isAdmin)
+            }
+          }
         } else {
           setUserData(null)
+          setServerAdmin(false)
           await fetch("/api/auth/session", { method: "DELETE" })
         }
       } catch (err) {

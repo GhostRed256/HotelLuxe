@@ -20,22 +20,24 @@ export async function POST(req: Request) {
 
   const { email, phone_number: phoneNumber, uid } = decodedToken
 
-  // SECURITY: Independently verify admin status on the server
-  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
+  // SECURITY: Independently verify admin status on the server using non-public variables
+  const adminEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "staynjoy05@gmail.com")
     .split(",")
     .map(e => e.trim().toLowerCase())
 
-  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414")
+  const adminPhones = (process.env.ADMIN_PHONES || process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414")
     .split(",")
     .map(p => p.trim())
 
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  // Ensure strict match
+  // Ensure strict match against authorized list
   const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
 
+  // Double check custom domains only if they are explicitly part of the allowed list
+  // but we prefer the explicit inclusion for security.
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
 
   const cookieStore = await cookies()

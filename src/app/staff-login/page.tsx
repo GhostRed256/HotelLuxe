@@ -1,11 +1,17 @@
 "use client"
 
 import { useAuth } from "@/lib/auth-context"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import {
+  signInWithEmailAndPassword,
+  getMultiFactorResolver,
+  PhoneAuthProvider,
+  PhoneMultiFactorGenerator,
+  RecaptchaVerifier
+} from "firebase/auth"
 import { auth } from "@/lib/firebase"
-import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard } from "lucide-react"
+import { Lock, ShieldCheck, ArrowLeft, LogOut, LayoutDashboard, Key, ShieldAlert } from "lucide-react"
 import Link from "next/link"
 
 export default function Login() {
@@ -18,10 +24,12 @@ export default function Login() {
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Step 2: OTP Verification
+  // MFA and OTP States
+  const [mfaResolver, setMfaResolver] = useState<any>(null)
+  const [verificationId, setVerificationId] = useState<string | null>(null)
   const [otpStep, setOtpStep] = useState(false)
-  const [confirmationResult, setConfirmationResult] = useState<any>(null)
   const [otpCode, setOtpCode] = useState("")
+  const [mfaMethodHints, setMfaMethodHints] = useState<any[]>([])
 
   useEffect(() => {
     if (user && !loading) {
@@ -41,51 +49,73 @@ export default function Login() {
 
     try {
       if (loginMethod === "email") {
-        const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password)
-        const idToken = await cred.user.getIdToken(true)
+        try {
+          const cred = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password)
+          const idToken = await cred.user.getIdToken(true)
 
-        // We verify if they are actually an admin before finalizing
-        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com").split(",").map(e => e.trim().toLowerCase())
-        const isUserAdmin = adminEmails.includes(cred.user.email?.toLowerCase() || "") || cred.user.email?.toLowerCase().includes("admin@")
+          const res = await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idToken })
+          })
+          const data = await res.json()
 
-        if (!isUserAdmin) {
-          throw new Error("AUTHORIZED PERSONNEL ONLY: Your account does not have admin privileges.")
+          if (!data.success || !data.isAdmin) {
+            await auth.signOut()
+            throw new Error("UNAUTHORIZED: Your account does not have admin privileges.")
+          }
+
+          window.location.assign("/admin")
+        } catch (err: any) {
+          if (err.code === "auth/multi-factor-auth-required") {
+            // Handle MFA Challenge
+            const resolver = getMultiFactorResolver(auth, err)
+            setMfaResolver(resolver)
+
+            // Get available factors (usually just one phone)
+            const hints = resolver.hints
+            setMfaMethodHints(hints)
+
+            // Trigger SMS to the first factor
+            if (hints.length > 0) {
+              const appVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+                size: "invisible"
+              })
+
+              const phoneOpts = {
+                multiFactorHint: hints[0],
+                session: resolver.session
+              }
+
+              const provider = new PhoneAuthProvider(auth)
+              const vId = await provider.verifyPhoneNumber(phoneOpts, appVerifier)
+              setVerificationId(vId)
+              setOtpStep(true)
+            } else {
+              throw new Error("MFA_ERROR: No verification methods available for this account.")
+            }
+          } else {
+            throw err
+          }
         }
-
-        await fetch("/api/auth/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken })
-        })
-
-        window.location.assign("/admin")
       } else {
-        // Phone login - Initial request
+        // Direct Phone login (Legacy/Standard)
         const cleanPhone = phone.trim().replace(/\D/g, "")
         const formattedPhone = cleanPhone.length === 10 ? `+91${cleanPhone}` : `+${cleanPhone}`
 
-        const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "").split(",").map(p => p.trim())
-        if (!adminPhones.includes(formattedPhone)) {
-          throw new Error("ACCESS DENIED: Phone number not found in Staff Registry.")
-        }
-
-        // Initialize reCAPTCHA
-        if (!(window as any).recaptchaVerifier) {
-          const { RecaptchaVerifier } = await import("firebase/auth")
-            ; (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-              size: "invisible"
-            })
-        }
+        const appVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible"
+        })
 
         const { signInWithPhoneNumber } = await import("firebase/auth")
-        const result = await signInWithPhoneNumber(auth, formattedPhone, (window as any).recaptchaVerifier)
-        setConfirmationResult(result)
+        const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier)
+        setMfaResolver(result) // Repurposing state for consistency
         setOtpStep(true)
-        setIsSubmitting(false)
       }
     } catch (err: any) {
       console.error(err)
       setError(err.message || "INVALID CREDENTIALS: Identification failed.")
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -96,18 +126,39 @@ export default function Login() {
     setError("")
 
     try {
-      const cred = await confirmationResult.confirm(otpCode)
-      const idToken = await cred.user.getIdToken(true)
+      let idToken = ""
 
-      await fetch("/api/auth/session", {
+      if (mfaResolver && verificationId) {
+        // Resolve MFA Challenge
+        const cred = PhoneAuthProvider.credential(verificationId, otpCode)
+        const mfaAssertion = PhoneMultiFactorGenerator.assertion(cred)
+        const userCred = await mfaResolver.resolveSignIn(mfaAssertion)
+        idToken = await userCred.user.getIdToken(true)
+      } else if (mfaResolver && (mfaResolver as any).confirm) {
+        // Standard Phone Login
+        const cred = await (mfaResolver as any).confirm(otpCode)
+        idToken = await cred.user.getIdToken(true)
+      } else {
+        throw new Error("SESSION_EXPIRED: Please restart the login process.")
+      }
+
+      const res = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken })
       })
+      const data = await res.json()
+
+      if (!data.success || !data.isAdmin) {
+        await auth.signOut()
+        throw new Error("UNAUTHORIZED: Access denied by security protocol.")
+      }
 
       window.location.assign("/admin")
     } catch (err: any) {
-      setError("INVALID OTP: Verification failed.")
+      console.error(err)
+      setError(err.message || "INVALID OTP: Verification failed.")
+    } finally {
       setIsSubmitting(false)
     }
   }
