@@ -32,12 +32,8 @@ export async function POST(req: Request) {
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  // Ensure strict match against authorized list
   const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
-
-  // Double check custom domains only if they are explicitly part of the allowed list
-  // but we prefer the explicit inclusion for security.
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
 
   const cookieStore = await cookies()
@@ -51,10 +47,11 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30 // 30 days for persistence
+    maxAge: 60 * 60 * 24 * 30 // 30 days
   })
 
-  return NextResponse.json({ success: true })
+  // Return isAdmin so client-side can verify access level immediately
+  return NextResponse.json({ success: true, isAdmin: isServerVerifiedAdmin })
 }
 
 export async function DELETE() {
