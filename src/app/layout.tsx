@@ -4,6 +4,7 @@ import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stay-n-joy.vercel.app'), // Using a safe fallback or env
   title: "Stay-N-Joy | Premium Homestay Booking",
   description: "Experience world-class comfort and joy at Stay-N-Joy, Tinsukia. Book your perfect homestay — from cozy rooms to spacious 2BHK houses.",
   openGraph: {
@@ -12,11 +13,20 @@ export const metadata: Metadata = {
     siteName: "Stay-N-Joy",
     type: "website",
     locale: "en_IN",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Stay-N-Joy Palace - Luxury Homestay",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Stay-N-Joy | Premium Homestay in Tinsukia",
     description: "Book your perfect homestay — cozy rooms, deluxe suites & spacious 2BHK houses. Experience world-class comfort at Stay-N-Joy, Tinsukia.",
+    images: ["/og-image.png"],
   },
 };
 
