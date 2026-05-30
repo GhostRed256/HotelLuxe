@@ -53,11 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!u) return false
 
     // Support multiple admins via comma-separated lists
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com,admin@homestay.com")
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
       .split(",")
       .map(e => e.trim().toLowerCase())
 
-    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+9181042005,+919876543210")
+    const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414")
       .split(",")
       .map(p => p.trim())
 
@@ -98,15 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Update server session cookie with verified admin status
+          const idToken = await user.getIdToken()
           await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: user.email,
-              phoneNumber: user.phoneNumber,
-              uid: user.uid,
-              isAdmin: checkIsAdmin(user)
-            })
+            body: JSON.stringify({ idToken })
           })
         } else {
           setUserData(null)

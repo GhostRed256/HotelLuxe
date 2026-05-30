@@ -38,7 +38,7 @@ const compressImage = async (file: File): Promise<File> => {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        
+
         canvas.toBlob(
           (blob) => {
             if (blob) {
@@ -71,17 +71,17 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
   const handleSubmitRoom = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmittingRoom(true)
-    
+
     try {
       const form = e.currentTarget
       const formData = new FormData(form)
-      
+
       const fileInput = form.querySelector('input[type="file"]') as HTMLInputElement
       if (fileInput && fileInput.files) {
         const files = Array.from(fileInput.files)
         // Clear standard images
         formData.delete("images")
-        
+
         // Add compressed images
         for (const file of files) {
           if (file.size === 0) continue
@@ -89,10 +89,10 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           formData.append("images", compressed)
         }
       }
-      
+
       await addRoom(formData)
       setShowAddRoom(false)
-    } catch(err) {
+    } catch (err) {
       console.error("Error establishing suite", err)
     } finally {
       setIsSubmittingRoom(false)
@@ -111,12 +111,12 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       try {
         const min = new Date(Math.min(...bookings.map(b => new Date(b.checkIn).getTime()))).toISOString().split('T')[0]
         const approvedBookings = bookings.filter(b => b.status === 'APPROVED')
-        const max = approvedBookings.length > 0 
+        const max = approvedBookings.length > 0
           ? new Date(Math.max(...approvedBookings.map(b => new Date(b.checkOut).getTime()))).toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0]
         setCsvStartDate(min)
         setCsvEndDate(max)
-      } catch(e) {}
+      } catch (e) { }
     }
   }, [bookings])
 
@@ -126,7 +126,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
         const bIn = new Date(b.checkIn).toISOString().split('T')[0]
         if (csvStartDate && bIn < csvStartDate) return false
         if (csvEndDate && bIn > csvEndDate) return false
-      } catch(e) { return false }
+      } catch (e) { return false }
       return true
     })
 
@@ -173,7 +173,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       {showAddRoom && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-2xl z-[100] flex items-center justify-center p-4">
           <div className="glass-panel p-10 w-full max-w-2xl relative animate-in fade-in zoom-in duration-500 border-white/10">
-            <button 
+            <button
               onClick={() => setShowAddRoom(false)}
               className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors"
             >
@@ -189,7 +189,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Description</label>
                 <textarea name="description" placeholder="What makes this stay unique?" required disabled={isSubmittingRoom} className="form-input min-h-[100px]" />
               </div>
-              
+
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Price (₹)</label>
                 <input type="number" name="price" placeholder="1999" required disabled={isSubmittingRoom} className="form-input" />
@@ -222,7 +222,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-4 block">Visual Assets (Max 10)</label>
                 <input type="file" name="images" multiple accept="image/*" disabled={isSubmittingRoom} className="block w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-primary)] file:text-white hover:file:bg-[var(--accent-primary)]/80 cursor-pointer" />
               </div>
-              
+
               <button type="submit" disabled={isSubmittingRoom} className="md:col-span-2 btn-primary !py-4 mt-4 shadow-none hover:shadow-2xl flex items-center justify-center gap-2">
                 {isSubmittingRoom ? (
                   <>
@@ -245,7 +245,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           { id: "manual", label: "Manual Intake", icon: Plus },
           { id: "rooms", label: "Suite Inventory", icon: Home },
         ].map((tab) => (
-          <button 
+          <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center justify-center gap-3 px-8 py-3 rounded-xl transition-all font-bold tracking-[0.1em] uppercase text-[10px] w-full
@@ -258,7 +258,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
 
       {/* CSV Export - Positioned below the tabs selection, collapsible on both mobile and PC */}
       <div className="relative mb-12 w-full max-w-2xl animate-in fade-in duration-500">
-        <button 
+        <button
           onClick={() => setShowCsvExport(!showCsvExport)}
           className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest transition-all w-full justify-between"
         >
@@ -275,24 +275,24 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-widest opacity-35">From</span>
-                <input 
-                  type="date" 
-                  value={csvStartDate} 
-                  onChange={e => setCsvStartDate(e.target.value)} 
+                <input
+                  type="date"
+                  value={csvStartDate}
+                  onChange={e => setCsvStartDate(e.target.value)}
                   className="form-input !py-3 !pl-14 !pr-4 !text-sm w-full cursor-pointer"
                 />
               </div>
               <div className="relative flex-1">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-widest opacity-35">To</span>
-                <input 
-                  type="date" 
-                  value={csvEndDate} 
-                  onChange={e => setCsvEndDate(e.target.value)} 
+                <input
+                  type="date"
+                  value={csvEndDate}
+                  onChange={e => setCsvEndDate(e.target.value)}
                   className="form-input !py-3 !pl-12 !pr-4 !text-sm w-full cursor-pointer"
                 />
               </div>
-              <button 
-                onClick={handleExportCSV} 
+              <button
+                onClick={handleExportCSV}
                 className="flex items-center justify-center gap-2 py-3 px-8 rounded-xl bg-[var(--accent-primary)] text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
                 <Download size={13} /> Download
@@ -334,21 +334,21 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
               </div>
             </div>
             <div className="glass-panel p-10 border-white/5 bg-gradient-to-br from-white/5 to-transparent">
-               <h2 className="text-xl font-heading font-bold mb-6">Manager Notes</h2>
-               <ul className="space-y-6">
-                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
-                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">1</div>
-                   <p className="text-sm font-light italic leading-relaxed">Respond to pending requests within 12h for maximum royalty points.</p>
-                 </li>
-                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
-                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">2</div>
-                   <p className="text-sm font-light italic leading-relaxed">Manual bookings trigger immediate confirmation protocols.</p>
-                 </li>
-                 <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
-                   <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">3</div>
-                   <p className="text-sm font-light italic leading-relaxed">Maintain high resolution assets for the best suite presentation.</p>
-                 </li>
-               </ul>
+              <h2 className="text-xl font-heading font-bold mb-6">Manager Notes</h2>
+              <ul className="space-y-6">
+                <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                  <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">1</div>
+                  <p className="text-sm font-light italic leading-relaxed">Respond to pending requests within 12h for maximum royalty points.</p>
+                </li>
+                <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                  <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">2</div>
+                  <p className="text-sm font-light italic leading-relaxed">Manual bookings trigger immediate confirmation protocols.</p>
+                </li>
+                <li className="flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                  <div className="h-6 w-6 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] text-[10px] font-bold">3</div>
+                  <p className="text-sm font-light italic leading-relaxed">Maintain high resolution assets for the best suite presentation.</p>
+                </li>
+              </ul>
             </div>
           </div>
         )}

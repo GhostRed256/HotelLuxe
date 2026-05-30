@@ -1,4 +1,5 @@
-const { db } = require("./src/lib/firebase-admin");
+/* eslint-disable */
+const { db } = require("../src/lib/firebase-admin");
 
 async function listRooms() {
     const snapshot = await db.collection("rooms").get();

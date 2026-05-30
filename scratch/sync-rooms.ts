@@ -1,14 +1,6 @@
-import * as admin from 'firebase-admin'
-
-const serviceAccount = require('../serviceAccountKey.json');
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}
-
-const db = admin.firestore();
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import { db } from "@/lib/firebase-admin";
 
 const targetRooms = [
   {
@@ -129,7 +121,7 @@ async function syncRooms() {
 
   for (const r of targetRooms) {
     const { id, ...data } = r;
-    
+
     if (id.startsWith('new_')) {
       // Create a new room with a random ID or unique custom ID
       // Let's query by roomNumber first to avoid creating duplicates
@@ -176,7 +168,7 @@ async function syncRooms() {
   // Double check if any extraneous rooms exist and remove them
   const snapshot = await roomsRef.get();
   const validRoomNumbers = targetRooms.map(r => r.roomNumber);
-  
+
   for (const doc of snapshot.docs) {
     const data = doc.data();
     if (!validRoomNumbers.includes(data.roomNumber)) {

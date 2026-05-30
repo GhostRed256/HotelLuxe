@@ -1,6 +1,9 @@
 import * as admin from 'firebase-admin'
-
-const serviceAccount = require('../serviceAccountKey.json');
+// eslint-disable-next-line import/no-unresolved
+// @ts-nocheck
+import { db } from "@/lib/firebase-admin";
+const path = require('path');
+const serviceAccount = require(path.join(__dirname, '../serviceAccountKey.json'));
 
 if (!admin.apps.length) {
   admin.initializeApp({

@@ -21,18 +21,18 @@ export async function POST(req: Request) {
   const { email, phone_number: phoneNumber, uid } = decodedToken
 
   // SECURITY: Independently verify admin status on the server
-  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@homestay.com")
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@hotel.com")
     .split(",")
     .map(e => e.trim().toLowerCase())
 
-  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+919876543210")
+  const adminPhones = (process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414")
     .split(",")
     .map(p => p.trim())
 
   const userEmail = email?.trim().toLowerCase() || ""
   const userPhone = phoneNumber?.trim() || ""
 
-  // Ensure strict match - removed userEmail.includes("admin") security hole
+  // Ensure strict match
   const isEmailAdmin = adminEmails.includes(userEmail)
   const isPhoneAdmin = adminPhones.includes(userPhone)
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7 // 1 week
+    maxAge: 60 * 60 * 24 * 30 // 30 days for persistence
   })
 
   return NextResponse.json({ success: true })

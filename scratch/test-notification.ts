@@ -1,4 +1,10 @@
-require('dotenv').config({ path: '.env' });
-const { notifyNewBooking } = require('./src/lib/notifications.ts');
+/* eslint-disable */
+import { db } from "@/lib/firebase-admin";
+import { notifyNewBooking } from "@/lib/notifications";
 
-// We have to use ts-node or similar, but since we are in Next.js, let's write a simple ts wrapper or execute it using ts-node.
+async function testNotification() {
+    console.log("Testing notification system...");
+    // Add test logic if needed
+}
+
+testNotification().catch(console.error);

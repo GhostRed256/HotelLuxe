@@ -1,5 +1,7 @@
+/* eslint-disable */
 const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
+const path = require("path");
+const serviceAccount = require(path.join(__dirname, "../serviceAccountKey.json"));
 
 if (!admin.apps.length) {
     admin.initializeApp({

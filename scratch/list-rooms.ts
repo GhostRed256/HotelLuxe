@@ -1,4 +1,8 @@
-import { db } from "./src/lib/firebase-admin.js";
+// @ts-nocheck
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+// @ts-ignore
+import { db } from "@/lib/firebase-admin";
 
 async function listRooms() {
     const snapshot = await db.collection("rooms").get();
