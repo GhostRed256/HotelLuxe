@@ -1,9 +1,9 @@
 "use client"
- 
- import { useTheme } from "next-themes"
- import { useState, useEffect } from "react"
- 
- export default function Logo({ className = "h-14" }: { className?: string }) {
+
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
+
+export default function Logo({ className = "h-14" }: { className?: string }) {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -18,8 +18,8 @@
   const goldGlow = isDark ? "#FFD700" : "#B88F54"
 
   return (
-    <svg 
-      viewBox="0 0 400 400" 
+    <svg
+      viewBox="0 0 400 400"
       className={`${className} w-auto cursor-pointer transition-all duration-500 animate-entrance`}
       onClick={() => window.location.href = "/"}
       xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@
           <stop offset="60%" style={{ stopColor: goldPrimary, stopOpacity: 1 }} />
           <stop offset="100%" style={{ stopColor: goldDark, stopOpacity: 1 }} />
         </linearGradient>
-        
+
         <filter id="iconDepth" x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
           <feOffset dx="3" dy="5" result="offsetBlur" />
@@ -91,8 +91,8 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur1" />
           <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
           <feMerge result="blur">
-             <feMergeNode in="blur1" />
-             <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="blur2" />
           </feMerge>
           <feFlood floodColor={goldPrimary} floodOpacity="0.5" result="glowColor" />
           <feComposite in="glowColor" in2="blur" operator="in" result="glow" />
@@ -123,52 +123,52 @@
       </g>
 
       {/* Background Disc */}
-      <circle 
-        cx="200" cy="200" r="190" 
-        fill={isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.8)"} 
+      <circle
+        cx="200" cy="200" r="190"
+        fill={isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.8)"}
         className="transition-colors duration-700"
       />
 
       {/* Circular Borders with Pink Glow */}
       <g className="animate-glow-pink">
-        <circle 
-          cx="200" cy="200" r="185" 
-          fill="none" 
-          stroke="url(#goldGradient)" 
-          strokeWidth="8" 
+        <circle
+          cx="200" cy="200" r="185"
+          fill="none"
+          stroke="url(#goldGradient)"
+          strokeWidth="8"
         />
-        <circle 
-          cx="200" cy="200" r="170" 
-          fill="none" 
-          stroke="url(#goldGradient)" 
-          strokeWidth="3" 
+        <circle
+          cx="200" cy="200" r="170"
+          fill="none"
+          stroke="url(#goldGradient)"
+          strokeWidth="3"
           opacity="0.6"
         />
       </g>
-      
+
       {/* Icon with Pink Glow and Depth */}
       <g className="animate-glow-pink">
         {/* Minimalist House Icon */}
         <g transform="translate(160, 60) scale(0.8)" filter="url(#iconDepth)">
-          <path 
-            d="M10 50 L50 10 L90 50 L90 90 L10 90 Z" 
-            fill="none" 
-            stroke="url(#goldGradient)" 
-            strokeWidth="8" 
+          <path
+            d="M10 50 L50 10 L90 50 L90 90 L10 90 Z"
+            fill="none"
+            stroke="url(#goldGradient)"
+            strokeWidth="8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <path 
-            d="M65 25 L65 15 L75 15 L75 35" 
-            fill="none" 
-            stroke="url(#goldGradient)" 
-            strokeWidth="6" 
+          <path
+            d="M65 25 L65 15 L75 15 L75 35"
+            fill="none"
+            stroke="url(#goldGradient)"
+            strokeWidth="6"
             strokeLinecap="round"
           />
-          <rect 
-            x="35" y="60" width="30" height="30" 
-            fill="none" 
-            stroke="url(#goldGradient)" 
+          <rect
+            x="35" y="60" width="30" height="30"
+            fill="none"
+            stroke="url(#goldGradient)"
             strokeWidth="6"
           />
         </g>
@@ -177,36 +177,37 @@
       {/* Typography Group */}
       <g className="animate-glow">
 
-        {/* StayNjoy Typography */}
+        {/* StayNJoy Homestay Typography */}
         <g filter="url(#goldTextGlow)">
-          <text 
-            x="200" 
-            y="245" 
-            textAnchor="middle" 
-            className="font-heading italic font-black"
-            style={{ 
-              fontSize: "90px", 
-              fill: accentPrimary,
+          <text
+            x="200"
+            y="235"
+            textAnchor="middle"
+            className="font-heading font-black"
+            style={{
+              fontSize: "80px",
               fontFamily: "var(--font-heading), cursive",
               letterSpacing: "-4px"
             }}
           >
-            Stay
+            <tspan fill="url(#goldGradient)">Stay</tspan>
+            <tspan fill={accentPrimary} style={{ fontStyle: "italic" }}>N</tspan>
+            <tspan fill="url(#goldGradient)">Joy</tspan>
           </text>
-          
-          <text 
-            x="200" 
-            y="310" 
-            textAnchor="middle" 
-            className="font-heading italic font-black"
-            style={{ 
-              fontSize: "90px", 
-              fontFamily: "var(--font-heading), cursive",
-              letterSpacing: "-4px"
+
+          <text
+            x="200"
+            y="300"
+            textAnchor="middle"
+            className="font-heading font-medium tracking-[0.2em] uppercase"
+            style={{
+              fontSize: "24px",
+              fontFamily: "var(--font-heading), sans-serif",
+              fill: "url(#goldGradient)",
+              opacity: 0.8
             }}
           >
-            <tspan fill="url(#goldGradient)">N</tspan>
-            <tspan fill={accentPrimary}>joy</tspan>
+            Homestay
           </text>
         </g>
       </g>

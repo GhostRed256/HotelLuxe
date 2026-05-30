@@ -81,12 +81,12 @@ h6 {
   background-position: center;
 }
 
-.palace-bg {
+.homestay-bg {
   position: relative;
   background-color: var(--background);
 }
 
-.palace-bg::before {
+.homestay-bg::before {
   content: '';
   position: absolute;
   inset: 0;

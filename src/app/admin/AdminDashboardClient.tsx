@@ -163,9 +163,9 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       <div className="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
         <div>
           <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-2">
-            Palace <span className="text-[var(--accent-primary)]">Control</span>
+            Homestay <span className="text-[var(--accent-primary)]">Control</span>
           </h1>
-          <p className="opacity-50 font-light italic text-lg">Curating the royal experience for every guest.</p>
+          <p className="opacity-50 font-light italic text-lg">Curating the perfect experience for every guest.</p>
         </div>
       </div>
 
@@ -179,7 +179,8 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
             >
               <X size={24} />
             </button>
-            <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Establish <span className="text-[var(--accent-primary)]">Suite</span></h2>
+            <h1 className="text-4xl font-heading font-black mb-2">StayNJoy <span className="text-[var(--accent-primary)]">Homestay</span></h1>
+            <p className="opacity-40 text-sm font-light uppercase tracking-widest">Administrative Control Center</p>
             <form onSubmit={handleSubmitRoom} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="text-[10px] font-bold tracking-widest uppercase opacity-40 mb-2 block">Name</label>

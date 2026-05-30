@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import nodemailer from "nodemailer";
 
 /**
- * Palace Professional Email Service
+ * StayNJoy Professional Email Service
  * 
  * Supports both Nodemailer (Gmail/SMTP) and Resend.
  * For SMTP, configure SMTP_USER and SMTP_PASS in .env.
@@ -67,10 +67,10 @@ export async function sendBookingEmail({
     const endDate = new Date(checkOut).toISOString().replace(/-|:|\.\d\d\d/g, "");
     const eventParams = new URLSearchParams({
       action: 'TEMPLATE',
-      text: `StayNjoy Booking: ${roomName}`,
+      text: `StayNJoy Booking: ${roomName}`,
       dates: `${startDate}/${endDate}`,
-      details: `Your royal stay is confirmed! Booking ID: ${displayBookingId}.`,
-      location: 'StayNjoy Palace, Tinsukia, Assam',
+      details: `Your stay is confirmed! Booking ID: ${displayBookingId}.`,
+      location: 'StayNJoy Homestay, Tinsukia, Assam',
     });
     const gCalUrl = `https://calendar.google.com/calendar/render?${eventParams.toString()}`;
 
@@ -87,8 +87,8 @@ export async function sendBookingEmail({
   const emailHtml = `
     <div style="font-family: 'Outfit', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eee; border-radius: 20px; background-color: #fff;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #D14D7E; font-size: 28px; margin: 0;">StayNjoy Palace</h1>
-        <p style="color: #B88F54; font-style: italic; margin-top: 5px;">Luxury Awaits You</p>
+        <h1 style="color: #FF2D55; font-size: 28px; margin: 0;">Stay<span style="color: #B88F54; font-style: italic;">N</span>Joy Homestay</h1>
+        <p style="color: #B88F54; font-style: italic; margin-top: 5px;">A Legacy of Palatial Warmth</p>
       </div>
       
       <h2 style="color: #1A0811; font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid #D14D7E; padding-bottom: 10px;">
@@ -100,7 +100,7 @@ export async function sendBookingEmail({
         ${isAdminReview
       ? `A new booking request has been received for <strong>${roomName}</strong>. Please review the details below.`
       : isApproved
-        ? `Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our palace.`
+        ? `Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
         : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing it.`}
       </p>
       
@@ -146,7 +146,7 @@ export async function sendBookingEmail({
       <div style="text-align: center; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
         <p style="color: #999; font-size: 12px;">
           Tinsukia, Assam • +91 7002475079 | 8133819414 | 9181042005<br>
-          © 2026 StayNjoy Palace. All Rights Reserved.
+          © 2026 StayNJoy Homestay. All Rights Reserved.
         </p>
       </div>
     </div>
@@ -156,7 +156,7 @@ export async function sendBookingEmail({
   if (transporter && smtpUser) {
     try {
       const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME || 'StayNjoy Palace'}" <${smtpUser}>`,
+        from: `"${process.env.SMTP_FROM_NAME || 'StayNJoy Homestay'}" <${smtpUser}>`,
         to: Array.isArray(to) ? to.join(", ") : to,
         subject: subject,
         html: emailHtml,

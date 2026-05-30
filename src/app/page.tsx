@@ -120,6 +120,7 @@ export default async function PreBookingWindow() {
             <span>Stay</span>
             <span className="text-[var(--accent-primary)] italic mx-0.5">N</span>
             <span>Joy</span>
+            <span className="block text-2xl md:text-4xl gold-shimmer mt-2 uppercase tracking-[0.3em] font-light">Homestay</span>
           </h1>
           <div className="flex flex-col items-center justify-center mb-4">
             <div className="animate-float mb-3 text-[#B88F54] drop-shadow-[0_0_20px_rgba(184,143,84,0.6)]">

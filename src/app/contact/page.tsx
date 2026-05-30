@@ -157,7 +157,7 @@ export default function ContactPage() {
                 const phone = formData.get("phone");
                 const msg = formData.get("message");
                 const body = encodeURIComponent(`Name: ${name}\nPhone: ${phone}\n\nMessage:\n${msg}`);
-                window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=staynjoy05@gmail.com&su=StayNjoy Inquiry from ${name}&body=${body}`, '_blank');
+                window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=staynjoy05@gmail.com&su=StayNJoy Inquiry from ${name}&body=${body}`, '_blank');
               }}
             >
               <div>

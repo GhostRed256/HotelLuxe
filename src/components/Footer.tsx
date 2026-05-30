@@ -105,7 +105,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-4 text-[10px] font-bold tracking-[0.2em] uppercase opacity-40">
-            <span>© 2026 StayNjoy Palace</span>
+            <span>© 2026 StayNJoy Homestay</span>
             <span className="w-1 h-1 rounded-full bg-[var(--accent-primary)]/20" />
             <span>Tinsukia, Assam</span>
             <span className="w-1 h-1 rounded-full bg-[var(--accent-primary)]/20" />

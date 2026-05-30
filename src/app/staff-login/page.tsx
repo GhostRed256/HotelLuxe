@@ -120,7 +120,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: "#050505" }}>
       {/* Top Identity Banner */}
       <div className="fixed top-0 w-full bg-rose-600 text-white py-3 text-center text-[10px] font-black tracking-[0.4em] uppercase z-[100] shadow-2xl">
-        Official Resort Management Portal — Secure Staff Entry Only
+        Official Homestay Management Portal — Secure Staff Entry Only
       </div>
 
       {user && isAdmin ? (
@@ -319,7 +319,7 @@ export default function Login() {
           <div className="mt-10 pt-10 border-t border-white/5 text-center">
             <Link href="/" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all">
               <ArrowLeft size={14} />
-              Return to Resort
+              Return to Homestay
             </Link>
           </div>
         </motion.div>

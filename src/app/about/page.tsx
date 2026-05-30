@@ -11,11 +11,11 @@ export default function AboutPage() {
     <div className="max-w-4xl mx-auto py-20 px-8">
       <div className="glass-panel p-12 text-center">
         <h1 className="text-4xl font-bold mb-6">
-          About <span className="text-[var(--accent-primary)]">StayNjoy</span> Homestay
+          About <span className="text-[var(--accent-primary)]">StayNJoy</span> Homestay
         </h1>
         {/* ... existing content ... */}
         <p className="text-lg opacity-80 leading-relaxed mb-8">
-          Welcome to StayNjoy Homestay — your home away from home in the heart of Tinsukia, Assam.
+          Welcome to StayNJoy Homestay — your home away from home in the heart of Tinsukia, Assam.
           We offer cozy, well-maintained rooms and homes with all modern amenities for solo travelers,
           couples, families, and groups.
         </p>
@@ -70,8 +70,8 @@ export default function AboutPage() {
                   key={num}
                   onClick={() => setSelectedContact(num)}
                   className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all duration-300 border ${selectedContact === num
-                      ? "bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20"
-                      : "bg-white/5 text-[var(--foreground)]/50 border-white/10 hover:bg-white/10"
+                    ? "bg-[var(--accent-primary)] text-white border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20"
+                    : "bg-white/5 text-[var(--foreground)]/50 border-white/10 hover:bg-white/10"
                     }`}
                 >
                   {num}

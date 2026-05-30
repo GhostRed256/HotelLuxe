@@ -1,7 +1,7 @@
 import { sendBookingEmail } from "./email";
 
 /**
- * Palace Unified Notification System
+ * StayNJoy Unified Notification System
  * Orchestrates notifications to both guests and owners via Email, Telegram, and SMS.
  */
 
@@ -121,7 +121,7 @@ export async function notifyNewBooking(booking: {
     emailPromises.push(
       sendBookingEmail({
         to: booking.customerEmail,
-        subject: `Your Palace Reservation Request: ${room.name}`,
+        subject: `Your StayNJoy Reservation Request: ${room.name}`,
         customerName: booking.customerName,
         roomName: room.name,
         checkIn: booking.checkIn,
@@ -164,12 +164,12 @@ export async function notifyNewBooking(booking: {
   await sendTelegramAlert(telegramMsg);
 
   // 4. Notify Owner via SMS (Fast2SMS)
-  const ownerSmsMsg = `StayNjoy Palace Alert:\nNew request from ${booking.customerName} for ${room.name} from ${checkInDate} to ${checkOutDate}. Log in to Admin panel to verify.`;
+  const ownerSmsMsg = `StayNJoy Alert:\nNew request from ${booking.customerName} for ${room.name} from ${checkInDate} to ${checkOutDate}. Log in to Admin panel to verify.`;
   await sendSMSAlert(ownerPhones, ownerSmsMsg);
 
   // 5. Notify Customer via SMS
   if (booking.customerPhone) {
-    const customerSmsMsg = `StayNjoy: We received your booking request for ${room.name} (${checkInDate} to ${checkOutDate}). Our team is reviewing it. ID: ${booking.id?.toUpperCase().substring(0, 8) || 'PENDING'}`;
+    const customerSmsMsg = `StayNJoy: We received your booking request for ${room.name} (${checkInDate} to ${checkOutDate}). Our team is reviewing it. ID: ${booking.id?.toUpperCase().substring(0, 8) || 'PENDING'}`;
     let cleanPhone = booking.customerPhone.trim().replace(/\D/g, "");
     if (cleanPhone.length > 10) cleanPhone = cleanPhone.substring(cleanPhone.length - 10);
     await sendSMSAlert([cleanPhone], customerSmsMsg);
@@ -207,7 +207,7 @@ export async function notifyBookingStatusChange(booking: {
     emailPromises.push(
       sendBookingEmail({
         to: booking.customerEmail,
-        subject: `Your Royal Stay is ${status === 'APPROVED' ? 'Confirmed' : 'Cancelled'}`,
+        subject: `Your Homestay Experience is ${status === 'APPROVED' ? 'Confirmed' : 'Cancelled'}`,
         customerName: booking.customerName,
         roomName: room.name,
         checkIn: booking.checkIn,
@@ -247,12 +247,12 @@ export async function notifyBookingStatusChange(booking: {
   await sendTelegramAlert(telegramMsg);
 
   // 4. Notify Owner via SMS
-  const ownerSmsMsg = `StayNjoy Alert: Booking for ${booking.customerName} (${room.name}) is ${status}.`;
+  const ownerSmsMsg = `StayNJoy Alert: Booking for ${booking.customerName} (${room.name}) is ${status}.`;
   await sendSMSAlert(ownerPhones, ownerSmsMsg);
 
   // 5. Notify Customer via SMS if Approved
   if (status === "APPROVED" && booking.customerPhone) {
-    const customerSmsMsg = `StayNjoy: Your booking for ${room.name} is confirmed! Booking ID: ${bookingIdStr}. Dates: ${checkInDate} to ${checkOutDate}. Check your Email for full details.`;
+    const customerSmsMsg = `StayNJoy: Your booking for ${room.name} is confirmed! Booking ID: ${bookingIdStr}. Dates: ${checkInDate} to ${checkOutDate}. Check your Email for full details.`;
 
     let cleanPhone = booking.customerPhone.trim().replace(/\D/g, "");
     if (cleanPhone.length > 10) cleanPhone = cleanPhone.substring(cleanPhone.length - 10);

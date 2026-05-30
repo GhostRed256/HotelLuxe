@@ -8,7 +8,7 @@ import { Suspense } from "react"
 
 export default async function AdminDashboard() {
   const session = await getAdminSession()
-  
+
   if (!session || !session.isAdmin) {
     redirect("/staff-login")
   }
@@ -45,8 +45,16 @@ export default async function AdminDashboard() {
   })
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Palace Control...</div>}>
-      <AdminDashboardClient rooms={rooms} bookings={bookings} />
-    </Suspense>
+    <div className="min-h-screen bg-[var(--background)]">
+      <div className="max-w-7xl mx-auto px-8 py-20">
+        <div className="mb-12">
+          <h1 className="text-4xl font-heading font-black mb-2">StayNJoy <span className="text-[var(--accent-primary)]">Homestay</span></h1>
+          <p className="opacity-40 text-sm font-light">Administrative Control Center</p>
+        </div>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Homestay Control...</div>}>
+          <AdminDashboardClient rooms={rooms} bookings={bookings} />
+        </Suspense>
+      </div>
+    </div>
   )
 }

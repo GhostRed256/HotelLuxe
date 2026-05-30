@@ -107,7 +107,7 @@ export default function Hero() {
               transition={{ delay: 0.2 }}
             >
               <span className={`font-bold tracking-[0.5em] uppercase text-[10px] md:text-[12px] mb-8 block ${isDark ? 'text-[var(--accent-primary)]' : '!text-[#1A0811]'}`}>
-                StayNjoy • The Soul of Upper Assam
+                StayNJoy • The Soul of Upper Assam
               </span>
             </motion.div>
 

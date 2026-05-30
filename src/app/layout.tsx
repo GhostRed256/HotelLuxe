@@ -5,12 +5,12 @@ import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stay-n-joy.vercel.app'), // Using a safe fallback or env
-  title: "Stay-N-Joy | Premium Homestay Booking",
-  description: "Experience world-class comfort and joy at Stay-N-Joy, Tinsukia. Book your perfect homestay — from cozy rooms to spacious 2BHK houses.",
+  title: "StayNJoy Homestay | Premium Homestay Booking",
+  description: "Experience world-class comfort and joy at StayNJoy Homestay, Tinsukia. Book your perfect homestay — from cozy rooms to spacious 2BHK houses.",
   openGraph: {
-    title: "Stay-N-Joy | Premium Homestay in Tinsukia",
-    description: "Book your perfect homestay — cozy rooms, deluxe suites & spacious 2BHK houses. Experience world-class comfort at Stay-N-Joy, Tinsukia.",
-    siteName: "Stay-N-Joy",
+    title: "StayNJoy Homestay | Premium Homestay in Tinsukia",
+    description: "Book your perfect homestay — cozy rooms, deluxe suites & spacious 2BHK houses. Experience world-class comfort at StayNJoy Homestay, Tinsukia.",
+    siteName: "StayNJoy Homestay",
     type: "website",
     locale: "en_IN",
     images: [
@@ -18,14 +18,14 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Stay-N-Joy Palace - Luxury Homestay",
+        alt: "StayNJoy Homestay - Luxury Homestay",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stay-N-Joy | Premium Homestay in Tinsukia",
-    description: "Book your perfect homestay — cozy rooms, deluxe suites & spacious 2BHK houses. Experience world-class comfort at Stay-N-Joy, Tinsukia.",
+    title: "StayNJoy Homestay | Premium Homestay in Tinsukia",
+    description: "Book your perfect homestay — cozy rooms, deluxe suites & spacious 2BHK houses. Experience world-class comfort at StayNJoy Homestay, Tinsukia.",
     images: ["/og-image.png"],
   },
 };
