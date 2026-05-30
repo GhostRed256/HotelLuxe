@@ -6,6 +6,19 @@ import { requestBooking } from "@/app/actions"
 import { User, Phone, Mail, X, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
+interface Room {
+  id: string
+  name: string
+  type: string
+  price: number
+}
+
+interface Booking {
+  roomId: string
+  checkIn: string
+  checkOut: string
+}
+
 interface OpeningBookingModalProps {
   isOpen: boolean
   onClose: () => void
@@ -15,8 +28,8 @@ interface OpeningBookingModalProps {
     image: string
     description: string
   } | null
-  rooms: any[]
-  bookings: any[]
+  rooms: Room[]
+  bookings: Booking[]
 }
 
 export default function OpeningBookingModal({
@@ -47,13 +60,12 @@ export default function OpeningBookingModal({
   const [upiTxnId, setUpiTxnId] = useState("")
   const [paymentImage, setPaymentImage] = useState<File | null>(null)
   const [paymentPreview, setPaymentPreview] = useState<string>("")
-  const [isUploading, setIsUploading] = useState(false)
 
   // Skeleton loading effect for 600ms
   const [loadingSkeleton, setLoadingSkeleton] = useState(true)
 
   // Check if room is booked
-  const isRoomBooked = (roomId: string) => {
+  const isRoomBooked = useMemo(() => {
     const isBooked = (id: string) => bookings?.some(b =>
       b.roomId === id &&
       new Date(b.checkIn) <= new Date() &&
@@ -65,42 +77,40 @@ export default function OpeningBookingModal({
     const IT3_3BHK = 'f3fJhWTuCDGwhxlxIQaD'
     const HOUSE_4BHK = '6rluzPaGTH1YT0kYfj0T'
 
-    if (roomId === HOUSE_4BHK) {
-      if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true;
+    return (roomId: string): boolean => {
+      if (roomId === HOUSE_4BHK) {
+        if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true
+      }
+      if (roomId === IT3_3BHK) {
+        if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true
+      }
+      if (roomId === IT2_2BHK) {
+        if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true
+      }
+      if (roomId === IT1_1BHK) {
+        if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true
+      }
+      return !!isBooked(roomId)
     }
-    if (roomId === IT3_3BHK) {
-      if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true;
-    }
-    if (roomId === IT2_2BHK) {
-      if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true;
-    }
-    if (roomId === IT1_1BHK) {
-      if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true;
-    }
-
-    return isBooked(roomId);
-  }
+  }, [bookings])
 
   // Filter physical rooms for category
   const availableRoomsForCategory = useMemo(() => {
     if (!selectedCategory) return []
-    return rooms.filter((r: any) => {
+    return rooms.filter((r: Room) => {
       if (selectedCategory.type === "2BHK House") {
         return r.type === "2BHK House" && Number(r.price) === Number(selectedCategory.price) && !isRoomBooked(r.id)
       }
       return r.type === selectedCategory.type && !isRoomBooked(r.id)
     })
-  }, [selectedCategory, rooms, bookings])
+  }, [selectedCategory, rooms, isRoomBooked])
 
   const [bookingRoomId, setBookingRoomId] = useState("")
 
   // Pre-select first physical room
   useEffect(() => {
-    if (availableRoomsForCategory.length > 0) {
-      setBookingRoomId(availableRoomsForCategory[0].id)
-    } else {
-      setBookingRoomId("")
-    }
+    const firstId = availableRoomsForCategory[0]?.id ?? ""
+    setBookingRoomId(firstId)
   }, [availableRoomsForCategory])
 
   // Trigger skeleton loader on open
@@ -128,7 +138,7 @@ export default function OpeningBookingModal({
 
   // Compute pricing
   const selectedRoomPrice = useMemo(() => {
-    const r = rooms.find((r: any) => r.id === bookingRoomId)
+    const r = rooms.find((r: Room) => r.id === bookingRoomId)
     return r ? (Number(r.price) || 0) : (selectedCategory?.price || 0)
   }, [rooms, bookingRoomId, selectedCategory])
 
@@ -162,16 +172,7 @@ export default function OpeningBookingModal({
 
     setIsSubmitting(true)
 
-    let imageUrl = ""
-    if (paymentImage) {
-      setIsUploading(true)
-      // For now, we'll simulate a file upload by converting it to base64 or just using a placeholder
-      // In a real app, you'd upload to Firebase Storage here.
-      // Since I don't have a direct storage upload function here, I'll use a data URL as a placeholder
-      // Or I can add a small helper if necessary.
-      imageUrl = paymentPreview
-      setIsUploading(false)
-    }
+    const imageUrl = paymentPreview || ""
 
     const formData = new FormData()
     formData.append("roomId", bookingRoomId)
@@ -191,10 +192,8 @@ export default function OpeningBookingModal({
       } else {
         setIsSubmitting(false)
         setSuccessMsg("Reservation requested! Confirmation email is on its way.")
-        // Removed auto-close so the user can interact with contact numbers
-
       }
-    } catch (err) {
+    } catch {
       setBookingError("An unexpected error occurred. Please try again.")
       setIsSubmitting(false)
     }
@@ -398,15 +397,15 @@ export default function OpeningBookingModal({
                         <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
                         {Object.entries(
                           rooms
-                            .filter((r: any) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
-                            .reduce((acc: any, r: any) => {
+                            .filter((r: Room) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
+                            .reduce((acc: Record<string, Room[]>, r: Room) => {
                               if (!acc[r.type]) acc[r.type] = []
                               acc[r.type].push(r)
                               return acc
                             }, {})
-                        ).map(([type, groupRooms]: any) => (
+                        ).map(([type, groupRooms]) => (
                           <optgroup key={type} label={type} className="bg-[var(--background)] text-[var(--foreground)] font-bold">
-                            {groupRooms.map((r: any) => (
+                            {(groupRooms as Room[]).map((r: Room) => (
                               <option key={r.id} value={r.id} className="bg-[var(--background)] text-[var(--foreground)] font-normal">
                                 {r.name} ₹{r.price}
                               </option>
@@ -550,9 +549,10 @@ export default function OpeningBookingModal({
                   {/* Step 2: Payment Verification */}
                   <div className="text-center mb-4">
                     <div className="inline-block p-4 bg-white rounded-3xl mb-4 shadow-xl border border-[var(--gold-primary)]/20">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="/booking-qr.jpg"
-                        alt="UPI QR Code"
+                        alt="UPI QR Code — Scan to pay ₹300 booking fee"
                         className="w-56 h-56 object-contain"
                       />
                     </div>
@@ -594,7 +594,8 @@ export default function OpeningBookingModal({
                       <div className="relative h-24 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl hover:border-[#D14D7E]/50 transition-colors flex items-center justify-center overflow-hidden bg-black/5 dark:bg-black/40">
                         {paymentPreview ? (
                           <div className="relative w-full h-full">
-                            <img src={paymentPreview} className="w-full h-full object-cover opacity-50" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={paymentPreview} alt="Payment screenshot preview" className="w-full h-full object-cover opacity-50" />
                             <div className="absolute inset-0 flex items-center justify-center gap-2">
                               <span className="text-[10px] font-bold uppercase bg-black/60 text-white px-3 py-1 rounded-full">Screenshot Ready</span>
                               <button type="button" onClick={() => { setPaymentImage(null); setPaymentPreview(""); }} className="bg-rose-500 text-white p-1 rounded-full"><X size={14} /></button>

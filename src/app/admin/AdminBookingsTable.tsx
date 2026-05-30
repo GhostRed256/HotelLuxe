@@ -3,9 +3,22 @@
 import { useState, useTransition, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { updateBookingStatus, deleteBooking } from "./actions"
-import { Trash2, Phone, ExternalLink, RotateCcw } from "lucide-react"
+import { Trash2, RotateCcw } from "lucide-react"
 
-function AdminBookingsTableInner({ bookings }: { bookings: any[] }) {
+interface BookingRow {
+  id: string
+  customerName: string
+  customerEmail: string
+  customerPhone?: string
+  checkIn: string
+  checkOut: string
+  status: string
+  upiTxnId?: string
+  paymentScreenshot?: string
+  room: { name: string }
+}
+
+function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
   const searchParams = useSearchParams()
   const defaultSearch = searchParams.get('bookingId') || ""
 
@@ -151,7 +164,7 @@ function AdminBookingsTableInner({ bookings }: { bookings: any[] }) {
                                 newWindow.document.body.style.height = "100vh";
 
                                 const img = newWindow.document.createElement("img");
-                                img.src = b.paymentScreenshot;
+                                img.src = b.paymentScreenshot ?? "";
                                 img.style.maxWidth = "90%";
                                 img.style.maxHeight = "95vh";
                                 img.style.objectFit = "contain";
@@ -242,7 +255,7 @@ function AdminBookingsTableInner({ bookings }: { bookings: any[] }) {
   )
 }
 
-export default function AdminBookingsTable(props: { bookings: any[] }) {
+export default function AdminBookingsTable(props: { bookings: BookingRow[] }) {
   return (
     <Suspense fallback={<div className="p-10 text-center opacity-50">Loading Registry...</div>}>
       <AdminBookingsTableInner {...props} />
