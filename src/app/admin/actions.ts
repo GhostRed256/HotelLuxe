@@ -160,8 +160,7 @@ export async function deleteRoom(roomId: string) {
 
 export async function addEmailForReports(formData: FormData) {
   await validateAdminSession()
-  const email = formData.get("email") as string
-  console.log(`Email ${email} registered for weekly/monthly booking reports.`)
+  // This would typically involve saving to a 'notifications' collection
 }
 
 export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED", skipRevalidate = false) {

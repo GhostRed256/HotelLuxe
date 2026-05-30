@@ -44,8 +44,6 @@ async function sendTelegramAlert(message: string) {
     const data = await response.json();
     if (!data.ok) {
       console.error("Telegram Bot API Error:", data.description);
-    } else {
-      console.log("Telegram alert successfully sent to owner.");
     }
   } catch (error) {
     console.error("Failed to send Telegram alert:", error);
@@ -80,7 +78,7 @@ async function sendSMSAlert(toNumbers: string[], message: string) {
 
     const data = await response.json();
     if (data.return) {
-      console.log(`Fast2SMS alert sent to: ${toNumbers.join(", ")}. Message: ${data.message}`);
+      // Success
     } else {
       console.error("Fast2SMS API Error:", data.message || data);
     }
