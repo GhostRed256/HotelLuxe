@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useEffect } from "react"
-import { requestBooking } from "@/app/actions"
+import { requestBooking, updateBookingPayment } from "@/app/actions"
 import { User, Phone, Mail, X, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -57,6 +57,7 @@ export default function OpeningBookingModal({
 
   // Payment States
   const [step, setStep] = useState(1)
+  const [currentBookingId, setCurrentBookingId] = useState<string | null>(null)
   const [upiTxnId, setUpiTxnId] = useState("")
   const [paymentImage, setPaymentImage] = useState<File | null>(null)
   const [paymentPreview, setPaymentPreview] = useState<string>("")
@@ -152,27 +153,24 @@ export default function OpeningBookingModal({
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) * selectedRoomPrice
   }, [checkIn, checkOut, selectedRoomPrice])
 
-  const handleBookingSubmit = async (e: React.FormEvent) => {
+  // SUBMIT STEP 1: Create initial booking
+  const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!bookingRoomId) {
       setBookingError("Please select a physical suite.")
       return
     }
-    setBookingError("")
-
     if (customerPhone.length !== 10) {
       setBookingError("Please enter a valid 10-digit phone number.")
       return
     }
-
     if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
       setBookingError("Please enter a valid email address.")
       return
     }
 
     setIsSubmitting(true)
-
-    const imageUrl = paymentPreview || ""
+    setBookingError("")
 
     const formData = new FormData()
     formData.append("roomId", bookingRoomId)
@@ -181,20 +179,41 @@ export default function OpeningBookingModal({
     formData.append("customerPhone", `${countryCode}${customerPhone}`)
     formData.append("checkIn", checkIn)
     formData.append("checkOut", checkOut)
-    formData.append("upiTxnId", upiTxnId)
-    formData.append("paymentScreenshot", imageUrl)
+    formData.append("paymentStatus", "PENDING") // Initial save
 
     try {
       const res = await requestBooking(formData)
       if (res && res.error) {
         setBookingError(res.error)
         setIsSubmitting(false)
-      } else {
+      } else if (res && res.bookingId) {
+        setCurrentBookingId(res.bookingId)
         setIsSubmitting(false)
-        setSuccessMsg("Reservation requested! Confirmation email is on its way.")
+        setStep(2)
       }
     } catch {
-      setBookingError("An unexpected error occurred. Please try again.")
+      setBookingError("Connection error. Please try again.")
+      setIsSubmitting(false)
+    }
+  }
+
+  // SUBMIT STEP 2: Update with payment info
+  const handleStep2Submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentBookingId) return
+
+    setIsSubmitting(true)
+    try {
+      const res = await updateBookingPayment(currentBookingId, upiTxnId, paymentPreview || "")
+      if (res.error) {
+        setBookingError(res.error)
+        setIsSubmitting(false)
+      } else {
+        setIsSubmitting(false)
+        setSuccessMsg("Payment proof submitted! We are verifying it now.")
+      }
+    } catch {
+      setBookingError("Failed to upload proof. Please contact support.")
       setIsSubmitting(false)
     }
   }
@@ -225,7 +244,7 @@ export default function OpeningBookingModal({
                 Reserve <span className="text-[#D14D7E]">Suite</span>
               </h3>
               <p className="text-xs text-[var(--foreground)] opacity-60 mt-1 font-light">
-                Select preferences and complete your request.
+                {step === 1 ? "Confirm your preferred dates and details." : "Verify payment to secure your booking."}
               </p>
             </div>
             <button
@@ -235,6 +254,8 @@ export default function OpeningBookingModal({
                   setSuccessMsg("")
                   setCheckIn("")
                   setCheckOut("")
+                  setStep(1)
+                  setCurrentBookingId(null)
                 }
               }}
               className="p-1 rounded-full text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors"
@@ -252,13 +273,14 @@ export default function OpeningBookingModal({
               <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                 <span className="text-3xl text-emerald-500 font-bold">✓</span>
               </div>
-              <h4 className="text-xl font-heading font-bold text-emerald-500 mb-2">Request Successful!</h4>
+              <h4 className="text-xl font-heading font-bold text-emerald-500 mb-2">Request Persistent!</h4>
               <p className="text-white/60 text-sm max-w-sm mx-auto leading-relaxed mb-6">
-                {successMsg} Our team will notify you within minutes. Or reach out to us directly:
+                {successMsg} Our team has received your request and will contact you shortly.
               </p>
 
-              {/* Contact Selection */}
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-sm mx-auto flex flex-col gap-4">
+              {/* Contact Help */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-sm mx-auto flex flex-col gap-4 text-center">
+                <p className="text-[10px] uppercase tracking-widest opacity-40">Contact for Instant Approval</p>
                 <div className="flex gap-2 justify-center flex-wrap">
                   {contactNumbers.map(num => (
                     <button
@@ -279,71 +301,32 @@ export default function OpeningBookingModal({
                     href={`https://wa.me/91${selectedContact}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/30 py-3 rounded-xl transition-colors text-sm font-bold"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/30 py-3 rounded-xl transition-colors text-xs font-bold"
                   >
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                     WhatsApp
                   </a>
                   <a
                     href={`tel:+91${selectedContact}`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 py-3 rounded-xl transition-colors text-sm font-bold"
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 py-3 rounded-xl transition-colors text-xs font-bold"
                   >
-                    <Phone size={18} />
                     Call
                   </a>
                 </div>
               </div>
             </motion.div>
           ) : loadingSkeleton ? (
-            /* pulsing luxury skeleton structure loader matching modal fields exactly */
             <div className="space-y-6 animate-pulse">
-              {/* Toggle Skeleton */}
-              <div className="grid grid-cols-2 gap-2 h-12 rounded-full bg-white/5 p-1">
-                <div className="bg-white/10 rounded-full" />
-                <div className="opacity-20 bg-white/5 rounded-full" />
-              </div>
-
-              {/* Select Suite Skeleton */}
-              <div className="space-y-2">
-                <div className="h-3 bg-white/10 rounded w-1/4" />
-                <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-              </div>
-
-              {/* Confirm Name Skeleton */}
-              <div className="space-y-2">
-                <div className="h-3 bg-white/10 rounded w-1/3" />
-                <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-              </div>
-
-              {/* Phone/Email Skeleton */}
+              <div className="h-12 rounded-full bg-white/5" />
+              <div className="h-14 bg-white/5 rounded-2xl" />
+              <div className="h-14 bg-white/5 rounded-2xl" />
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="h-3 bg-white/10 rounded w-1/3" />
-                  <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-                </div>
-                <div className="space-y-2">
-                  <div className="h-3 bg-white/10 rounded w-1/3" />
-                  <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-                </div>
+                <div className="h-14 bg-white/5 rounded-2xl" />
+                <div className="h-14 bg-white/5 rounded-2xl" />
               </div>
-
-              {/* Dates Skeleton */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="h-3 bg-white/10 rounded w-1/3" />
-                  <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-                </div>
-                <div className="space-y-2">
-                  <div className="h-3 bg-white/10 rounded w-1/3" />
-                  <div className="h-14 bg-white/5 rounded-2xl border border-white/5" />
-                </div>
-              </div>
-
               <div className="h-14 bg-white/10 rounded-full mt-4" />
             </div>
           ) : (
-            /* Form matching screenshot visually */
-            <form onSubmit={step === 1 ? (e) => { e.preventDefault(); setStep(2); } : handleBookingSubmit} className="flex flex-col gap-5">
+            <form onSubmit={step === 1 ? handleStep1Submit : handleStep2Submit} className="flex flex-col gap-5">
               {bookingError && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -358,7 +341,6 @@ export default function OpeningBookingModal({
               {step === 1 ? (
                 <>
                   {/* Step 1: Guest Details */}
-                  {/* BOOKING FOR Toggle */}
                   <div className="flex p-1 bg-black/5 dark:bg-black/60 rounded-full border border-black/10 dark:border-white/10 w-full">
                     <button
                       type="button"
@@ -382,7 +364,6 @@ export default function OpeningBookingModal({
                     </button>
                   </div>
 
-                  {/* SELECT SUITE Dropdown */}
                   <div>
                     <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                       Select Suite
@@ -413,13 +394,10 @@ export default function OpeningBookingModal({
                           </optgroup>
                         ))}
                       </select>
-                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D14D7E] text-xs">
-                        ▼
-                      </div>
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#D14D7E] text-xs">▼</div>
                     </div>
                   </div>
 
-                  {/* CONFIRM NAME */}
                   <div>
                     <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
                       {bookingFor === "myself" ? "Confirm Name" : "Guest Full Name"}
@@ -429,7 +407,7 @@ export default function OpeningBookingModal({
                       <input
                         type="text"
                         required
-                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50"
                         value={customerName}
                         onChange={e => setCustomerName(e.target.value)}
                         placeholder="Full name"
@@ -437,84 +415,51 @@ export default function OpeningBookingModal({
                     </div>
                   </div>
 
-                  {/* CONFIRM PHONE & EMAIL */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        {bookingFor === "myself" ? "Confirm Phone" : "Guest Phone"}
-                      </label>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Phone</label>
                       <div className="flex gap-2">
-                        <div className="relative w-23 flex-shrink-0">
-                          <select
-                            value={countryCode}
-                            onChange={e => setCountryCode(e.target.value)}
-                            className="w-full h-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-3 text-[var(--foreground)] text-xs appearance-none cursor-pointer focus:outline-none focus:border-[#D14D7E]/50"
-                          >
-                            <option value="+91" className="bg-[var(--background)]">+91</option>
-                            <option value="+1" className="bg-[var(--background)]">+1</option>
-                            <option value="+44" className="bg-[var(--background)]">+44</option>
-                            <option value="+971" className="bg-[var(--background)]">+971</option>
-                          </select>
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--foreground)] opacity-40 text-[8px]">▼</div>
-                        </div>
-                        <div className="relative flex-1">
-                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                          <input
-                            type="tel"
-                            required
-                            className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                            value={customerPhone}
-                            onChange={e => {
-                              const val = e.target.value.replace(/\D/g, "").slice(0, 10)
-                              setCustomerPhone(val)
-                            }}
-                            placeholder="10-dig"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        Email Address
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
                         <input
-                          type="email"
+                          type="tel"
                           required
-                          className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                          value={customerEmail}
-                          onChange={e => setCustomerEmail(e.target.value)}
-                          placeholder="your@email.com"
+                          className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50"
+                          value={customerPhone}
+                          onChange={e => setCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                          placeholder="10-digit number"
                         />
                       </div>
                     </div>
+                    <div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Email</label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50"
+                        value={customerEmail}
+                        onChange={e => setCustomerEmail(e.target.value)}
+                        placeholder="your@email.com"
+                      />
+                    </div>
                   </div>
 
-                  {/* CHECK IN & CHECK OUT */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        Check In
-                      </label>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Check In</label>
                       <input
                         type="date"
                         required
-                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm dark:[color-scheme:dark]"
                         value={checkIn}
                         min={new Date().toISOString().split("T")[0]}
                         onChange={e => setCheckIn(e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        Check Out
-                      </label>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Check Out</label>
                       <input
                         type="date"
                         required
-                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 dark:[color-scheme:dark]"
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm dark:[color-scheme:dark]"
                         value={checkOut}
                         min={checkIn || new Date().toISOString().split("T")[0]}
                         onChange={e => setCheckOut(e.target.value)}
@@ -522,26 +467,12 @@ export default function OpeningBookingModal({
                     </div>
                   </div>
 
-                  {/* Pricing Estimation banner */}
-                  {computedPrice > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="p-4 bg-[#D14D7E]/10 border border-[#D14D7E]/20 rounded-2xl text-center shadow-inner"
-                    >
-                      <span className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-55 block mb-1 text-[var(--foreground)]">Estimated Total Stay Price</span>
-                      <span className="text-2xl font-heading font-black text-[#D14D7E]">
-                        ₹{computedPrice.toLocaleString('en-IN')}
-                      </span>
-                    </motion.div>
-                  )}
-
                   <button
                     type="submit"
-                    disabled={!bookingRoomId || !checkIn || !checkOut}
-                    className="w-full py-4 rounded-full bg-[#D14D7E] text-white font-bold transition-all duration-300 hover:shadow-lg hover:shadow-[#D14D7E]/30 mt-2 text-xs uppercase tracking-wider cursor-pointer active:scale-98"
+                    disabled={isSubmitting || !bookingRoomId || !checkIn || !checkOut}
+                    className="w-full py-4 rounded-full bg-[#D14D7E] text-white font-bold transition-all duration-300 hover:shadow-lg hover:shadow-[#D14D7E]/30 mt-2 text-xs uppercase tracking-wider"
                   >
-                    Next: Payment Verification
+                    {isSubmitting ? "Saving Request..." : "Next: Payment Verification"}
                   </button>
                 </>
               ) : (
@@ -549,64 +480,28 @@ export default function OpeningBookingModal({
                   {/* Step 2: Payment Verification */}
                   <div className="text-center mb-4">
                     <div className="inline-block p-4 bg-white rounded-3xl mb-4 shadow-xl border border-[var(--gold-primary)]/20">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/booking-qr.jpg"
-                        alt="UPI QR Code — Scan to pay ₹300 booking fee"
-                        className="w-56 h-56 object-contain"
-                      />
+                      <img src="/booking-qr.jpg" alt="UPI QR Code" className="w-48 h-48 object-contain" />
                     </div>
                     <div className="bg-black/5 dark:bg-black/60 p-4 rounded-2xl border border-black/10 dark:border-white/10">
-                      <p className="text-[10px] uppercase tracking-widest opacity-50 mb-1">Pay Booking Fee to UPI ID</p>
+                      <p className="text-[10px] uppercase tracking-widest opacity-50 mb-1">Pay Booking Fee ₹300 to</p>
                       <p className="text-lg font-mono font-bold text-[#D14D7E]">7002586087-2@ybl</p>
-
-                      {/* UPI App Trigger Button */}
-                      <a
-                        href="upi://pay?pa=7002586087-2@ybl&pn=Diban%20Borboruah&am=300&cu=INR&tn=StayNJoy%20Booking%20Fee"
-                        className="mt-4 flex items-center justify-center gap-3 w-full py-3 bg-[#451624] hover:bg-[#D14D7E] text-white rounded-xl border border-[#D14D7E]/30 transition-all font-bold text-xs shadow-lg shadow-black/20 active:scale-95"
-                      >
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                        </div>
-                        Open in UPI App
-                      </a>
-
-                      <div className="mt-4 flex flex-col gap-2">
-                        <div className="flex justify-between items-center px-4 py-2 bg-[#D14D7E]/5 rounded-xl border border-[#D14D7E]/10">
-                          <span className="text-xs opacity-60">Security Deposit</span>
-                          <span className="text-lg font-black text-[#D14D7E]">₹300</span>
-                        </div>
-                        <p className="text-[9px] opacity-40 font-light italic">
-                          This amount is required to secure your reservation and will be adjusted against your final bill.
-                        </p>
-                      </div>
                     </div>
                   </div>
 
-                  {/* Payment Verification Proof */}
                   <div className="space-y-4">
                     <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        Upload Payment Screenshot
-                      </label>
-                      <div className="relative h-24 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl hover:border-[#D14D7E]/50 transition-colors flex items-center justify-center overflow-hidden bg-black/5 dark:bg-black/40">
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Upload Proof</label>
+                      <div className="relative h-24 border-2 border-dashed border-black/10 dark:border-white/10 rounded-2xl flex items-center justify-center bg-black/5 dark:bg-black/40 overflow-hidden">
                         {paymentPreview ? (
                           <div className="relative w-full h-full">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={paymentPreview} alt="Payment screenshot preview" className="w-full h-full object-cover opacity-50" />
-                            <div className="absolute inset-0 flex items-center justify-center gap-2">
-                              <span className="text-[10px] font-bold uppercase bg-black/60 text-white px-3 py-1 rounded-full">Screenshot Ready</span>
-                              <button type="button" onClick={() => { setPaymentImage(null); setPaymentPreview(""); }} className="bg-rose-500 text-white p-1 rounded-full"><X size={14} /></button>
-                            </div>
+                            <img src={paymentPreview} alt="Preview" className="w-full h-full object-cover opacity-50" />
+                            <button type="button" onClick={() => { setPaymentImage(null); setPaymentPreview(""); }} className="absolute inset-0 flex items-center justify-center font-bold text-rose-500">Remove</button>
                           </div>
                         ) : (
                           <>
                             <input
                               type="file"
                               accept="image/*"
-                              required
                               className="absolute inset-0 opacity-0 cursor-pointer z-10"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
@@ -618,46 +513,52 @@ export default function OpeningBookingModal({
                                 }
                               }}
                             />
-                            <div className="text-center">
-                              <div className="text-[#D14D7E] text-xs font-bold mb-1">Click to upload proof</div>
-                              <div className="text-[9px] opacity-40">JPG, PNG allowed</div>
-                            </div>
+                            <div className="text-[#D14D7E] text-xs font-bold">Click to upload screenshot</div>
                           </>
                         )}
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">
-                        Transaction ID / UTR (Optional)
-                      </label>
-                      <div className="relative">
-                        <AlertCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--foreground)] opacity-40" size={16} />
-                        <input
-                          type="text"
-                          className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 pl-12 text-[var(--foreground)] text-sm focus:outline-none focus:border-[#D14D7E]/50 focus:ring-1 focus:ring-[#D14D7E]/50 placeholder-[#D14D7E]/40"
-                          value={upiTxnId}
-                          onChange={e => setUpiTxnId(e.target.value)}
-                          placeholder="Ex: 123456789012"
-                        />
-                      </div>
+                      <label className="text-[10px] font-bold tracking-[0.2em] uppercase text-[var(--foreground)] opacity-60 mb-2 block">Txn ID (Optional)</label>
+                      <input
+                        type="text"
+                        className="w-full bg-black/5 dark:bg-black/60 border border-black/10 dark:border-white/10 rounded-2xl px-5 py-4 text-[var(--foreground)] text-sm"
+                        value={upiTxnId}
+                        onChange={e => setUpiTxnId(e.target.value)}
+                        placeholder="Ex: 123456789012"
+                      />
                     </div>
                   </div>
 
-                  <div className="flex gap-3 mt-4">
+                  {/* Immediate Assistance Section in Step 2 */}
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mt-2">
+                    <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 text-center">Trouble paying? Contact Owner</p>
+                    <div className="flex gap-2 justify-center flex-wrap mb-4">
+                      {contactNumbers.map(num => (
+                        <button key={num} type="button" onClick={() => setSelectedContact(num)} className={`px-2 py-1 text-[10px] rounded-full ${selectedContact === num ? "bg-[#D14D7E] text-white" : "bg-white/5 text-white/50"}`}>{num}</button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href={`https://wa.me/91${selectedContact}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-[#25D366]/10 text-[#25D366] text-center py-2 rounded-xl text-[10px] font-bold border border-[#25D366]/20">WhatsApp</a>
+                      <a href={`tel:+91${selectedContact}`} className="flex-1 bg-blue-500/10 text-blue-400 text-center py-2 rounded-xl text-[10px] font-bold border border-blue-500/20">Call</a>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 mt-4">
+                    <div className="flex gap-3">
+                      <button type="button" onClick={() => setStep(1)} className="flex-1 py-4 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest">Back</button>
+                      <button type="submit" disabled={isSubmitting || !paymentImage} className="flex-[2] py-4 rounded-full bg-[#D14D7E] text-white font-bold text-[10px] uppercase tracking-widest disabled:opacity-40">{isSubmitting ? "Updating..." : "Submit Proof"}</button>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setStep(1)}
-                      className="flex-1 py-4 rounded-full border border-black/10 dark:border-white/10 text-[var(--foreground)] opacity-60 hover:opacity-100 font-bold transition-all text-xs uppercase"
+                      onClick={() => {
+                        setSuccessMsg("Inquiry persistence restored. Admin will verify manually.")
+                        // We already saved in step 1, so we just show success.
+                      }}
+                      className="w-full py-4 rounded-full border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] text-[10px] font-bold uppercase tracking-widest"
                     >
-                      Back
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || !paymentImage}
-                      className="flex-[2] py-4 rounded-full bg-[#D14D7E] text-white font-bold transition-all duration-300 disabled:opacity-30 text-xs uppercase tracking-wider"
-                    >
-                      {isSubmitting ? "Submitting..." : "Submit Proof & Reserve"}
+                      Can't Pay? Submit for Manual Review
                     </button>
                   </div>
                 </>

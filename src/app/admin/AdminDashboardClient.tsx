@@ -7,6 +7,7 @@ import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
 import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 const compressImage = async (file: File): Promise<File> => {
   return new Promise((resolve) => {
@@ -67,6 +68,10 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
   const [csvStartDate, setCsvStartDate] = useState("")
   const [csvEndDate, setCsvEndDate] = useState("")
   const [isSubmittingRoom, setIsSubmittingRoom] = useState(false)
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false)
+
+  // Sync isGlobalLoading with transitions if needed, or manual trigger
+  const handleSetGlobalLoading = (loading: boolean) => setIsGlobalLoading(loading)
 
   const handleSubmitRoom = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -307,7 +312,9 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
         {activeTab === "bookings" && (
           <div className="glass-panel p-10 border-white/5">
             <h2 className="text-3xl font-heading font-black mb-10 tracking-tight">Registry <span className="text-[var(--accent-primary)]">Insights</span></h2>
-            <AdminBookingsTable bookings={bookings} />
+            <AdminBookingsTable
+              bookings={bookings}
+            />
           </div>
         )}
 
@@ -354,6 +361,28 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           </div>
         )}
       </div>
+      {/* Global Loading Overlay */}
+      <AnimatePresence>
+        {isGlobalLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex flex-col items-center justify-center"
+          >
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative">
+                <div className="w-20 h-20 border-2 border-white/10 rounded-full animate-pulse" />
+                <Loader2 className="absolute inset-0 m-auto text-[var(--accent-primary)] animate-spin" size={40} />
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-heading font-black tracking-tight text-white uppercase">Syncing Registry</h3>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.3em] mt-2">Connecting to Secure Vault...</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

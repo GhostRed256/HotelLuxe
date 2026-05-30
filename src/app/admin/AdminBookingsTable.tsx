@@ -2,8 +2,10 @@
 
 import { useState, useTransition, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { updateBookingStatus, deleteBooking } from "./actions"
-import { Trash2, RotateCcw } from "lucide-react"
+import { updateBookingStatus, deleteBooking, deleteMultipleBookings, approveMultipleBookings } from "./actions"
+import { Trash2, RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useEffect } from "react"
 
 interface BookingRow {
   id: string
@@ -19,7 +21,7 @@ interface BookingRow {
   room: { name: string }
 }
 
-function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
+function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: BookingRow[], setGlobalLoading?: (loading: boolean) => void }) {
   const searchParams = useSearchParams()
   const defaultSearch = searchParams.get('bookingId') || ""
 
@@ -28,22 +30,6 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-
-  const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
-    if (!confirm(`Are you sure you want to ${status === 'APPROVED' ? 'Authorize' : 'Decline'} this booking?`)) return
-    startTransition(async () => {
-      await updateBookingStatus(id, status)
-      router.refresh()
-    })
-  }
-
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`PERMANENT ACTION: Are you sure you want to remove ${name} from the registry? This cannot be undone.`)) return
-    startTransition(async () => {
-      await deleteBooking(id)
-      router.refresh()
-    })
-  }
 
   const filteredBookings = bookings.filter(b => {
     // We check substring of customer name, email OR ID (for the email link routing)
@@ -61,6 +47,75 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
 
     return matchesSearch && matchesDate && matchesStatus
   })
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [isBulkPending, setIsBulkPending] = useState(false)
+
+  const isAllSelected = filteredBookings.length > 0 && selectedIds.length === filteredBookings.length
+
+  const toggleAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredBookings.map(b => b.id))
+    }
+  }
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
+
+  const handleBulkAction = async (action: "APPROVE" | "DELETE") => {
+    if (selectedIds.length === 0) return
+    if (!confirm(`Are you sure you want to ${action === 'APPROVE' ? 'Approve' : 'Delete'} ${selectedIds.length} selected bookings?`)) return
+
+    setIsBulkPending(true)
+    setGlobalLoading?.(true)
+    startTransition(async () => {
+      try {
+        if (action === "APPROVE") {
+          await approveMultipleBookings(selectedIds)
+        } else {
+          await deleteMultipleBookings(selectedIds)
+        }
+        setSelectedIds([])
+        router.refresh()
+      } catch (e) {
+        console.error("Bulk action failed", e)
+      } finally {
+        setIsBulkPending(false)
+        setGlobalLoading?.(false)
+      }
+    })
+  }
+
+  const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
+    if (!confirm(`Are you sure you want to ${status === 'APPROVED' ? 'Authorize' : 'Decline'} this booking?`)) return
+    setGlobalLoading?.(true)
+    startTransition(async () => {
+      try {
+        await updateBookingStatus(id, status)
+        router.refresh()
+      } finally {
+        setGlobalLoading?.(false)
+      }
+    })
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`PERMANENT ACTION: Are you sure you want to remove ${name} from the registry? This cannot be undone.`)) return
+    setGlobalLoading?.(true)
+    startTransition(async () => {
+      try {
+        await deleteBooking(id)
+        router.refresh()
+      } finally {
+        setGlobalLoading?.(false)
+      }
+    })
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -104,6 +159,11 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
       <table className="w-full border-collapse block md:table">
         <thead className="hidden md:table-header-group">
           <tr className="border-b border-white/5 text-left text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 md:table-row">
+            <th className="p-6">
+              <button onClick={toggleAll} className="p-1 hover:bg-white/10 rounded transition-colors">
+                {isAllSelected ? <CheckSquare size={16} className="text-[var(--accent-primary)]" /> : <Square size={16} />}
+              </button>
+            </th>
             <th className="p-6">Guest Profile</th>
             <th className="p-6">Suite Selection</th>
             <th className="p-6">Duration</th>
@@ -114,11 +174,17 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
         <tbody className="text-sm font-light block md:table-row-group">
           {filteredBookings.length === 0 ? (
             <tr>
-              <td colSpan={5} className="p-20 text-center opacity-40 italic">No records found in the registry.</td>
+              <td colSpan={6} className="p-20 text-center opacity-40 italic">No records found in the registry.</td>
             </tr>
           ) : (
             filteredBookings.map((b) => (
-              <tr key={b.id} className="border border-white/10 md:border-0 md:border-b md:border-white/5 group hover:bg-white/5 transition-colors block md:table-row mb-6 md:mb-0 rounded-2xl md:rounded-none overflow-hidden bg-black/20 md:bg-transparent">
+              <tr key={b.id} className={`border border-white/10 md:border-0 md:border-b md:border-white/5 group transition-colors block md:table-row mb-6 md:mb-0 rounded-2xl md:rounded-none overflow-hidden ${selectedIds.includes(b.id) ? 'bg-white/10' : 'bg-black/20 md:bg-transparent'} hover:bg-white/5`}>
+                <td className="p-5 md:p-6 block md:table-cell border-b border-white/5 md:border-0">
+                  <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Select</div>
+                  <button onClick={() => toggleSelected(b.id)} className="p-1 hover:bg-white/10 rounded transition-colors">
+                    {selectedIds.includes(b.id) ? <CheckSquare size={16} className="text-[var(--accent-primary)]" /> : <Square size={16} />}
+                  </button>
+                </td>
                 <td className="p-5 md:p-6 block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Guest Profile</div>
                   <div className="font-bold text-xl md:text-lg">{b.customerName}</div>
@@ -139,9 +205,11 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
 
                   {/* Payment Verification Proof */}
                   {(b.upiTxnId || b.paymentScreenshot) && (
-                    <div className="mt-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs max-w-xs">
-                      <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent-primary)] mb-2">
-                        UPI Verification Proof (Demo)
+                    <div className="mt-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs max-w-xs shadow-2xl relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent-primary)] animate-pulse" />
+                      <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent-primary)] mb-2 flex items-center gap-2">
+                        <ShieldCheck size={10} />
+                        Payment Verification Details
                       </div>
                       {b.upiTxnId && (
                         <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -176,12 +244,18 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
                                 newWindow.document.body.appendChild(img);
                               }
                             }}
-                            className="w-full text-center px-3 py-1.5 bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] border border-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)] hover:text-white rounded-lg text-[9px] font-bold uppercase tracking-widest transition-colors cursor-pointer"
+                            className="w-full text-center px-3 py-2 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em] transition-all cursor-pointer shadow-lg"
                           >
-                            View Payment Screenshot Proof
+                            View Evidence Screenshot
                           </button>
                         </div>
                       )}
+                    </div>
+                  )}
+                  {b.paymentStatus === 'MANUAL' && (
+                    <div className="mt-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-[9px] font-bold uppercase tracking-widest text-amber-500/60 flex items-center gap-2">
+                      <AlertCircle size={12} />
+                      Requested Manual Review
                     </div>
                   )}
                 </td>
@@ -200,10 +274,10 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
                       'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                     }`}>
                     {b.status}
-                    <span className="opacity-40 text-[9px] font-bold block mt-1 tracking-widest text-[#B88F54]">
-                      {b.paymentStatus === 'PAID' ? '✓ PAID ONLINE' :
-                        b.paymentStatus === 'MANUAL' ? '⌨ MANUALLY ADDED' :
-                          '❗ PAYMENT PENDING'}
+                    <span className="opacity-40 text-[9px] font-black block mt-2 tracking-widest">
+                      {b.paymentStatus === 'PAID' ? '✓ VERIFIED PAID' :
+                        b.paymentStatus === 'MANUAL' ? '⚠️ MANUAL REVIEW' :
+                          '❌ UNPAID / PENDING'}
                     </span>
                   </span>
                 </td>
@@ -257,11 +331,59 @@ function AdminBookingsTableInner({ bookings }: { bookings: BookingRow[] }) {
           )}
         </tbody>
       </table>
+      {/* Floating Bulk Actions Bar */}
+      <AnimatePresence>
+        {(selectedIds.length > 0 || isBulkPending) && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] max-w-xl w-full px-4"
+          >
+            <div className="glass-panel p-4 flex items-center justify-between shadow-2xl border-white/20 bg-black/60 backdrop-blur-xl">
+              <div className="flex items-center gap-3 ml-2">
+                <CheckSquare size={20} className="text-[var(--accent-primary)]" />
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest">{selectedIds.length} SELECTED</p>
+                  <p className="text-[8px] opacity-40 uppercase tracking-widest">{isBulkPending ? "PROCESSING BATCH..." : "Batch operations"}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleBulkAction("APPROVE")}
+                  disabled={isBulkPending}
+                  className="px-6 py-2 bg-emerald-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-emerald-600 transition-colors flex items-center gap-2"
+                >
+                  {isBulkPending ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                  Approve All
+                </button>
+                <button
+                  onClick={() => handleBulkAction("DELETE")}
+                  disabled={isBulkPending}
+                  className="px-6 py-2 bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  {isBulkPending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  Delete All
+                </button>
+                {!isBulkPending && (
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="p-2 text-white/40 hover:text-white transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-export default function AdminBookingsTable(props: { bookings: BookingRow[] }) {
+export default function AdminBookingsTable(props: { bookings: BookingRow[], setGlobalLoading?: (loading: boolean) => void }) {
   return (
     <Suspense fallback={<div className="p-10 text-center opacity-50">Loading Registry...</div>}>
       <AdminBookingsTableInner {...props} />

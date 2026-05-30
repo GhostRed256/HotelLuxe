@@ -20,7 +20,12 @@ export async function requestBooking(formData: FormData) {
     const roomDoc = await db.collection("rooms").doc(roomId).get()
     const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
 
-    const paymentStatus: "PAID" | "PENDING" = (upiTxnId || paymentScreenshot) ? "PAID" : "PENDING"
+    // Determine payment status. If specifically set by frontend (e.g. manual), use that.
+    // Otherwise fallback to PAID if proof exists, PENDING if not.
+    const explicitStatus = formData.get("paymentStatus") as string
+    const paymentStatus: "PAID" | "PENDING" | "MANUAL" =
+      explicitStatus === "MANUAL" ? "MANUAL" :
+        (upiTxnId || paymentScreenshot) ? "PAID" : "PENDING"
 
     const bookingData = {
       roomId,
@@ -48,10 +53,26 @@ export async function requestBooking(formData: FormData) {
     revalidatePath("/rooms")
     revalidatePath("/admin")
     revalidatePath("/bookings")
-    return { success: true }
+    return { success: true, bookingId: docRef.id }
   } catch (error) {
     console.error(error)
     return { error: "Failed to request booking" }
+  }
+}
+
+export async function updateBookingPayment(bookingId: string, upiTxnId: string, paymentScreenshot: string) {
+  try {
+    await db.collection("bookings").doc(bookingId).update({
+      upiTxnId,
+      paymentScreenshot,
+      paymentStatus: (upiTxnId || paymentScreenshot) ? "PAID" : "PENDING",
+      updatedAt: new Date()
+    })
+    revalidatePath("/admin")
+    return { success: true }
+  } catch (error) {
+    console.error("Update failed", error)
+    return { error: "Failed to update payment proof" }
   }
 }
 

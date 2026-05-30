@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
-import { requestBooking } from "@/app/actions"
+import { requestBooking, updateBookingPayment } from "@/app/actions"
 import RoomCard from "./RoomCard"
 import { ChevronLeft, ChevronRight, User, Phone, Mail, Upload, ArrowLeft, IndianRupee, ShieldCheck, Copy, Check } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
@@ -29,6 +29,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
   const [customerEmail, setCustomerEmail] = useState("")
   const [countryCode, setCountryCode] = useState("+91")
   const [bookingStep, setBookingStep] = useState<1 | 2>(1)
+  const [currentBookingId, setCurrentBookingId] = useState<string | null>(null)
   const [upiTxnId, setUpiTxnId] = useState("")
   const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(null)
   const [paymentFileName, setPaymentFileName] = useState("")
@@ -193,12 +194,41 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     formData.append("customerPhone", `${countryCode}${customerPhone}`)
     formData.append("checkIn", checkIn)
     formData.append("checkOut", checkOut)
-    if (upiTxnId) formData.append("upiTxnId", upiTxnId)
-    if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot)
+    formData.append("paymentStatus", "PENDING")
 
-    await requestBooking(formData)
-    setIsSubmitting(false)
-    setSuccessMsg("Reservation requested! We'll email you the confirmation shortly.")
+    try {
+      const res = await requestBooking(formData)
+      if (res && res.error) {
+        setBookingError(res.error)
+        setIsSubmitting(false)
+      } else if (res && res.bookingId) {
+        setCurrentBookingId(res.bookingId)
+        setIsSubmitting(false)
+        setBookingStep(2)
+      }
+    } catch {
+      setBookingError("Connection failed.")
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentBookingId) return
+    setIsSubmitting(true)
+    try {
+      const res = await updateBookingPayment(currentBookingId, upiTxnId, paymentScreenshot || "")
+      if (res.error) {
+        setBookingError(res.error)
+        setIsSubmitting(false)
+      } else {
+        setIsSubmitting(false)
+        setSuccessMsg("Payment proof submitted! Our team is verifying your booking.")
+      }
+    } catch {
+      setBookingError("Update failed. Contact support.")
+      setIsSubmitting(false)
+    }
   }
 
   const handleStep1Submit = async (e: React.FormEvent) => {
@@ -212,7 +242,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
       setBookingError("Please enter a valid email address.")
       return
     }
-    await handleBookingSubmit(e);
+    await handleBookingSubmit(e)
   }
 
   const scroll = (dir: "left" | "right") => {
@@ -643,129 +673,46 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
                       {/* === STEP 2: UPI Payment === */}
                       {bookingStep === 2 && (
-                        <form onSubmit={handleBookingSubmit} className="flex flex-col gap-5">
-                          {/* Back Button */}
-                          <button
-                            type="button"
-                            onClick={() => { setBookingStep(1); setBookingError("") }}
-                            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity self-start"
-                          >
-                            <ArrowLeft size={14} /> Back to Details
-                          </button>
-
-                          {/* Deposit Banner */}
-                          <div className="p-5 bg-gradient-to-br from-[var(--accent-primary)]/15 to-[var(--accent-primary)]/5 border border-[var(--accent-primary)]/20 rounded-2xl text-center">
-                            <div className="flex items-center justify-center gap-2 mb-2">
-                              <ShieldCheck size={16} className="text-emerald-400" />
-                              <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-emerald-400">Secure Booking Deposit</span>
+                        <>
+                          {/* Support Contacts in Step 2 */}
+                          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mt-2">
+                            <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 text-center">Need instant approval? Contact owner</p>
+                            <div className="flex gap-2 justify-center flex-wrap mb-4">
+                              {contactNumbersList.map(num => (
+                                <button key={num} type="button" onClick={() => setSelectedContact(num)} className={`px-2 py-1 text-[10px] rounded-full border ${selectedContact === num ? "bg-[#D14D7E] border-[#D14D7E] text-white shadow-lg" : "bg-white/5 border-white/10 text-white/50"}`}>{num}</button>
+                              ))}
                             </div>
-                            <span className="text-3xl font-black text-[var(--accent-primary)]">₹{DEPOSIT_AMOUNT}</span>
-                            <p className="text-[10px] opacity-40 mt-1 font-light">Refundable deposit • Deducted from total stay</p>
-                          </div>
-
-                          {/* QR Code */}
-                          <div className="flex flex-col items-center gap-4 py-4">
-                            <div className="relative p-3 bg-white rounded-2xl shadow-[0_0_40px_rgba(209,77,126,0.15)]">
-                              <img
-                                src={upiQrUrl}
-                                alt="UPI QR Code"
-                                width={180}
-                                height={180}
-                                className="rounded-lg"
-                              />
-                            </div>
-                            <p className="text-[10px] opacity-40 font-light italic">Scan with any UPI app to pay</p>
-                          </div>
-
-                          {/* UPI ID + Copy */}
-                          <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-                            <div>
-                              <span className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-40 block">UPI ID</span>
-                              <span className="text-sm font-mono font-bold">{UPI_ID}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={copyUpiId}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-[10px] font-bold"
-                            >
-                              {copiedUpi ? <><Check size={12} className="text-emerald-400" /> Copied</> : <><Copy size={12} /> Copy</>}
-                            </button>
-                          </div>
-
-                          {/* Pay via UPI App - Mobile Deep Link */}
-                          <a
-                            href={upiDeepLink}
-                            className="flex items-center justify-center gap-2 py-4 rounded-xl bg-[#5f259f]/20 hover:bg-[#5f259f]/30 border border-[#5f259f]/30 text-[#b87dff] font-bold text-sm transition-colors"
-                          >
-                            <IndianRupee size={16} />
-                            Pay ₹{DEPOSIT_AMOUNT} via UPI App
-                          </a>
-
-                          <div className="h-[1px] bg-white/5" />
-
-                          {/* Payment Proof Section */}
-                          <div>
-                            <label className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 mb-3 block">Payment Proof</label>
-
-                            {/* UTR / Transaction ID */}
-                            <div className="mb-3">
-                              <label className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-30 mb-1.5 block">12-Digit UTR / Txn ID</label>
-                              <input
-                                type="text"
-                                value={upiTxnId}
-                                onChange={e => setUpiTxnId(e.target.value.replace(/\s/g, "").slice(0, 22))}
-                                placeholder="Enter UPI Transaction Reference"
-                                className="form-input text-sm font-mono"
-                              />
-                            </div>
-
-                            {/* Screenshot Upload */}
-                            <div>
-                              <label className="text-[9px] font-bold tracking-[0.15em] uppercase opacity-30 mb-1.5 block">Or Upload Screenshot</label>
-                              <label className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/15 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors">
-                                <Upload size={18} className="opacity-40" />
-                                <span className="text-sm opacity-50">
-                                  {paymentFileName || "Tap to upload payment screenshot"}
-                                </span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={handleScreenshotUpload}
-                                />
-                              </label>
-                              {paymentScreenshot && (
-                                <div className="mt-3 relative rounded-xl overflow-hidden border border-white/10 max-h-40">
-                                  <img src={paymentScreenshot} alt="Payment proof" className="w-full h-full object-contain" />
-                                </div>
-                              )}
+                            <div className="flex gap-2">
+                              <a href={`https://wa.me/91${selectedContact}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-[#25D366]/10 text-[#25D366] text-center py-2.5 rounded-xl text-[10px] font-bold border border-[#25D366]/20 uppercase tracking-widest">WhatsApp</a>
+                              <a href={`tel:+91${selectedContact}`} className="flex-1 bg-blue-500/10 text-blue-400 text-center py-2.5 rounded-xl text-[10px] font-bold border border-blue-500/20 uppercase tracking-widest">Call Agent</a>
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-3 mt-2">
-                            <button
-                              type="submit"
-                              disabled={isSubmitting || (!upiTxnId && !paymentScreenshot)}
-                              className="btn-primary w-full !py-4 shadow-none hover:shadow-2xl disabled:opacity-30 text-[8px] sm:text-[10px]"
-                            >
-                              {isSubmitting ? "Confirming Reservation..." : "Submit Reservation with Payment Proof"}
-                            </button>
+                          <div className="flex flex-col gap-3 mt-4">
+                            <div className="flex gap-3">
+                              <button type="button" onClick={() => { setBookingStep(1); setBookingError(""); }} className="flex-1 py-4 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest">Back</button>
+                              <button
+                                type="submit"
+                                onClick={(e) => handleFinalSubmit(e)}
+                                disabled={isSubmitting || (!upiTxnId && !paymentScreenshot)}
+                                className="flex-[2] py-4 rounded-full bg-[#D14D7E] text-white font-bold text-[10px] uppercase tracking-widest disabled:opacity-30 shadow-xl shadow-[#D14D7E]/20"
+                              >
+                                {isSubmitting ? "Updating..." : "Submit Proof"}
+                              </button>
+                            </div>
 
                             <button
                               type="button"
-                              onClick={(e) => handleBookingSubmit(e as any)}
-                              disabled={isSubmitting}
-                              className="text-[9px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity py-2"
+                              onClick={() => {
+                                setSuccessMsg("Reservation requested! Our team will verify your details manually.")
+                                setBookingStep(1)
+                              }}
+                              className="w-full py-4 rounded-full border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--accent-primary)]/10 transition-all"
                             >
-                              Having trouble? Submit for Manual Review
+                              Can't Pay Online? Submit for Manual Review
                             </button>
                           </div>
-
-                          <p className="text-[9px] text-center opacity-30 font-light leading-relaxed">
-                            Your booking will be confirmed once our team verifies the payment.
-                            A confirmation email will be sent to <strong className="opacity-60">{customerEmail}</strong>.
-                          </p>
-                        </form>
+                        </>
                       )}
                     </>
                   )}

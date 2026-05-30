@@ -164,7 +164,7 @@ export async function addEmailForReports(formData: FormData) {
   console.log(`Email ${email} registered for weekly/monthly booking reports.`)
 }
 
-export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED") {
+export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED", skipRevalidate = false) {
   await validateAdminSession()
   const bookingDoc = await db.collection("bookings").doc(bookingId).get()
   if (!bookingDoc.exists) return
@@ -178,25 +178,65 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
     updatedAt: new Date()
   })
 
-  await notifyBookingStatusChange(
-    {
-      id: bookingId,
-      customerName: booking.customerName,
-      customerEmail: booking.customerEmail,
-      customerPhone: booking.customerPhone,
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
-    },
-    {
-      name: room.name || "Unknown Suite",
-      price: room.price || 0,
-    },
-    status
-  )
+  // We await this to ensure reliability, but for bulk we could potentially fire and forget
+  // However, the user specifically asked to fix "crashes" which might be timeout related
+  try {
+    await notifyBookingStatusChange(
+      {
+        id: bookingId,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+      },
+      {
+        name: room.name || "Unknown Suite",
+        price: room.price || 0,
+      },
+      status
+    )
+  } catch (e) {
+    console.error("Failed to send notification for booking", bookingId, e)
+  }
+
+  if (!skipRevalidate) {
+    revalidatePath("/admin")
+    revalidatePath("/")
+    revalidatePath("/rooms")
+  }
+}
+
+export async function deleteMultipleBookings(ids: string[]) {
+  await validateAdminSession()
+  const batch = db.batch()
+  ids.forEach(id => {
+    const ref = db.collection("bookings").doc(id)
+    batch.delete(ref)
+  })
+  await batch.commit()
+  revalidatePath("/admin")
+}
+
+export async function approveMultipleBookings(ids: string[]) {
+  await validateAdminSession()
+
+  // Update status in batch first for speed
+  const batch = db.batch()
+  ids.forEach(id => {
+    const ref = db.collection("bookings").doc(id)
+    batch.update(ref, {
+      status: "APPROVED",
+      updatedAt: new Date()
+    })
+  })
+  await batch.commit()
+
+  // Then send notifications in parallel
+  // This is safer than awaiting one-by-one in a loop
+  await Promise.allSettled(ids.map(id => updateBookingStatus(id, "APPROVED", true)))
 
   revalidatePath("/admin")
-  revalidatePath("/")
-  revalidatePath("/rooms")
 }
 
 export async function deleteBooking(bookingId: string) {
