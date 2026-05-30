@@ -7,7 +7,7 @@ import { sendBookingEmail } from "./email";
 
 // Retrieve configuration options from environment
 const getOwnerEmails = (): string[] => {
-  const emails = process.env.OWNER_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "GhostRed256@gmail.com";
+  const emails = process.env.OWNER_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "staynjoy05@gmail.com";
   return emails.split(",").map(email => email.trim()).filter(email => email !== "");
 };
 

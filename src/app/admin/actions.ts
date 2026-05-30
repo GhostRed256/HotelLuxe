@@ -199,6 +199,13 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
   revalidatePath("/rooms")
 }
 
+export async function deleteBooking(bookingId: string) {
+  await validateAdminSession()
+  await db.collection("bookings").doc(bookingId).delete()
+  revalidatePath("/admin")
+}
+
+
 export async function createManualBooking(formData: FormData) {
   await validateAdminSession()
   const roomId = formData.get("roomId") as string

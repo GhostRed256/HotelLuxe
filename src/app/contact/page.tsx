@@ -14,7 +14,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[var(--background)] pt-32 pb-20 px-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-20">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-8xl font-heading font-black tracking-tight mb-6"
@@ -30,7 +30,7 @@ export default function ContactPage() {
           {/* Contact Methods */}
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Phone Numbers - HIGH VISIBILITY */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="glass-panel p-10 md:col-span-2 border-white/10 shadow-2xl relative overflow-hidden group"
@@ -41,7 +41,7 @@ export default function ContactPage() {
               <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] mb-10">Instant Reservations</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {contactNumbers.map((item, i) => (
-                  <div 
+                  <div
                     key={i}
                     className="flex flex-col gap-4 p-6 rounded-3xl border border-white/5 bg-white/5 transition-all group/item hover:border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)]/5"
                   >
@@ -50,16 +50,16 @@ export default function ContactPage() {
                         <Phone size={20} />
                       </div>
                       <div className="flex gap-2">
-                        <a 
+                        <a
                           href={`tel:+91${item.number}`}
                           className="w-10 h-10 rounded-xl bg-blue-500/10 hover:bg-blue-500 hover:text-white border border-blue-500/20 text-blue-400 flex items-center justify-center transition-all"
                           title="Call"
                         >
                           <Phone size={16} />
                         </a>
-                        <a 
+                        <a
                           href={`https://wa.me/91${item.number}`}
-                          target="_blank" 
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="w-10 h-10 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366] hover:text-white border border-[#25D366]/20 text-[#25D366] flex items-center justify-center transition-all"
                           title="WhatsApp"
@@ -78,7 +78,7 @@ export default function ContactPage() {
             </motion.div>
 
             {/* Email & Support */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -86,29 +86,37 @@ export default function ContactPage() {
             >
               <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-[var(--accent-primary)] mb-8 text-center md:text-left">Electronic Mail</h3>
               <div className="flex flex-col gap-6">
-                <a href="mailto:contact@staynjoy.com" className="flex items-center gap-6 group">
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=staynjoy05@gmail.com"
+                  target="_blank"
+                  className="flex items-center gap-6 group"
+                >
                   <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[var(--accent-primary)] group-hover:text-white transition-all">
                     <Mail size={20} />
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold tracking-[0.1em] uppercase opacity-40">General Inquiry</span>
-                    <span className="block font-bold">contact@staynjoy.com</span>
+                    <span className="block font-bold">staynjoy05@gmail.com</span>
                   </div>
                 </a>
-                <a href="mailto:GhostRed256@gmail.com" className="flex items-center gap-6 group">
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=redlio8473@gmail.com"
+                  target="_blank"
+                  className="flex items-center gap-6 group"
+                >
                   <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[var(--accent-primary)] group-hover:text-white transition-all">
                     <MessageSquare size={20} />
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold tracking-[0.1em] uppercase opacity-40">Direct Support</span>
-                    <span className="block font-bold">GhostRed256@gmail.com</span>
+                    <span className="block font-bold">redlio8473@gmail.com</span>
                   </div>
                 </a>
               </div>
             </motion.div>
 
             {/* Location Address */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -132,26 +140,37 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="glass-panel p-10 border-white/10 shadow-2xl bg-[var(--accent-primary)]/5"
           >
             <h2 className="text-3xl font-heading font-black mb-2">Send <span className="text-[var(--accent-primary)]">Message</span></h2>
             <p className="text-xs opacity-40 font-light italic mb-10">We usually respond within 15 minutes.</p>
-            
-            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Your message has been received by our concierge."); }}>
+
+            <form
+              className="space-y-6"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const name = formData.get("name");
+                const phone = formData.get("phone");
+                const msg = formData.get("message");
+                const body = encodeURIComponent(`Name: ${name}\nPhone: ${phone}\n\nMessage:\n${msg}`);
+                window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=staynjoy05@gmail.com&su=StayNjoy Inquiry from ${name}&body=${body}`, '_blank');
+              }}
+            >
               <div>
                 <label className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Full Name</label>
-                <input type="text" required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)]" placeholder="Name" />
+                <input type="text" name="name" required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)]" placeholder="Name" />
               </div>
               <div>
                 <label className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Contact Number</label>
-                <input type="tel" required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)]" placeholder="Phone" />
+                <input type="tel" name="phone" required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)]" placeholder="Phone" />
               </div>
               <div>
                 <label className="text-[9px] font-bold tracking-[0.2em] uppercase opacity-40 mb-2 block">Message Details</label>
-                <textarea required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)] min-h-[150px] resize-none" placeholder="Your inquiry..."></textarea>
+                <textarea name="message" required className="form-input bg-white/5 border-white/10 focus:border-[var(--accent-primary)] min-h-[150px] resize-none" placeholder="Your inquiry..."></textarea>
               </div>
               <button type="submit" className="btn-primary w-full !py-4 flex items-center gap-3 group">
                 <Send size={16} />
