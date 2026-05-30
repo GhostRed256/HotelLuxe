@@ -2,6 +2,23 @@ import { getAdminSession } from "@/lib/server-auth"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/firebase-admin"
 
+interface Room {
+  id: string;
+  name: string;
+}
+
+interface Booking {
+  id: string;
+  customerName?: string;
+  customerEmail?: string;
+  checkIn?: string;
+  checkOut?: string;
+  status?: string;
+  roomId?: string;
+  createdAt?: unknown;
+  room?: Room;
+}
+
 export async function GET() {
   const session = await getAdminSession()
   if (!session || !session.isAdmin) {
@@ -9,27 +26,31 @@ export async function GET() {
   }
 
   const roomsSnapshot = await db.collection("rooms").get()
-  const rooms = roomsSnapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
+  const rooms = roomsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data() as { name: string }
+  }))
 
   const bookingsSnapshot = await db.collection("bookings").orderBy("createdAt", "desc").get()
-  const bookings = bookingsSnapshot.docs.map((doc: any) => {
-    const data = doc.data()
+  const bookings = bookingsSnapshot.docs.map((doc) => {
+    const data = doc.data() as Record<string, unknown>
     const associatedRoom = rooms.find(r => r.id === data.roomId)
     return {
       id: doc.id,
       ...data,
       room: associatedRoom || { name: "Unknown Room" }
-    }
+    } as Booking
   })
 
   const fields = ['id', 'customerName', 'customerEmail', 'checkIn', 'checkOut', 'status', 'room.name', 'createdAt']
-  
+
   const csvRows: string[] = []
   csvRows.push(fields.join(','))
   for (const row of bookings) {
     const values = fields.map(field => {
       const fieldParts = field.split('.')
-      let val = row
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let val: any = row
       for (const part of fieldParts) {
         val = val ? val[part] : ''
       }

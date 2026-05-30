@@ -11,36 +11,38 @@ export async function GET(request: Request) {
   }
 
   try {
-    let bookings: any[] = []
-    
+    let bookings: Record<string, unknown>[] = []
+
     try {
       // 1. Try with native ordering (High Performance)
       const snapshot = await db.collection("bookings")
         .where("customerEmail", "==", email)
         .orderBy("createdAt", "desc")
         .get()
-      
+
       bookings = snapshot.docs.map(doc => ({ id: doc.id, ...serializeFirestoreData(doc.data()) }))
-    } catch (orderError) {
+    } catch (_orderError) {
       console.warn("Index not ready yet, falling back to basic search.")
       // 2. FALLBACK: Basic search if index is missing/building
       const snapshot = await db.collection("bookings")
         .where("customerEmail", "==", email)
         .get()
-      
+
       bookings = snapshot.docs.map(doc => ({ id: doc.id, ...serializeFirestoreData(doc.data()) }))
-      
+
       // 3. Manual Sort (in-memory) so user still sees the right order
       bookings.sort((a, b) => {
-        const dateA = a.createdAt?._seconds || new Date(a.createdAt).getTime() || 0
-        const dateB = b.createdAt?._seconds || new Date(b.createdAt).getTime() || 0
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateA = (a.createdAt as any)?._seconds || new Date(a.createdAt as any).getTime() || 0
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateB = (b.createdAt as any)?._seconds || new Date(b.createdAt as any).getTime() || 0
         return dateB - dateA
       })
     }
 
     // Attach room details
     const roomsSnapshot = await db.collection("rooms").get()
-    const rooms = roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }))
+    const rooms = roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Record<string, unknown> }))
 
     const enrichedBookings = bookings.map(b => ({
       ...b,
@@ -48,8 +50,9 @@ export async function GET(request: Request) {
     }))
 
     return NextResponse.json(enrichedBookings)
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Identification failed"
     console.error("Critical API Failure:", error)
-    return NextResponse.json({ error: "Internal Server Error", message: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Internal Server Error", message }, { status: 500 })
   }
 }
