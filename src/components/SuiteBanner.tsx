@@ -128,8 +128,8 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
                   {/* Availability Badge */}
                   <div className="absolute top-6 left-6 flex gap-3">
                     <span className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase backdrop-blur-xl border ${cat.available > 0
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/20'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20'
+                      : 'bg-rose-500/20 text-rose-300 border-rose-500/20'
                       }`}>
                       {cat.available > 0 ? `${cat.available} Available` : 'Fully Booked'}
                     </span>
@@ -144,9 +144,22 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
 
                   {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <h3 className="text-3xl md:text-4xl font-heading font-black text-white mb-3 leading-tight">
-                      {cat.type}
-                    </h3>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-[var(--accent-primary)]/10 border border-[var(--gold-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] backdrop-blur-md shadow-[0_0_15px_rgba(var(--accent-primary-rgb),0.2)]">
+                        {cat.type.toLowerCase().includes("cozy") ? (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" /><path d="M3.6 9h16.8" /><path d="M3.6 15h16.8" /><path d="M11.5 3v18" /><path d="M12.5 3v18" /></svg>
+                        ) : cat.type.toLowerCase().includes("deluxe") ? (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+                        ) : cat.type.toLowerCase().includes("suite") ? (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M3 9h18" /></svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                        )}
+                      </div>
+                      <h3 className="text-3xl md:text-4xl font-heading font-black text-white leading-tight">
+                        {cat.type}
+                      </h3>
+                    </div>
                     <p className="text-white/50 font-light text-sm mb-6 max-w-[80%]">
                       {cat.description}
                     </p>

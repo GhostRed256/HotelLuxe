@@ -41,7 +41,7 @@ export default function Navbar() {
               key={item}
               href={
                 item === "Home" ? "/home" :
-                  item === "Homestays" ? "/home#hero" :
+                  item === "Homestays" ? "/homestays" :
                     `/${item.toLowerCase()}`
               }
               className={`text-[9px] font-black tracking-[0.3em] uppercase transition-all ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "text-[#1A0811] hover:text-[var(--accent-primary)] dark:text-white"
@@ -159,7 +159,7 @@ export default function Navbar() {
               key={item}
               href={
                 item === "Home" ? "/home" :
-                  item === "Homestays" ? "/home#hero" :
+                  item === "Homestays" ? "/homestays" :
                     `/${item.toLowerCase()}`
               }
               onClick={() => setMobileMenuOpen(false)}

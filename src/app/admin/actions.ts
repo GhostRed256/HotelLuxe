@@ -56,8 +56,8 @@ async function fileToDataUri(file: File): Promise<string> {
   return `data:${mimeType};base64,${base64}`
 }
 
-export async function addRoom(formData: FormData) {
-  await validateAdminSession()
+export async function addRoom(formData: FormData, clientToken?: string) {
+  await validateAdminSession(clientToken)
   const name = formData.get("name") as string
   const description = formData.get("description") as string
   const price = parseFloat(formData.get("price") as string)
@@ -163,8 +163,8 @@ export async function removeRoomImage(roomId: string, imageIndex: number) {
   revalidatePath("/")
 }
 
-export async function deleteRoom(roomId: string) {
-  await validateAdminSession()
+export async function deleteRoom(roomId: string, clientToken?: string) {
+  await validateAdminSession(clientToken)
 
   const roomDoc = await db.collection("rooms").doc(roomId).get()
   if (!roomDoc.exists) return { success: false, error: "Room not found" }

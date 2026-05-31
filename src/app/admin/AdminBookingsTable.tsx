@@ -3,7 +3,7 @@
 import { useState, useTransition, Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { updateBookingStatus, deleteBooking, deleteMultipleBookings, approveMultipleBookings } from "./actions"
-import { RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle, Trash2 } from "lucide-react"
+import { RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle, Trash2, Phone, MapPin } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
 
@@ -312,10 +312,10 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
                       'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                     }`}>
                     {b.status || 'PENDING'}
-                    <span className="opacity-40 text-[9px] font-black block mt-2 tracking-widest">
-                      {b.paymentStatus === 'PAID' ? '✓ VERIFIED PAID' :
-                        b.paymentStatus === 'MANUAL' ? '⚠️ MANUAL REVIEW' :
-                          '❌ UNPAID / PENDING'}
+                    <span className="opacity-60 text-[9px] font-black flex items-center justify-center gap-1.5 mt-2 tracking-widest">
+                      {b.paymentStatus === 'PAID' ? <><Check size={10} className="text-emerald-500" /> VERIFIED PAID</> :
+                        b.paymentStatus === 'MANUAL' ? <><AlertCircle size={10} className="text-amber-500" /> MANUAL REVIEW</> :
+                          <><X size={10} className="text-rose-500" /> UNPAID / PENDING</>}
                     </span>
                   </span>
                 </td>

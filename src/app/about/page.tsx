@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Phone } from "lucide-react"
+import { Phone, ShieldCheck, MapPin } from "lucide-react"
 
 export default function AboutPage() {
   const [selectedContact, setSelectedContact] = useState("9181042005")
@@ -26,42 +26,118 @@ export default function AboutPage() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 text-left">
-          <div className="p-6 border border-[var(--accent-primary)] rounded-lg">
-            <h3 className="text-xl font-bold mb-2">🌸 Cozy Rooms</h3>
-            <p className="opacity-70">From ₹1399/night — perfect for solo travelers and backpackers.</p>
+          <div className="p-8 border border-[var(--gold-primary)]/20 rounded-2xl bg-[var(--accent-primary)]/5 backdrop-blur-sm flex items-start gap-6 group hover:bg-[var(--accent-primary)]/10 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--gold-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" /><path d="M3.6 9h16.8" /><path d="M3.6 15h16.8" /><path d="M11.5 3v18" /><path d="M12.5 3v18" /></svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-black mb-2 tracking-tight">Cozy Rooms</h3>
+              <p className="opacity-60 text-sm font-light">From ₹1399/night — perfect for solo travelers and backpackers.</p>
+            </div>
           </div>
-          <div className="p-6 border border-[var(--accent-primary)] rounded-lg">
-            <h3 className="text-xl font-bold mb-2">💖 Couple Friendly</h3>
-            <p className="opacity-70">Deluxe rooms with attached bathroom and projector setup from ₹1799/night.</p>
+          <div className="p-8 border border-[var(--gold-primary)]/20 rounded-2xl bg-[var(--accent-primary)]/5 backdrop-blur-sm flex items-start gap-6 group hover:bg-[var(--accent-primary)]/10 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--gold-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-black mb-2 tracking-tight">Couple Friendly</h3>
+              <p className="opacity-60 text-sm font-light">Deluxe rooms with attached bathroom and projector setup from ₹1799/night.</p>
+            </div>
           </div>
-          <div className="p-6 border border-[var(--accent-primary)] rounded-lg">
-            <h3 className="text-xl font-bold mb-2">🏡 Family Suites</h3>
-            <p className="opacity-70">Premium 1BHK with private living room, kitchen & bathroom from ₹2200/night.</p>
+          <div className="p-8 border border-[var(--gold-primary)]/20 rounded-2xl bg-[var(--accent-primary)]/5 backdrop-blur-sm flex items-start gap-6 group hover:bg-[var(--accent-primary)]/10 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--gold-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M3 9h18" /></svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-black mb-2 tracking-tight">Family Suites</h3>
+              <p className="opacity-60 text-sm font-light">Premium 1BHK with private living room, kitchen & bathroom from ₹2200/night.</p>
+            </div>
           </div>
-          <div className="p-6 border border-[var(--accent-primary)] rounded-lg">
-            <h3 className="text-xl font-bold mb-2">🏘️ Full Houses</h3>
-            <p className="opacity-70">2BHK houses for birthdays & parties — from ₹2700 to ₹4400/night.</p>
+          <div className="p-8 border border-[var(--gold-primary)]/20 rounded-2xl bg-[var(--accent-primary)]/5 backdrop-blur-sm flex items-start gap-6 group hover:bg-[var(--accent-primary)]/10 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--gold-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-black mb-2 tracking-tight">Full Houses</h3>
+              <p className="opacity-60 text-sm font-light">2BHK houses for birthdays & parties — from ₹2700 to ₹4400/night.</p>
+            </div>
           </div>
         </div>
 
         <div className="mt-12 glass-panel p-8 text-left">
-          <h3 className="text-xl font-bold mb-6 text-center">✅ Amenities Included</h3>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <ShieldCheck className="text-[var(--accent-primary)]" size={24} />
+            <h3 className="text-xl font-black uppercase tracking-widest text-center">Amenities Included</h3>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
             {[
-              { icon: "📶", label: "Free WiFi", sub: "High-speed internet" },
-              { icon: "🎥", label: "Projector Setup", sub: "In select rooms" },
-              { icon: "🛏️", label: "Clean Linen", sub: "Fresh every stay" },
-              { icon: "🚗", label: "Free Parking", sub: "On-site available" },
-              { icon: "💧", label: "24×7 Water", sub: "Hot & cold supply" },
-              { icon: "🏠", label: "Home Comfort", sub: "Fully furnished" },
-              { icon: "🍳", label: "Private Kitchen", sub: "Select suites" },
-              { icon: "❄️", label: "AC Rooms", sub: "Climate controlled" },
-              { icon: "🔒", label: "Secure Entry", sub: "24hr safety" },
-            ].map(({ icon, label, sub }) => (
-              <div key={label} className="p-4 rounded-2xl border border-[var(--accent-primary)]/20 bg-[var(--accent-primary)]/5 hover:bg-[var(--accent-primary)]/10 transition-colors group">
-                <div className="text-3xl mb-2">{icon}</div>
-                <div className="font-bold text-sm group-hover:text-[var(--accent-primary)] transition-colors">{label}</div>
-                <div className="text-[10px] opacity-50 mt-1">{sub}</div>
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><line x1="12" y1="20" x2="12.01" y2="20" />
+                  </svg>
+                ), label: "Free WiFi"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8" /><path d="M12 17v4" /><polygon points="10 7 15 10 10 13 10 7" />
+                  </svg>
+                ), label: "Projector Setup"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <path d="M12 3v18" /><path d="M3 12h18" /><path d="M12 7l-5 5 5 5" /><path d="M12 7l5 5-5 5" />
+                  </svg>
+                ), label: "Clean Linen"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <rect x="1" y="3" width="15" height="13" /><polyline points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
+                  </svg>
+                ), label: "Free Parking"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <path d="M7 16.3c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Z" /><path d="M12 2v20" /><path d="M20 16.3c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Z" />
+                  </svg>
+                ), label: "24×7 Water"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <path d="M4 11a1 1 0 0 1 1 1v1h14v-1a1 1-0 0 1 1-1 2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Z" /><path d="M4 11V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" />
+                  </svg>
+                ), label: "Home Comfort"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                  </svg>
+                ), label: "Private Kitchen"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /><path d="M9 13h12" />
+                  </svg>
+                ), label: "AC Rooms"
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
+                    <circle cx="12" cy="12" r="10" /><path d="M8 11V7a4 4 0 1 1 8 0v4" /><rect x="5" y="11" width="14" height="10" rx="2" />
+                  </svg>
+                ), label: "Secure Entry"
+              },
+            ].map(({ icon, label }) => (
+              <div key={label} className="p-6 rounded-2xl border border-[var(--gold-primary)]/20 bg-[var(--accent-primary)]/5 hover:bg-[var(--accent-primary)]/10 transition-all group flex flex-col items-center justify-center">
+                <div className="text-[var(--accent-primary)] mb-3 group-hover:scale-110 transition-transform">{icon}</div>
+                <div className="font-black text-[9px] uppercase tracking-widest group-hover:text-[var(--accent-primary)] transition-colors opacity-70 group-hover:opacity-100">{label}</div>
               </div>
             ))}
           </div>
@@ -111,8 +187,9 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="mt-8 opacity-70 text-sm">
-          📍 Chaliha Nagar, Bordoloi Nagar Near Lake, Tinsukia, Assam
+        <div className="mt-8 opacity-70 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+          <MapPin size={12} className="text-[var(--accent-primary)]" />
+          Chaliha Nagar, Bordoloi Nagar Near Lake, Tinsukia, Assam
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Camera, MapPin, Mail, ArrowUpRight } from "lucide-react"
+import { Camera, MapPin, Mail, ArrowUpRight, Heart, Music } from "lucide-react"
 import Logo from "./Logo"
 
 export default function Footer() {
@@ -53,11 +53,11 @@ export default function Footer() {
             <h4 className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-40 mb-8 text-[var(--accent-primary)]">Our Sanctuaries</h4>
             <ul className="flex flex-col gap-6">
               {[
-                { name: "Chaliha Nagar", desc: "Main Branch" },
-                { name: "Bordoloi Nagar", desc: "Lake View" },
-                { name: "Bordoloi Nagar", desc: "Income Tax" }
+                { name: "Chaliha Nagar", desc: "Main Branch", map: "https://www.google.com/maps/search/?api=1&query=StayNJoy+Homestay+Chaliha+Nagar+Tinsukia" },
+                { name: "Bordoloi Nagar", desc: "Lake View", map: "https://www.google.com/maps/search/?api=1&query=StayNJoy+Homestay+Bordoloi+Nagar+Tinsukia" },
+                { name: "Bordoloi Nagar", desc: "Income Tax", map: "https://www.google.com/maps/search/?api=1&query=StayNJoy+Homestay+Income+Tax+Office+Tinsukia" }
               ].map((loc, i) => (
-                <li key={i} className="group cursor-default">
+                <li key={i} className="group flex items-center justify-between">
                   <div className="flex items-start gap-4">
                     <MapPin size={18} className="mt-1 text-[var(--accent-primary)] opacity-40 group-hover:opacity-100 transition-opacity" />
                     <div>
@@ -65,6 +65,15 @@ export default function Footer() {
                       <span className="block text-[10px] font-light opacity-40 uppercase tracking-widest">{loc.desc}</span>
                     </div>
                   </div>
+                  <a
+                    href={loc.map}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-[var(--accent-primary)]/5 border border-[var(--gold-primary)]/20 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition-all shadow-sm"
+                    title="Open in Maps"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>
+                  </a>
                 </li>
               ))}
             </ul>
