@@ -1,4 +1,4 @@
-import { Camera, Phone, MapPin, Mail, Globe, ArrowUpRight } from "lucide-react"
+import { Camera, MapPin, Mail, ArrowUpRight } from "lucide-react"
 import Logo from "./Logo"
 
 export default function Footer() {

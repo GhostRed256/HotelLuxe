@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { addRoom } from "./actions"
 import ManualBookingForm from "@/components/ManualBookingForm"
@@ -70,8 +70,6 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
   const [isSubmittingRoom, setIsSubmittingRoom] = useState(false)
   const [isGlobalLoading, setIsGlobalLoading] = useState(false)
 
-  // Sync isGlobalLoading with transitions if needed, or manual trigger
-  const handleSetGlobalLoading = (loading: boolean) => setIsGlobalLoading(loading)
 
   const handleSubmitRoom = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

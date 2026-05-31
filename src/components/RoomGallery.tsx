@@ -709,7 +709,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                               }}
                               className="w-full py-4 rounded-full border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--accent-primary)]/10 transition-all"
                             >
-                              Can't Pay Online? Submit for Manual Review
+                              Can&apos;t Pay Online? Submit for Manual Review
                             </button>
                           </div>
                         </>

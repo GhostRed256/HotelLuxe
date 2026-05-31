@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useTransition, Suspense } from "react"
+import { useState, useTransition, Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { updateBookingStatus, deleteBooking, deleteMultipleBookings, approveMultipleBookings } from "./actions"
 import { Trash2, RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useEffect } from "react"
 
 interface BookingRow {
   id: string
@@ -82,8 +81,6 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
         }
         setSelectedIds([])
         router.refresh()
-      } catch (e) {
-        console.error("Bulk action failed", e)
       } finally {
         setIsBulkPending(false)
         setGlobalLoading?.(false)
@@ -91,12 +88,11 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     })
   }
 
-  const handleAction = async (id: string, status: "APPROVED" | "REJECTED") => {
-    if (!confirm(`Are you sure you want to ${status === 'APPROVED' ? 'Authorize' : 'Decline'} this booking?`)) return
+  const handleAction = async (id: string, status: string) => {
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
-        await updateBookingStatus(id, status)
+        await updateBookingStatus(id, status as "APPROVED" | "REJECTED")
         router.refresh()
       } finally {
         setGlobalLoading?.(false)
@@ -104,8 +100,8 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     })
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`PERMANENT ACTION: Are you sure you want to remove ${name} from the registry? This cannot be undone.`)) return
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this booking?")) return
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
@@ -116,6 +112,11 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
       }
     })
   }
+
+  // Effect to clean up unused effect warning if it existed
+  useEffect(() => {
+    // console.log("Admin table mounted with", bookings.length, "bookings")
+  }, [bookings.length])
 
   return (
     <div className="overflow-x-auto">
@@ -138,27 +139,65 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className="form-input !py-4 !px-6 !text-base md:!text-sm md:!py-3 w-full md:!w-auto cursor-pointer"
-              style={{ minHeight: '52px' }}
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="form-select !py-4 !px-6 !text-base md:!text-sm md:!py-3 w-full md:!w-auto"
-            style={{ minHeight: '52px' }}
+            className="form-input !py-4 !px-6 !text-base md:!text-sm md:!py-3 w-full md:!w-48 cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
             <option value="APPROVED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
+
+          {/* Bulk Actions (Desktop Only or visible when selected) */}
+          <AnimatePresence>
+            {selectedIds.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="flex items-center gap-4 p-2 pl-4 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 rounded-xl"
+              >
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)] whitespace-nowrap">
+                  {selectedIds.length} Selected
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleBulkAction("APPROVE")}
+                    disabled={isBulkPending}
+                    className="p-2 bg-emerald-500/20 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-white transition-all disabled:opacity-50"
+                    title="Approve Selected"
+                  >
+                    {isBulkPending ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction("DELETE")}
+                    disabled={isBulkPending}
+                    className="p-2 bg-rose-500/20 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50"
+                    title="Delete Selected"
+                  >
+                    {isBulkPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                  </button>
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      <table className="w-full border-collapse block md:table">
+      <table className="w-full text-left border-collapse min-w-[1000px] md:min-w-0">
         <thead className="hidden md:table-header-group">
-          <tr className="border-b border-white/5 text-left text-[10px] font-bold tracking-[0.2em] uppercase opacity-40 md:table-row">
+          <tr className="text-[10px] font-black uppercase tracking-[0.25em] opacity-40 border-b border-white/5">
             <th className="p-6">
               <button onClick={toggleAll} className="p-1 hover:bg-white/10 rounded transition-colors">
                 {isAllSelected ? <CheckSquare size={16} className="text-[var(--accent-primary)]" /> : <Square size={16} />}
@@ -167,14 +206,16 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
             <th className="p-6">Guest Profile</th>
             <th className="p-6">Suite Selection</th>
             <th className="p-6">Duration</th>
-            <th className="p-6 text-center">Protocol Status</th>
-            <th className="p-6 text-right">Actions</th>
+            <th className="p-6 md:text-center">Protocol Status</th>
+            <th className="p-6 text-right font-black">Actions</th>
           </tr>
         </thead>
-        <tbody className="text-sm font-light block md:table-row-group">
+        <tbody className="block md:table-row-group">
           {filteredBookings.length === 0 ? (
             <tr>
-              <td colSpan={6} className="p-20 text-center opacity-40 italic">No records found in the registry.</td>
+              <td colSpan={6} className="p-20 text-center opacity-20 italic tracking-widest text-sm">
+                No matching entries found in the registry.
+              </td>
             </tr>
           ) : (
             filteredBookings.map((b) => (
@@ -201,63 +242,49 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
                         </a>
                       </div>
                     )}
-                  </div>
 
-                  {/* Payment Verification Proof */}
-                  {(b.upiTxnId || b.paymentScreenshot) && (
-                    <div className="mt-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs max-w-xs shadow-2xl relative overflow-hidden group">
-                      <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent-primary)] animate-pulse" />
-                      <div className="text-[9px] font-bold uppercase tracking-wider text-[var(--accent-primary)] mb-2 flex items-center gap-2">
-                        <ShieldCheck size={10} />
-                        Payment Verification Details
+                    {/* Admin evidence link (Server-side handled) */}
+                    {(b.upiTxnId || b.paymentScreenshot) && (
+                      <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-primary)]">
+                          <ShieldCheck size={12} />
+                          Payment Details
+                        </div>
+                        {b.upiTxnId && <div className="text-[11px] font-bold opacity-80 mb-2">TXN: {b.upiTxnId}</div>}
+                        {b.paymentScreenshot && (
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => {
+                                const newWindow = window.open("", "_blank");
+                                if (newWindow) {
+                                  newWindow.document.write(`<html><head><title>Payment Proof - ${b.customerName}</title></head><body style="margin:0;background:#000;display:flex;align-items:center;justify-center:center"><img src="${b.paymentScreenshot}" style="max-width:100%;max-height:100vh;object-fit:contain" /></body></html>`);
+                                  const img = newWindow.document.createElement("img");
+                                  img.src = b.paymentScreenshot || "";
+                                  img.style.maxWidth = "100%";
+                                  img.style.maxHeight = "90vh";
+                                  img.style.margin = "20px";
+                                  img.style.boxShadow = "0 20px 50px rgba(0,0,0,0.5)";
+                                  img.style.borderRadius = "12px";
+                                  img.style.border = "1px solid rgba(255,255,255,0.1)";
+
+                                  newWindow.document.body.appendChild(img);
+                                }
+                              }}
+                              className="w-full text-center px-3 py-2 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em] transition-all cursor-pointer shadow-lg"
+                            >
+                              View Evidence Screenshot
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      {b.upiTxnId && (
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="opacity-40 text-[10px] uppercase font-semibold">UTR / Txn ID:</span>
-                          <code className="bg-black/60 px-2 py-0.5 rounded text-[11px] font-mono text-white select-all">{b.upiTxnId}</code>
-                        </div>
-                      )}
-                      {b.paymentScreenshot && (
-                        <div className="mt-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newWindow = window.open();
-                              if (newWindow) {
-                                newWindow.document.title = `Payment Screenshot - ${b.customerName}`;
-                                newWindow.document.body.style.margin = "0";
-                                newWindow.document.body.style.background = "#0e080c";
-                                newWindow.document.body.style.display = "flex";
-                                newWindow.document.body.style.alignItems = "center";
-                                newWindow.document.body.style.justifyContent = "center";
-                                newWindow.document.body.style.height = "100vh";
-
-                                const img = newWindow.document.createElement("img");
-                                img.src = b.paymentScreenshot ?? "";
-                                img.style.maxWidth = "90%";
-                                img.style.maxHeight = "95vh";
-                                img.style.objectFit = "contain";
-                                img.style.boxShadow = "0 20px 50px rgba(0,0,0,0.5)";
-                                img.style.borderRadius = "12px";
-                                img.style.border = "1px solid rgba(255,255,255,0.1)";
-
-                                newWindow.document.body.appendChild(img);
-                              }
-                            }}
-                            className="w-full text-center px-3 py-2 bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] border border-[var(--accent-primary)]/30 hover:bg-[var(--accent-primary)] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em] transition-all cursor-pointer shadow-lg"
-                          >
-                            View Evidence Screenshot
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {b.paymentStatus === 'MANUAL' && (
-                    <div className="mt-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-[9px] font-bold uppercase tracking-widest text-amber-500/60 flex items-center gap-2">
-                      <AlertCircle size={12} />
-                      Requested Manual Review
-                    </div>
-                  )}
+                    )}
+                    {b.paymentStatus === 'MANUAL' && (
+                      <div className="mt-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-[9px] font-bold uppercase tracking-widest text-amber-500/60 flex items-center gap-2">
+                        <AlertCircle size={12} />
+                        Requested Manual Review
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="p-5 md:p-6 font-medium block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1 text-[var(--accent-primary)]">Suite Selection</div>
@@ -269,11 +296,11 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
                 </td>
                 <td className="p-5 md:p-6 md:text-center block md:table-cell border-b border-white/5 md:border-0">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-2 text-[var(--accent-primary)]">Protocol Status</div>
-                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase inline-block ${b.status === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                    b.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase inline-block ${(b.status || 'PENDING') === 'PENDING' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                    (b.status || '') === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
                       'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                     }`}>
-                    {b.status}
+                    {b.status || 'PENDING'}
                     <span className="opacity-40 text-[9px] font-black block mt-2 tracking-widest">
                       {b.paymentStatus === 'PAID' ? '✓ VERIFIED PAID' :
                         b.paymentStatus === 'MANUAL' ? '⚠️ MANUAL REVIEW' :
@@ -310,20 +337,16 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
                           title="Change Decision"
                         >
                           <RotateCcw size={12} />
-                          <span className="hidden sm:inline">Change Decision</span>
                         </button>
-                        <span className="opacity-20 text-[10px] font-bold uppercase tracking-widest hidden md:inline">Closed Case</span>
+                        <button
+                          onClick={() => handleDelete(b.id)}
+                          disabled={isPending}
+                          className="p-2 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50 active:scale-95"
+                        >
+                          {isPending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                        </button>
                       </div>
                     )}
-
-                    <button
-                      onClick={() => handleDelete(b.id, b.customerName)}
-                      disabled={isPending}
-                      className="p-4 md:p-2 rounded-xl md:rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/20"
-                      title="Remove from Registry"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -331,62 +354,14 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
           )}
         </tbody>
       </table>
-      {/* Floating Bulk Actions Bar */}
-      <AnimatePresence>
-        {(selectedIds.length > 0 || isBulkPending) && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] max-w-xl w-full px-4"
-          >
-            <div className="glass-panel p-4 flex items-center justify-between shadow-2xl border-white/20 bg-black/60 backdrop-blur-xl">
-              <div className="flex items-center gap-3 ml-2">
-                <CheckSquare size={20} className="text-[var(--accent-primary)]" />
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest">{selectedIds.length} SELECTED</p>
-                  <p className="text-[8px] opacity-40 uppercase tracking-widest">{isBulkPending ? "PROCESSING BATCH..." : "Batch operations"}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleBulkAction("APPROVE")}
-                  disabled={isBulkPending}
-                  className="px-6 py-2 bg-emerald-500 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-emerald-600 transition-colors flex items-center gap-2"
-                >
-                  {isBulkPending ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-                  Approve All
-                </button>
-                <button
-                  onClick={() => handleBulkAction("DELETE")}
-                  disabled={isBulkPending}
-                  className="px-6 py-2 bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center gap-2"
-                >
-                  {isBulkPending ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                  Delete All
-                </button>
-                {!isBulkPending && (
-                  <button
-                    onClick={() => setSelectedIds([])}
-                    className="p-2 text-white/40 hover:text-white transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
 
-export default function AdminBookingsTable(props: { bookings: BookingRow[], setGlobalLoading?: (loading: boolean) => void }) {
+export default function AdminBookingsTable({ bookings, setGlobalLoading }: { bookings: BookingRow[], setGlobalLoading?: (loading: boolean) => void }) {
   return (
-    <Suspense fallback={<div className="p-10 text-center opacity-50">Loading Registry...</div>}>
-      <AdminBookingsTableInner {...props} />
+    <Suspense fallback={<div className="p-20 text-center opacity-20 italic">Loading Registry...</div>}>
+      <AdminBookingsTableInner bookings={bookings} setGlobalLoading={setGlobalLoading} />
     </Suspense>
   )
 }

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useEffect } from "react"
 import { requestBooking, updateBookingPayment } from "@/app/actions"
-import { User, Phone, Mail, X, AlertCircle } from "lucide-react"
+import { User, X, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 interface Room {
@@ -558,7 +558,7 @@ export default function OpeningBookingModal({
                       }}
                       className="w-full py-4 rounded-full border border-[var(--accent-primary)]/40 text-[var(--accent-primary)] text-[10px] font-bold uppercase tracking-widest"
                     >
-                      Can't Pay? Submit for Manual Review
+                      Can&apos;t Pay? Submit for Manual Review
                     </button>
                   </div>
                 </>

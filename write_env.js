@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const sa = JSON.parse(fs.readFileSync('serviceAccountKey.json', 'utf8'));
 

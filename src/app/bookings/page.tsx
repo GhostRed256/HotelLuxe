@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle, Hash, Phone as PhoneIcon, Mail as MailIcon } from "lucide-react"
+import { Search, Loader2, CheckCircle, Clock, XCircle, AlertCircle, Phone as PhoneIcon, Mail as MailIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import { normalizeGuestIdentifier, formatGuestIdentifierForDisplay } from "@/lib/utils"

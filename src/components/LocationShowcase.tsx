@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MapPin, Clock, Plane, Train, Trees, Mountain } from "lucide-react"
+import { MapPin, Plane, Train, Trees, Mountain } from "lucide-react"
 
 const landmarks = [
   { name: "Tinsukia Junction", distance: "3 KM", time: "8 min", icon: Train },
@@ -36,9 +36,9 @@ export default function LocationShowcase() {
               Where <span className="text-[var(--accent-primary)]">Nature</span> Meets Comfort
             </h2>
             <p className="opacity-60 font-light text-lg leading-relaxed mb-10">
-              Situated in the heart of Tinsukia — the gateway to Dibru-Saikhowa National Park. 
-              Our properties offer the ideal base for birdwatchers tracking the White-winged Wood Duck 
-              or explorers seeking the feral horses of the Dibru valley. Just minutes from Tinsukia 
+              Situated in the heart of Tinsukia — the gateway to Dibru-Saikhowa National Park.
+              Our properties offer the ideal base for birdwatchers tracking the White-winged Wood Duck
+              or explorers seeking the feral horses of the Dibru valley. Just minutes from Tinsukia
               Junction, we blend Assamese warmth with modern luxury.
             </p>
 

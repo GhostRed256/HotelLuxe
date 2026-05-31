@@ -1,6 +1,6 @@
 "use client"
 
-import { Phone, Mail, MapPin, Clock, MessageSquare, Send, ArrowRight } from "lucide-react"
+import { Phone, Mail, MapPin, MessageSquare, Send, ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function ContactPage() {
