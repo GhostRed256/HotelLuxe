@@ -92,8 +92,14 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
-        await updateBookingStatus(id, status as "APPROVED" | "REJECTED")
+        const result = await updateBookingStatus(id, status as "APPROVED" | "REJECTED")
+        if (result && !result.success) {
+          alert(`ACTION FAILED: ${result.error || "Please try again later."}`)
+        }
         router.refresh()
+      } catch (e: any) {
+        console.error("UI Action Error:", e)
+        alert(`SECURITY_ERROR: The action could not be completed. ${e.message || ""}`)
       } finally {
         setGlobalLoading?.(false)
       }

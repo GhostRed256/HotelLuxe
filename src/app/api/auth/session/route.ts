@@ -36,6 +36,8 @@ export async function POST(req: Request) {
   const isPhoneAdmin = adminPhones.includes(userPhone)
   const isServerVerifiedAdmin = isEmailAdmin || isPhoneAdmin
 
+  const isProd = process.env.NODE_ENV === "production"
+
   const cookieStore = await cookies()
   cookieStore.set("admin_session", JSON.stringify({
     email,
@@ -44,7 +46,7 @@ export async function POST(req: Request) {
     isAdmin: isServerVerifiedAdmin
   }), {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProd, // Keep it true for production, but ensure sameSite is lax
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30 // 30 days

@@ -164,45 +164,65 @@ export async function addEmailForReports(formData: FormData) {
 }
 
 export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED", skipRevalidate = false) {
-  await validateAdminSession()
-  const bookingDoc = await db.collection("bookings").doc(bookingId).get()
-  if (!bookingDoc.exists) return
-  const booking = bookingDoc.data()!
-
-  const roomDoc = await db.collection("rooms").doc(booking.roomId).get()
-  const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
-
-  await db.collection("bookings").doc(bookingId).update({
-    status,
-    updatedAt: new Date()
-  })
-
-  // We await this to ensure reliability, but for bulk we could potentially fire and forget
-  // However, the user specifically asked to fix "crashes" which might be timeout related
   try {
-    await notifyBookingStatusChange(
-      {
-        id: bookingId,
-        customerName: booking.customerName,
-        customerEmail: booking.customerEmail,
-        customerPhone: booking.customerPhone,
-        checkIn: booking.checkIn,
-        checkOut: booking.checkOut,
-      },
-      {
-        name: room.name || "Unknown Suite",
-        price: room.price || 0,
-      },
-      status
-    )
-  } catch (e) {
-    console.error("Failed to send notification for booking", bookingId, e)
-  }
+    await validateAdminSession()
 
-  if (!skipRevalidate) {
-    revalidatePath("/admin")
-    revalidatePath("/")
-    revalidatePath("/rooms")
+    if (!bookingId) throw new Error("Booking ID is required");
+
+    const bookingDoc = await db.collection("bookings").doc(bookingId).get()
+    if (!bookingDoc.exists) throw new Error("Booking not found");
+
+    const booking = bookingDoc.data()!
+    const roomId = booking.roomId;
+
+    let room = { name: "Unknown Suite", price: 0 };
+    if (roomId) {
+      try {
+        const roomDoc = await db.collection("rooms").doc(roomId).get()
+        if (roomDoc.exists) {
+          room = roomDoc.data() as { name: string, price: number };
+        }
+      } catch (e) {
+        console.error("Non-fatal error fetching room for booking status update:", e);
+      }
+    }
+
+    await db.collection("bookings").doc(bookingId).update({
+      status,
+      updatedAt: new Date()
+    })
+
+    // We await this to ensure reliability, but for bulk we could potentially fire and forget
+    try {
+      await notifyBookingStatusChange(
+        {
+          id: bookingId,
+          customerName: booking.customerName || "Guest",
+          customerEmail: booking.customerEmail,
+          customerPhone: booking.customerPhone,
+          checkIn: booking.checkIn,
+          checkOut: booking.checkOut,
+        },
+        {
+          name: room.name || "Unknown Suite",
+          price: room.price || 0,
+        },
+        status
+      )
+    } catch (e) {
+      console.error("Non-fatal failure to send notification for booking", bookingId, e)
+    }
+
+    if (!skipRevalidate) {
+      revalidatePath("/admin")
+      revalidatePath("/")
+      revalidatePath("/rooms")
+    }
+
+    return { success: true }
+  } catch (error: any) {
+    console.error(`CRITICAL_SERVER_ACTION_CRASH [updateBookingStatus]:`, error.message);
+    return { success: false, error: error.message || "Failed to update record" }
   }
 }
 
