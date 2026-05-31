@@ -36,15 +36,19 @@ export default function Navbar() {
 
         {/* Desktop Nav - Middle Links (Only visible on large screens to avoid overlap) */}
         <div className="hidden lg:flex items-center gap-10 flex-1 justify-center whitespace-nowrap">
-          {["Home", "Rooms", "About", "Contact"].map((item) => (
-            <Link
+          {(["Home", "Homestays", "About", "Contact"] as const).map((item) => (
+            <a
               key={item}
-              href={item === "Home" ? "/home" : `/${item.toLowerCase()}`}
+              href={
+                item === "Home" ? "/home" :
+                  item === "Homestays" ? "/home#hero" :
+                    `/${item.toLowerCase()}`
+              }
               className={`text-[9px] font-black tracking-[0.3em] uppercase transition-all ${scrolled ? "text-[var(--foreground)] hover:text-[var(--accent-primary)]" : "text-[#1A0811] hover:text-[var(--accent-primary)] dark:text-white"
                 }`}
             >
               {item}
-            </Link>
+            </a>
           ))}
         </div>
 
@@ -122,13 +126,13 @@ export default function Navbar() {
               )}
 
               {!isAdmin && (
-                <Link
-                  href="/rooms"
+                <a
+                  href="/home#hero"
                   className={`btn-primary !py-2.5 !px-8 !text-[9px] !font-black tracking-[0.3em] uppercase shadow-xl hover:scale-105 transition-all ${scrolled ? "" : "dark:!bg-white dark:!text-black !bg-[var(--accent-primary)] !text-white"
                     }`}
                 >
                   Book A Stay
-                </Link>
+                </a>
               )}
             </div>
           )}
@@ -150,10 +154,19 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#0A0307] border-t border-black/5 dark:border-white/5 p-6 flex flex-col gap-6 shadow-2xl z-[110]">
-          {["Home", "Rooms", "About", "Contact"].map((item) => (
-            <Link key={item} href={item === "Home" ? "/home" : `/${item.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-[12px] font-black tracking-widest uppercase text-black dark:text-white hover:text-rose-500 transition-colors">
+          {(["Home", "Homestays", "About", "Contact"] as const).map((item) => (
+            <a
+              key={item}
+              href={
+                item === "Home" ? "/home" :
+                  item === "Homestays" ? "/home#hero" :
+                    `/${item.toLowerCase()}`
+              }
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-[12px] font-black tracking-widest uppercase text-black dark:text-white hover:text-rose-500 transition-colors"
+            >
               {item}
-            </Link>
+            </a>
           ))}
           <div className="pt-4 border-t border-black/10 dark:border-white/10 flex flex-col gap-4">
             {isAdmin ? (

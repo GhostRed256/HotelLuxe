@@ -283,30 +283,30 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
                 </td>
                 <td className="p-5 md:p-6 md:text-right block md:table-cell bg-white/5 md:bg-transparent">
                   <div className="md:hidden text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--accent-primary)]">Actions</div>
-                  <div className="flex flex-wrap gap-3 md:justify-end">
+                  <div className="flex flex-wrap gap-2 md:justify-end">
                     {b.status === 'PENDING' ? (
                       <>
                         <button
                           onClick={() => handleAction(b.id, 'APPROVED')}
                           disabled={isPending}
-                          className="flex-1 md:flex-none px-6 py-4 md:py-2 border border-emerald-500/20 md:border-0 rounded-xl md:rounded-none bg-emerald-500/10 md:bg-transparent text-emerald-500 hover:text-emerald-400 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 text-center active:scale-95"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500 text-white font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20 active:scale-95"
                         >
-                          Approve
+                          <Check size={12} /> Approve
                         </button>
                         <button
                           onClick={() => handleAction(b.id, 'REJECTED')}
                           disabled={isPending}
-                          className="flex-1 md:flex-none px-6 py-4 md:py-2 border border-rose-500/20 md:border-0 rounded-xl md:rounded-none bg-rose-500/10 md:bg-transparent text-rose-500 hover:text-rose-400 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50 text-center active:scale-95"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-rose-500 transition-all disabled:opacity-50 shadow-lg shadow-rose-600/20 active:scale-95"
                         >
-                          Decline
+                          <X size={12} /> Decline
                         </button>
                       </>
                     ) : (
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleAction(b.id, b.status === 'APPROVED' ? 'REJECTED' : 'APPROVED')}
                           disabled={isPending}
-                          className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity text-[9px] font-bold uppercase tracking-widest text-white active:scale-95"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all text-[9px] font-bold uppercase tracking-widest active:scale-95"
                           title="Change Decision"
                         >
                           <RotateCcw size={12} />

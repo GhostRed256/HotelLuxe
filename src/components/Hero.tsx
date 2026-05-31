@@ -74,7 +74,7 @@ export default function Hero() {
   const isDark = resolvedTheme === 'dark'
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative px-4 overflow-hidden pt-20 bg-[var(--background)]">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative px-4 overflow-hidden pt-20 bg-[var(--background)]">
       {/* Background Image Slider (Seamless Crossfade) */}
       <div className="absolute inset-0 z-0 bg-[var(--background)]">
         {images.map((src, i) => (

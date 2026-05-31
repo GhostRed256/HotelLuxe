@@ -45,14 +45,25 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-12 glass-panel p-8 text-left">
-          <h3 className="text-xl font-bold mb-4 text-center">✅ Amenities Included</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">Free WiFi</span>
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">Projector Setup</span>
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">Clean Linen</span>
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">Parking</span>
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">24×7 Water</span>
-            <span className="p-3 border border-[var(--border-color)] rounded-lg">Home Comfort</span>
+          <h3 className="text-xl font-bold mb-6 text-center">✅ Amenities Included</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+            {[
+              { icon: "📶", label: "Free WiFi", sub: "High-speed internet" },
+              { icon: "🎥", label: "Projector Setup", sub: "In select rooms" },
+              { icon: "🛏️", label: "Clean Linen", sub: "Fresh every stay" },
+              { icon: "🚗", label: "Free Parking", sub: "On-site available" },
+              { icon: "💧", label: "24×7 Water", sub: "Hot & cold supply" },
+              { icon: "🏠", label: "Home Comfort", sub: "Fully furnished" },
+              { icon: "🍳", label: "Private Kitchen", sub: "Select suites" },
+              { icon: "❄️", label: "AC Rooms", sub: "Climate controlled" },
+              { icon: "🔒", label: "Secure Entry", sub: "24hr safety" },
+            ].map(({ icon, label, sub }) => (
+              <div key={label} className="p-4 rounded-2xl border border-[var(--accent-primary)]/20 bg-[var(--accent-primary)]/5 hover:bg-[var(--accent-primary)]/10 transition-colors group">
+                <div className="text-3xl mb-2">{icon}</div>
+                <div className="font-bold text-sm group-hover:text-[var(--accent-primary)] transition-colors">{label}</div>
+                <div className="text-[10px] opacity-50 mt-1">{sub}</div>
+              </div>
+            ))}
           </div>
         </div>
 
