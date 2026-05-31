@@ -26,11 +26,15 @@ if (!admin.apps.length) {
     if (credential) {
       admin.initializeApp({ credential });
     } else {
-      throw new Error("No Firebase Admin credentials found!");
+      console.warn("⚠️ Firebase Admin credentials not found. Database operations will be unavailable in this environment.");
     }
   } catch (error: any) {
-    console.error('Firebase admin initialization error:', error.message);
-    throw error;
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Firebase admin initialization error:', error.message);
+      // We don't throw here to avoid killing the build process
+    } else {
+      console.error('Firebase admin initialization error:', error.message);
+    }
   }
 }
 

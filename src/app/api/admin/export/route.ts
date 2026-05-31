@@ -20,6 +20,16 @@ interface Booking {
 }
 
 export async function GET() {
+  // Proactive check for database availability
+  try {
+    if (!db || !db.collection) {
+      console.warn("Export API called but database is uninitialized.");
+      return new NextResponse("Service Unavailable", { status: 503 });
+    }
+  } catch (e) {
+    return new NextResponse("Configuration Error", { status: 500 });
+  }
+
   const session = await getAdminSession()
   if (!session || !session.isAdmin) {
     return new NextResponse("Unauthorized", { status: 401 })
