@@ -46,11 +46,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <div className="max-w-7xl mx-auto px-8 py-20">
-        <div className="mb-12">
-          <h1 className="text-4xl font-heading font-black mb-2">StayNJoy <span className="text-[var(--accent-primary)]">Homestay</span></h1>
-          <p className="opacity-40 text-sm font-light">Administrative Control Center</p>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-20">
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Homestay Control...</div>}>
           <AdminDashboardClient rooms={rooms} bookings={bookings} />
         </Suspense>

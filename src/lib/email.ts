@@ -111,7 +111,7 @@ export async function sendBookingEmail({
           : `A new booking request has been received for <strong>${roomName}</strong>. The guest has provided a ₹300 booking fee via UPI. <strong>Please verify the payment in your bank account before authorizing the stay.</strong>`)
       : isApproved
         ? `Great news! Your stay at <strong>${roomName}</strong> is now officially confirmed. We look forward to welcoming you to our homestay.`
-        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing your details. ${paymentStatus === 'PAID' ? 'We are verifying your ₹300 booking fee.' : 'You will receive a final confirmation email shortly.'}`}
+        : `We have received your reservation request for <strong>${roomName}</strong>. Our team is currently reviewing your details. You will receive a final confirmation email shortly. <strong>Please pay the booking fee of ₹300 to confirm the stay so we can authorize your booking.</strong>`}
       </p>
       
       ${calendarLinkHtml}

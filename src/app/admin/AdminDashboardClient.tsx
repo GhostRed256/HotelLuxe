@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { addRoom } from "./actions"
+import { addRoom, logoutAdmin } from "./actions"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
-import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2 } from "lucide-react"
+import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const compressImage = async (file: File): Promise<File> => {
@@ -166,10 +166,21 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       <div className="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
         <div>
           <h1 className="text-4xl md:text-6xl font-heading font-black tracking-tight mb-2">
-            Homestay <span className="text-[var(--accent-primary)]">Control</span>
+            StayNJoy <span className="text-[var(--accent-primary)]">Control</span>
           </h1>
           <p className="opacity-50 font-light italic text-lg">Curating the perfect experience for every guest.</p>
         </div>
+        <button
+          onClick={async () => {
+            if (confirm("Are you sure you want to end your administrative session?")) {
+              await logoutAdmin()
+            }
+          }}
+          className="flex items-center gap-3 px-6 py-3 rounded-full border border-white/10 hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest transition-all"
+        >
+          <LogOut size={14} className="text-[var(--accent-primary)]" />
+          End Session
+        </button>
       </div>
 
       {/* Conditionally Show Add Room Form */}
