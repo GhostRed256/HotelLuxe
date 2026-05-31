@@ -99,7 +99,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setUserData(null)
           setServerAdmin(false)
-          await fetch("/api/auth/session", { method: "DELETE" })
+          // DO NOT auto-delete the admin_session cookie here.
+          // The admin cookie is managed server-side and should only
+          // be cleared on explicit logout via logoutAdmin() action.
+          // Auto-deleting here wipes the session every time Firebase
+          // client auth re-initializes (e.g. on page refresh), causing
+          // "Unauthorized: No session found" on all server actions.
         }
       } catch (err) {
         console.error("Auth state change error:", err)
