@@ -6,7 +6,28 @@ import { notifyBookingStatusChange } from "@/lib/notifications"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-async function validateAdminSession() {
+import { adminAuth } from "@/lib/firebase-admin"
+
+async function validateAdminSession(clientToken?: string) {
+  if (clientToken) {
+    try {
+      const decoded = await adminAuth.verifyIdToken(clientToken)
+
+      const adminEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL || "staynjoy05@gmail.com").split(",").map(e => e.trim().toLowerCase())
+      const adminPhones = (process.env.ADMIN_PHONES || process.env.NEXT_PUBLIC_ADMIN_PHONE || "+918133819414").split(",").map(p => p.trim())
+
+      const userEmail = decoded.email?.trim().toLowerCase() || ""
+      const userPhone = decoded.phone_number?.trim() || ""
+
+      const isServerVerifiedAdmin = adminEmails.includes(userEmail) || adminPhones.includes(userPhone)
+      if (isServerVerifiedAdmin) {
+        return { uid: decoded.uid, email: userEmail, isAdmin: true }
+      }
+    } catch (e) {
+      console.error("Token fallback verification failed in action", e)
+    }
+  }
+
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get("admin_session")
 
@@ -163,9 +184,9 @@ export async function addEmailForReports(formData: FormData) {
   // This would typically involve saving to a 'notifications' collection
 }
 
-export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED", skipRevalidate = false) {
+export async function updateBookingStatus(bookingId: string, status: "APPROVED" | "REJECTED", skipRevalidate = false, clientToken?: string) {
   try {
-    await validateAdminSession()
+    await validateAdminSession(clientToken)
 
     if (!bookingId) throw new Error("Booking ID is required");
 
@@ -226,8 +247,8 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
   }
 }
 
-export async function deleteMultipleBookings(ids: string[]) {
-  await validateAdminSession()
+export async function deleteMultipleBookings(ids: string[], clientToken?: string) {
+  await validateAdminSession(clientToken)
   const batch = db.batch()
   ids.forEach(id => {
     const ref = db.collection("bookings").doc(id)
@@ -237,8 +258,8 @@ export async function deleteMultipleBookings(ids: string[]) {
   revalidatePath("/admin")
 }
 
-export async function approveMultipleBookings(ids: string[]) {
-  await validateAdminSession()
+export async function approveMultipleBookings(ids: string[], clientToken?: string) {
+  await validateAdminSession(clientToken)
 
   // Update status in batch first for speed
   const batch = db.batch()
@@ -253,13 +274,13 @@ export async function approveMultipleBookings(ids: string[]) {
 
   // Then send notifications in parallel
   // This is safer than awaiting one-by-one in a loop
-  await Promise.allSettled(ids.map(id => updateBookingStatus(id, "APPROVED", true)))
+  await Promise.allSettled(ids.map(id => updateBookingStatus(id, "APPROVED", true, clientToken)))
 
   revalidatePath("/admin")
 }
 
-export async function deleteBooking(bookingId: string) {
-  await validateAdminSession()
+export async function deleteBooking(bookingId: string, clientToken?: string) {
+  await validateAdminSession(clientToken)
   await db.collection("bookings").doc(bookingId).delete()
   revalidatePath("/admin")
 }

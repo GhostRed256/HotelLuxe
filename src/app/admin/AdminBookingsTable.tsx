@@ -3,8 +3,9 @@
 import { useState, useTransition, Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { updateBookingStatus, deleteBooking, deleteMultipleBookings, approveMultipleBookings } from "./actions"
-import { Trash2, RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle } from "lucide-react"
+import { RotateCcw, CheckSquare, Square, Check, X, Loader2, ShieldCheck, AlertCircle, Trash2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useAuth } from "@/lib/auth-context"
 
 interface BookingRow {
   id: string
@@ -29,6 +30,7 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { user } = useAuth()
 
   const filteredBookings = bookings.filter(b => {
     // We check substring of customer name, email OR ID (for the email link routing)
@@ -74,10 +76,11 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
+        const token = user ? await user.getIdToken() : undefined;
         if (action === "APPROVE") {
-          await approveMultipleBookings(selectedIds)
+          await approveMultipleBookings(selectedIds, token)
         } else {
-          await deleteMultipleBookings(selectedIds)
+          await deleteMultipleBookings(selectedIds, token)
         }
         setSelectedIds([])
         router.refresh()
@@ -92,7 +95,8 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
-        const result = await updateBookingStatus(id, status as "APPROVED" | "REJECTED")
+        const token = user ? await user.getIdToken() : undefined;
+        const result = await updateBookingStatus(id, status as "APPROVED" | "REJECTED", false, token)
         if (result && !result.success) {
           alert(`ACTION FAILED: ${result.error || "Please try again later."}`)
         }
@@ -111,7 +115,8 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
     setGlobalLoading?.(true)
     startTransition(async () => {
       try {
-        await deleteBooking(id)
+        const token = user ? await user.getIdToken() : undefined;
+        await deleteBooking(id, token)
         router.refresh()
       } finally {
         setGlobalLoading?.(false)
