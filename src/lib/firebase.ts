@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || (typeof window === "undefined" ? "BUILD_TIME_DUMMY_KEY" : undefined),
@@ -19,6 +20,19 @@ try {
   if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "BUILD_TIME_DUMMY_KEY") {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
+
+    // Initialize App Check with reCAPTCHA Enterprise setup
+    if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      try {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaEnterpriseProvider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
+          isTokenAutoRefreshEnabled: true
+        });
+      } catch (checkError) {
+        // We catch here so App Check failure doesn't crash the entire app initialization
+        console.warn("App Check initialization skipped or failed:", checkError);
+      }
+    }
   } else {
     // During build time or if keys are missing, we export "mock" versions 
     // that won't crash on module load but also won't do anything.
