@@ -13,7 +13,6 @@ import {
 } from "firebase/auth"
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"
 
-const db = getFirestore(app)
 
 interface UserData {
   displayName?: string
@@ -52,6 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = serverAdmin
 
   useEffect(() => {
+    // Build Safety: Skip subscription if Firebase is unavailable during static analysis
+    if (!auth || typeof auth.onAuthStateChanged !== "function") {
+      setLoading(false)
+      return
+    }
+
+    const db = getFirestore(app)
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user)
 
@@ -123,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, pass: string, data: UserData) => {
     const res = await createUserWithEmailAndPassword(auth, email, pass)
     if (res.user) {
+      const db = getFirestore(app)
       const cleanData: any = { ...data }
       if (email.includes("@staynjoy.com") || email.includes("@homestay.com")) {
         if (!data.email) delete cleanData.email
