@@ -38,5 +38,29 @@ if (!admin.apps.length) {
   }
 }
 
-export const db = admin.firestore()
-export const adminAuth = admin.auth()
+// Helper to create a build-safe lazy proxy
+function createLazyProxy<T extends object>(initializer: () => T, name: string): T {
+  return new Proxy({} as T, {
+    get(_, prop) {
+      if (!admin.apps.length) {
+        // If we are in build time, we return a mock or undefined to prevent crashes
+        console.warn(`[Build Safety] Accessing ${name} property "${String(prop)}" before initialization.`);
+
+        // Return a mock function that doesn't crash if called
+        return (...args: any[]) => {
+          console.warn(`[Build Safety] Called ${name}.${String(prop)} but Firebase is uninitialized.`);
+          return Promise.resolve(null);
+        };
+      }
+      const instance = initializer();
+      const value = (instance as any)[prop];
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
+      return value;
+    }
+  });
+}
+
+export const db = createLazyProxy(() => admin.firestore(), 'Firestore');
+export const adminAuth = createLazyProxy(() => admin.auth(), 'Auth');
