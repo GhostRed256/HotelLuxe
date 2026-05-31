@@ -11,8 +11,31 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase only once
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
+/**
+ * Lazy Initialization Proxy for Firebase Client SDK
+ * Prevents build-time crashes when API keys are missing during static analysis.
+ */
+function createLazyProxy<T extends object>(initializer: () => T, name: string): T {
+  let instance: T | null = null;
+  return new Proxy({} as T, {
+    get(_, prop) {
+      if (!firebaseConfig.apiKey) {
+        console.warn(`[Firebase Proxy] ${name} accessed but apiKey is missing. Returning null for ${String(prop)}.`);
+        return null;
+      }
+      if (!instance) {
+        instance = initializer();
+      }
+      return (instance as any)[prop];
+    }
+  });
+}
+
+const app = createLazyProxy(() =>
+  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig),
+  "app"
+);
+
+const auth = createLazyProxy(() => getAuth(app), "auth");
 
 export { app, auth };
