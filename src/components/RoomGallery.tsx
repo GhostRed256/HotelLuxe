@@ -41,9 +41,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
 
   // 2. Constants & Pure Functions
   const displayRooms = useMemo(() =>
-    (rooms.length > 0 ? rooms : []).filter((r: any) =>
-      !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk')
-    ), [rooms])
+    (rooms.length > 0 ? rooms : []), [rooms])
 
   const isRoomBooked = useCallback((roomId: string) => {
     const isBooked = (id: string) => bookings?.some(b =>
@@ -57,17 +55,20 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     const IT3_3BHK = 'f3fJhWTuCDGwhxlxIQaD'
     const HOUSE_4BHK = '6rluzPaGTH1YT0kYfj0T'
 
+    // 4BHK House = 2BHK (Top Floor) + 3BHK (Top Floor) only.
+    // Booking 4BHK blocks 2BHK and 3BHK, but NOT 1BHK Down floor.
     if (roomId === HOUSE_4BHK) {
-      if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true;
+      if (isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true;
     }
     if (roomId === IT3_3BHK) {
-      if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true;
+      if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK)) return true;
     }
     if (roomId === IT2_2BHK) {
-      if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true;
+      if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK)) return true;
     }
     if (roomId === IT1_1BHK) {
-      if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true;
+      // 1BHK Down floor is independent — only blocked by its own booking
+      if (isBooked(IT1_1BHK)) return true;
     }
 
     return isBooked(roomId);
@@ -293,6 +294,7 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
                 <option value="Cozy Pink Room">Pink Cozy Room {"\u20B9"}1399</option>
                 <option value="Deluxe Room">Deluxe Room {"\u20B9"}1799</option>
                 <option value="Premium Suite">Premium Suite</option>
+                <option value="4BHK House">4BHK House (Entire Floor)</option>
               </select>
               <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">▼</div>
             </div>

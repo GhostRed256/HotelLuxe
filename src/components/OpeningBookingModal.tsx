@@ -78,18 +78,21 @@ export default function OpeningBookingModal({
     const IT3_3BHK = 'f3fJhWTuCDGwhxlxIQaD'
     const HOUSE_4BHK = '6rluzPaGTH1YT0kYfj0T'
 
+    // 4BHK House covers 2BHK and 3BHK Top Floor units only.
+    // Booking 4BHK does NOT block the 1BHK Down floor.
     return (roomId: string): boolean => {
       if (roomId === HOUSE_4BHK) {
-        if (isBooked(HOUSE_4BHK) || isBooked(IT1_1BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true
+        if (isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK) || isBooked(IT3_3BHK)) return true
       }
       if (roomId === IT3_3BHK) {
-        if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK) || isBooked(IT2_2BHK)) return true
+        if (isBooked(IT3_3BHK) || isBooked(HOUSE_4BHK)) return true
       }
       if (roomId === IT2_2BHK) {
-        if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK) || isBooked(IT3_3BHK)) return true
+        if (isBooked(IT2_2BHK) || isBooked(HOUSE_4BHK)) return true
       }
       if (roomId === IT1_1BHK) {
-        if (isBooked(IT1_1BHK) || isBooked(HOUSE_4BHK)) return true
+        // 1BHK Down floor is independent of the 4BHK House
+        if (isBooked(IT1_1BHK)) return true
       }
       return !!isBooked(roomId)
     }
@@ -378,7 +381,7 @@ export default function OpeningBookingModal({
                         <option value="" className="bg-[var(--background)]">— Choose an available suite —</option>
                         {Object.entries(
                           rooms
-                            .filter((r: Room) => !isRoomBooked(r.id) && !r.type?.toLowerCase().includes('4bhk') && !r.name?.toLowerCase().includes('4bhk'))
+                            .filter((r: Room) => !isRoomBooked(r.id))
                             .reduce((acc: Record<string, Room[]>, r: Room) => {
                               if (!acc[r.type]) acc[r.type] = []
                               acc[r.type].push(r)

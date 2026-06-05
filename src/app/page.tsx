@@ -96,8 +96,8 @@ export default async function PreBookingWindow() {
     };
   }).filter(Boolean) as any[];
 
-  // Only show categories that have available rooms
-  // Exclude 4BHK HOUSE from showing as its own category card — it's a combination of the 3 sub-units
+  // Only show categories that have available rooms.
+  // Exclude 4BHK HOUSE — it is a combination of the sub-units and booked separately via the booking modal.
   const availableCategories = categories.filter(c => c.available > 0 && !c.type.toLowerCase().includes('4bhk'));
 
   return (
