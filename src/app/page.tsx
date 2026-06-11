@@ -6,6 +6,12 @@ import { serializeFirestoreData } from "@/lib/utils";
 import { ShieldCheck } from "lucide-react";
 import PreBookingClient from "@/components/PreBookingClient";
 
+export const metadata = {
+  alternates: {
+    canonical: "/"
+  }
+}
+
 export default async function PreBookingWindow() {
   const [roomsSnapshot, bookingsSnapshot] = await Promise.all([
     db.collection("rooms").get(),

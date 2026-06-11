@@ -7,6 +7,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JaapiDivider from "@/components/JaapiDivider";
 
+export const metadata = {
+    title: "Luxury Suites & Houses | StayNJoy Homestay",
+    description: "Browse our premium homestay rooms, couple suites, and large 2BHK/4BHK family houses in Tinsukia. Real-time availability and fast booking.",
+    alternates: {
+        canonical: "/homestays"
+    }
+}
+
 /**
  * HomestaysPage - The "Detailed Opening Screen" for browsing all rooms and suites.
  */

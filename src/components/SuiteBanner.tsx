@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import { useRef } from "react"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
+import ProgressiveImage from "./ProgressiveImage"
+
 
 interface SuiteBannerProps {
   rooms: any[]
@@ -112,14 +114,12 @@ export default function SuiteBanner({ rooms, bookings = [] }: SuiteBannerProps) 
             >
               <Link href={`/rooms?suite=${encodeURIComponent(cat.type)}`} className="block group">
                 <div className="relative h-[50vh] md:h-[60vh] rounded-3xl overflow-hidden border border-white/5 bg-black">
-                  {/* Background Image */}
-                  <img
+                  {/* Background Image using Progressive Loading */}
+                  <ProgressiveImage
                     src={cat.image}
                     alt={cat.type}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    fetchPriority={i === 0 ? "high" : "low"}
-                    decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    priority={i === 0}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 z-0"
                   />
 
                   {/* Overlay */}

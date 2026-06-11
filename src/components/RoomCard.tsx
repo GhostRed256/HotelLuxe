@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
+import ProgressiveImage from "./ProgressiveImage"
 
 export default function RoomCard({ room, onBook, isBooked, hideBookButton = false, availableFloors = null }: { room: any, onBook?: () => void, isBooked?: boolean, hideBookButton?: boolean, availableFloors?: string | null }) {
   const ref = useRef(null)
@@ -56,15 +57,20 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
       className="glass-panel flex flex-col overflow-hidden relative group hover:scale-[1.02]"
     >
       <div className="h-72 md:h-80 overflow-hidden relative">
-        <motion.img
+        {/* We keep the motion effects but apply them to the wrapper using motion.div */}
+        <motion.div
           key={currentImageIndex}
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2 }}
-          src={images[currentImageIndex]}
-          alt={room.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[4000ms]"
-        />
+          className="w-full h-full absolute inset-0"
+        >
+          <ProgressiveImage
+            src={images[currentImageIndex]}
+            alt={room.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[4000ms]"
+          />
+        </motion.div>
 
         {/* Subtle Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />

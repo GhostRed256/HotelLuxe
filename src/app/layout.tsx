@@ -38,13 +38,34 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to speed up external resources on mobile */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
         <link rel="dns-prefetch" href="https://api.qrserver.com" />
         <link rel="dns-prefetch" href="https://www.google.com" />
+        {/* SEO - Structured Data JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LodgingBusiness",
+              "name": "StayNJoy Homestay",
+              "image": "https://stay-n-joy.vercel.app/og-image.png",
+              "description": "Experience world-class comfort and joy at StayNJoy Homestay, Tinsukia. Book your perfect homestay.",
+              "url": "https://stay-n-joy.vercel.app",
+              "telephone": "+9181042005",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Tinsukia",
+                "addressRegion": "Assam",
+                "addressCountry": "IN"
+              },
+              "priceRange": "₹1399 - ₹5400"
+            })
+          }}
+        />
       </head>
       <body>
         <Providers>

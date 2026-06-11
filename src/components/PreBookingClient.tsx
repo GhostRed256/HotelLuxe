@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import OpeningBookingModal from "./OpeningBookingModal"
+import ProgressiveImage from "./ProgressiveImage"
 
 interface Category {
   type: string
@@ -72,10 +73,11 @@ export default function PreBookingClient({
               className={`block group cursor-pointer ${colSpanClass}`}
             >
               <div className={`relative ${isPremium ? 'h-[500px]' : 'h-[400px]'} rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 bg-black shadow-2xl transition-all duration-500 ornate-border ${glowClass}`}>
-                <img
+                <ProgressiveImage
                   src={cat.image}
                   alt={cat.type}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                  priority={i === 0}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 z-0"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10" />
