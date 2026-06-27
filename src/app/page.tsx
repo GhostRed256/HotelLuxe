@@ -154,7 +154,7 @@ export default async function PreBookingWindow() {
 
         <div className="flex justify-center mb-12 animate-in fade-in duration-1000 delay-200">
           <a
-            href="https://airbnb.co.in/h/staynjoytinsukia"
+            href="https://airbnb.co.in/h/pinkcozyroomstaynjoy"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-6 py-3.5 bg-[#FF5A5F]/15 border border-[#FF5A5F]/30 text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 shadow-md hover:scale-105 active:scale-95 cursor-pointer"

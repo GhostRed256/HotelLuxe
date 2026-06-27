@@ -48,12 +48,20 @@ export async function logoutAdmin() {
   redirect("/staff-login")
 }
 
-// Convert file to base64 data URI for Firestore storage
+import sharp from "sharp"
+
+// Convert file to base64 data URI for Firestore storage, compressing it first
 async function fileToDataUri(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
-  const base64 = buffer.toString('base64')
-  const mimeType = file.type || 'image/jpeg'
-  return `data:${mimeType};base64,${base64}`
+  
+  // Compress the image to a highly efficient WebP format, max 1200x1200 px
+  const compressedBuffer = await sharp(buffer)
+    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 75 })
+    .toBuffer()
+
+  const base64 = compressedBuffer.toString('base64')
+  return `data:image/webp;base64,${base64}`
 }
 
 export async function addRoom(formData: FormData, clientToken?: string) {
