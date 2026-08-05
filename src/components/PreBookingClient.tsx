@@ -2,8 +2,12 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import OpeningBookingModal from "./OpeningBookingModal"
+import dynamic from "next/dynamic"
 import ProgressiveImage from "./ProgressiveImage"
+
+const OpeningBookingModal = dynamic(() => import("./OpeningBookingModal"), {
+  ssr: false
+})
 
 interface Category {
   type: string
@@ -70,7 +74,16 @@ export default function PreBookingClient({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
               onClick={() => handleBookNow(cat)}
-              className={`block group cursor-pointer ${colSpanClass}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  handleBookNow(cat)
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Book ${cat.type} starting from ₹${cat.price} per night`}
+              className={`block group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B88F54] focus-visible:ring-offset-2 rounded-3xl ${colSpanClass}`}
             >
               <div className={`relative ${isPremium ? 'h-[500px]' : 'h-[400px]'} rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 bg-black shadow-2xl transition-all duration-500 ornate-border ${glowClass}`}>
                 <ProgressiveImage
@@ -91,12 +104,12 @@ export default function PreBookingClient({
                 </div>
 
                 {/* Gold corners to reinforce luxury branding */}
-                <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-[var(--gold-primary)]/40 rounded-tl-lg" />
-                <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-[var(--gold-primary)]/40 rounded-br-lg" />
+                <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-[var(--gold-primary)]/40 rounded-tl-lg" aria-hidden="true" />
+                <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-[var(--gold-primary)]/40 rounded-br-lg" aria-hidden="true" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-400">
                       {cat.available} Available Now
                     </span>
@@ -131,13 +144,16 @@ export default function PreBookingClient({
       </div>
 
       {/* Mounting exclusive Booking Modal */}
-      <OpeningBookingModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        selectedCategory={selectedCat}
-        rooms={rooms}
-        bookings={bookings}
-      />
+      {isOpen && (
+        <OpeningBookingModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          selectedCategory={selectedCat}
+          rooms={rooms}
+          bookings={bookings}
+        />
+      )}
     </>
   )
 }
+

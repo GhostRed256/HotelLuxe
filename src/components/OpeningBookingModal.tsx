@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useMemo, useEffect } from "react"
 import { requestBooking, updateBookingPayment } from "@/app/actions"
+import { compressImage } from "@/lib/image-utils"
 import { User, X, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -506,9 +507,12 @@ export default function OpeningBookingModal({
                               type="file"
                               accept="image/*"
                               className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
+                              onChange={async (e) => {
+                                let file = e.target.files?.[0];
                                 if (file) {
+                                  if (file.type.startsWith('image/')) {
+                                    file = await compressImage(file, 1000, 1000, 0.6);
+                                  }
                                   setPaymentImage(file);
                                   const reader = new FileReader();
                                   reader.onloadend = () => setPaymentPreview(reader.result as string);

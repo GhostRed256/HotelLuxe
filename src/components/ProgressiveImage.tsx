@@ -16,6 +16,7 @@ export default function ProgressiveImage({ src, alt, className, priority = false
                 src={src}
                 alt={alt}
                 loading={priority ? "eager" : "lazy"}
+                fetchPriority={priority ? "high" : "low"}
                 decoding="async"
                 onLoad={() => setIsLoaded(true)}
                 className={`w-full h-full object-cover transition-all duration-[1500ms] ease-out z-10 relative ${isLoaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-2xl scale-110"

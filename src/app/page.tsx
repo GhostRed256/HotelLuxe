@@ -133,18 +133,20 @@ export default async function PreBookingWindow() {
               {/* Jaapi Image Design */}
               <img
                 src="/jaapi.png"
-                alt="Jaapi Design"
+                alt="Traditional Assamese Jaapi motif"
                 width={80}
                 height={80}
+                loading="eager"
+                fetchPriority="high"
                 className="w-20 md:w-24 h-auto drop-shadow-[0_10px_15px_rgba(184,143,84,0.4)]"
               />
             </div>
             <div className="flex items-center justify-center gap-3">
-              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
+              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" aria-hidden="true" />
               <p className="text-[11px] md:text-xs font-heading font-bold uppercase tracking-[0.3em] text-black dark:text-white opacity-80 [text-shadow:0_0_15px_rgba(255,255,255,1)] dark:[text-shadow:none]">
                 Book <span className="text-[#B88F54] font-extrabold">your</span> Stay
               </p>
-              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" />
+              <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -157,9 +159,10 @@ export default async function PreBookingWindow() {
             href="https://airbnb.co.in/h/pinkcozyroomstaynjoy"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-6 py-3.5 bg-[#FF5A5F]/15 border border-[#FF5A5F]/30 text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+            aria-label="Book via Airbnb Listing (opens in a new tab)"
+            className="flex items-center gap-3 px-6 py-3.5 bg-[#FF5A5F]/15 border border-[#FF5A5F]/30 text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 shadow-md hover:scale-105 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5A5F]"
           >
-            <svg viewBox="0 0 32 32" className="w-4 h-4 fill-current">
+            <svg viewBox="0 0 32 32" className="w-4 h-4 fill-current" aria-hidden="true">
               <path d="M16 1c-2.007 0-3.666 1.488-3.957 3.42C9.489 8.283 5 15.65 5 21.053c0 5.485 4.433 9.947 9.9 9.947 2.007 0 3.666-1.488 3.957-3.42 2.554-3.863 7.043-11.23 7.043-16.633C25.9 5.462 21.467 1 16 1zm0 2.21c4.27 0 7.733 3.479 7.733 7.766 0 4.148-3.714 10.457-6.076 14.07a3.972 3.972 0 0 1-3.314 1.764c-2.207 0-4-1.797-4-4.004 0-4.148 3.714-10.457 6.076-14.07A3.972 3.972 0 0 1 16 3.21zm0 6.643a1.996 1.996 0 0 0-2 2c0 1.102.898 2 2 2s2-.898 2-2c0-1.102-.898-2-2-2z" />
             </svg>
             Book via Airbnb Listing

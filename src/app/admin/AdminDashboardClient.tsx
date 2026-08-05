@@ -3,60 +3,13 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { addRoom, logoutAdmin } from "./actions"
+import { compressImage } from "@/lib/image-utils"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
 import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
-const compressImage = async (file: File): Promise<File> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
-            } else {
-              resolve(file);
-            }
-          },
-          'image/jpeg',
-          0.5
-        );
-      };
-      img.onerror = () => resolve(file);
-    };
-    reader.onerror = () => resolve(file);
-  });
-};
 
 export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[], bookings: any[] }) {
   const searchParams = useSearchParams()

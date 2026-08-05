@@ -154,7 +154,7 @@ export default function Hero() {
                 Reserve Your Stay
               </Link>
               <a
-                href="https://airbnb.co.in/h/staynjoytinsukia"
+                href="https://airbnb.co.in/h/pinkcozyroomstaynjoy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-outline min-w-[240px] !py-5 md:backdrop-blur-xl text-[11px] md:text-[12px] font-bold tracking-[0.2em] uppercase transition-all !text-[#FF5A5F] !border-[#FF5A5F]/40 hover:!bg-[#FF5A5F]/10 flex items-center justify-center gap-2.5 cursor-pointer"

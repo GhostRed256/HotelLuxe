@@ -57,7 +57,8 @@ export default function Navbar() {
           {mounted && (
             <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className={`p-2 transition-transform hover:scale-110 ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}
+              aria-label={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              className={`p-2 transition-transform hover:scale-110 min-w-[44px] min-h-[44px] flex items-center justify-center ${scrolled ? "text-[var(--foreground)]" : "text-[#1A0811] dark:text-white"}`}
             >
               {resolvedTheme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -141,11 +142,20 @@ export default function Navbar() {
         {/* Mobile Toggle */}
         <div className="md:hidden flex items-center gap-4">
           {mounted && (
-            <button onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="p-2 text-rose-500">
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              aria-label={resolvedTheme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              className="p-2 text-rose-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            >
               {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           )}
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-[#1A0811] dark:text-white">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+            className="p-2 text-[#1A0811] dark:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>

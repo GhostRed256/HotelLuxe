@@ -26,6 +26,7 @@ export default function Footer() {
                 href="https://www.instagram.com/stayn_joy_tinsukia"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Visit our Instagram page"
                 className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center hover:bg-[var(--accent-primary)] hover:text-white transition-all duration-500"
               >
                 <Camera size={20} />
@@ -34,6 +35,7 @@ export default function Footer() {
                 href="https://wa.me/919181042005"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Contact us on WhatsApp"
                 className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center hover:bg-[#25D366] hover:border-[#25D366] hover:text-white transition-all duration-500"
               >
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
@@ -41,6 +43,8 @@ export default function Footer() {
               <a
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=staynjoy05@gmail.com"
                 target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Send us an email"
                 className="w-12 h-12 rounded-full border border-[var(--border-color)] flex items-center justify-center hover:bg-[var(--accent-primary)] hover:text-white transition-all duration-500"
               >
                 <Mail size={20} />
@@ -69,6 +73,7 @@ export default function Footer() {
                     href={loc.map}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={`Open ${loc.name} (${loc.desc}) in Google Maps`}
                     className="p-2 rounded-full bg-[var(--accent-primary)]/5 border border-[var(--gold-primary)]/20 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white transition-all shadow-sm"
                     title="Open in Maps"
                   >
