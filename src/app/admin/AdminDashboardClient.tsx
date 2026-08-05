@@ -7,6 +7,7 @@ import { compressImage } from "@/lib/image-utils"
 import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
+import InventoryMatrixWidget from "@/components/InventoryMatrixWidget"
 import { Plus, X, Calendar, Home, Download, ChevronDown, Loader2, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -345,6 +346,9 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Inventory Matrix Floating Widget - Admin only, hidden from public */}
+      <InventoryMatrixWidget rooms={rooms} bookings={bookings} />
     </div>
   )
 }

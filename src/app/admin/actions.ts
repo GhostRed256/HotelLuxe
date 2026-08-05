@@ -325,3 +325,59 @@ export async function createManualBooking(formData: FormData) {
     return { success: false, error: error.message }
   }
 }
+
+export async function toggleRoomInventoryStatus(roomId: string, setBooked: boolean, clientToken?: string) {
+  try {
+    await validateAdminSession(clientToken)
+    const todayStr = new Date().toISOString().split('T')[0]
+
+    if (setBooked) {
+      const existingBookings = await db.collection("bookings")
+        .where("roomId", "==", roomId)
+        .where("status", "==", "APPROVED")
+        .get()
+
+      const isAlreadyBooked = existingBookings.docs.some((doc: any) => {
+        const b = doc.data()
+        return new Date(b.checkIn) <= new Date() && new Date(b.checkOut) >= new Date()
+      })
+
+      if (!isAlreadyBooked) {
+        await db.collection("bookings").add({
+          roomId,
+          customerName: "Admin Quick Block",
+          customerEmail: "admin@staynjoy.com",
+          customerPhone: "+918133819414",
+          checkIn: todayStr,
+          checkOut: "2099-12-31",
+          status: "APPROVED",
+          paymentStatus: "MANUAL",
+          isQuickBlock: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      }
+    } else {
+      const existingBookings = await db.collection("bookings")
+        .where("roomId", "==", roomId)
+        .where("status", "==", "APPROVED")
+        .get()
+
+      const batch = db.batch()
+      existingBookings.docs.forEach((doc: any) => {
+        batch.update(doc.ref, { status: "REJECTED", updatedAt: new Date() })
+      })
+      await batch.commit()
+    }
+
+    revalidatePath("/admin")
+    revalidatePath("/")
+    revalidatePath("/rooms")
+    revalidatePath("/homestays")
+    return { success: true }
+  } catch (error: any) {
+    console.error("Failed to toggle room status:", error)
+    return { success: false, error: error.message }
+  }
+}
+
