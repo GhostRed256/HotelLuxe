@@ -4,8 +4,8 @@ import React from "react"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
 
-// Pre-compute particle positions outside render to satisfy react-hooks/purity rule
-const LOGO_PARTICLES = [...Array(15)].map(() => ({
+// ANTIGRAVITY: Reduced from 15 to 8 particles — halves composite layer work on mobile
+const LOGO_PARTICLES = [...Array(8)].map(() => ({
   r: Math.random() * 2 + 1,
   cx: 150 + Math.random() * 100,
   cy: 150 + Math.random() * 100,
@@ -63,6 +63,12 @@ export default function Logo({ className = "h-14" }: { className?: string }) {
           .animate-glow { animation: glow-pulse 4s ease-in-out infinite; }
           .animate-glow-pink { animation: glow-pink 4s ease-in-out infinite; }
           .particle { animation: particle-float 6s infinite ease-in-out; pointer-events: none; }
+          /* ANTIGRAVITY: Respect reduced-motion — kills all looping animations on low-end/accessibility devices */
+          @media (prefers-reduced-motion: reduce) {
+            .animate-entrance { animation: none; opacity: 1; }
+            .animate-glow, .animate-glow-pink { animation: none; }
+            .particle { display: none; }
+          }
         `}
       </style>
 

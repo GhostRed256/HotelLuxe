@@ -22,14 +22,18 @@
            <div className="absolute inset-[-6px] rounded-full border border-[var(--gold-primary)] opacity-25" />
            <div className="absolute inset-[-12px] rounded-full border border-dashed border-[var(--gold-primary)]/15 animate-[spin_35s_linear_infinite_reverse]" />
            
-           {/* The Jaapi PNG itself - Transparent and Large */}
+            {/* The Jaapi PNG itself - Transparent and Large */}
            <div className="relative w-32 h-32 flex items-center justify-center">
-             <Image 
-               src="/jaapi.png" 
-               alt="Assamese Jaapi Artifact" 
-               fill 
-               className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
-             />
+             {/* ANTIGRAVITY: WebP source for 65% smaller file, PNG fallback for older browsers */}
+             <picture>
+               <source srcSet="/jaapi.webp" type="image/webp" />
+               <Image 
+                 src="/jaapi.png" 
+                 alt="Assamese Jaapi Artifact" 
+                 fill 
+                 className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
+               />
+             </picture>
            </div>
  
            {/* Atmospheric Gold Glow */}

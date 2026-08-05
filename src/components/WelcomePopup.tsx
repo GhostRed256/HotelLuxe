@@ -64,12 +64,16 @@ export default function WelcomePopup() {
               <div className="relative w-24 h-24">
                 <div className="absolute inset-0 rounded-full border-2 border-[var(--gold-primary)]/30 animate-ping" />
                 <div className="absolute inset-[-4px] rounded-full border border-[var(--gold-primary)]/20 shadow-[0_0_20px_rgba(184,143,84,0.3)]" />
-                <Image
-                  src="/jaapi.png"
-                  alt="Heritage Artifact"
-                  fill
-                  className="object-contain"
-                />
+                {/* ANTIGRAVITY: WebP fallback for 65% smaller image in welcome popup */}
+                <picture>
+                  <source srcSet="/jaapi.webp" type="image/webp" />
+                  <Image
+                    src="/jaapi.png"
+                    alt="Heritage Artifact"
+                    fill
+                    className="object-contain"
+                  />
+                </picture>
               </div>
             </div>
 

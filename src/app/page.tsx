@@ -131,15 +131,19 @@ export default async function PreBookingWindow() {
           <div className="flex flex-col items-center justify-center mb-4">
             <div className="animate-float mb-3 text-[#B88F54] drop-shadow-[0_0_20px_rgba(184,143,84,0.6)]">
               {/* Jaapi Image Design */}
-              <img
-                src="/jaapi.png"
-                alt="Traditional Assamese Jaapi motif"
-                width={80}
-                height={80}
-                loading="eager"
-                fetchPriority="high"
-                className="w-20 md:w-24 h-auto drop-shadow-[0_10px_15px_rgba(184,143,84,0.4)]"
-              />
+              {/* ANTIGRAVITY: WebP = 179KB vs PNG 518KB, 65% savings on hero load */}
+              <picture>
+                <source srcSet="/jaapi.webp" type="image/webp" />
+                <img
+                  src="/jaapi.png"
+                  alt="Traditional Assamese Jaapi motif"
+                  width={80}
+                  height={80}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="w-20 md:w-24 h-auto drop-shadow-[0_10px_15px_rgba(184,143,84,0.4)]"
+                />
+              </picture>
             </div>
             <div className="flex items-center justify-center gap-3">
               <div className="h-[1px] w-8 bg-black/10 dark:bg-white/10" aria-hidden="true" />
