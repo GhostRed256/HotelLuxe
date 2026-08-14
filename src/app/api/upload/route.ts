@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
       else mimeType = "image/jpeg";
     }
 
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "hh0twxep";
-    const apiKey = process.env.CLOUDINARY_API_KEY || "525939719417216";
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || "qWIhLnopv09OXiu4RGlLMWYg9DE";
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
       return NextResponse.json(
