@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Settings,
   Sheet,
+  Plus,
 } from "lucide-react"
 
 interface AdminSheetSyncFormProps {
@@ -38,8 +39,9 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
   const [online, setOnline] = useState("")
   const [notes, setNotes] = useState("")
 
-  const [preBookingUrl, setPreBookingUrl] = useState("")
-  const [postBookingUrl, setPostBookingUrl] = useState("")
+  // Arrays to support multiple photos per field (e.g. 3 different links in single cell)
+  const [preBookingUrls, setPreBookingUrls] = useState<string[]>([])
+  const [postBookingUrls, setPostBookingUrls] = useState<string[]>([])
 
   const [isUploadingPre, setIsUploadingPre] = useState(false)
   const [isUploadingPost, setIsUploadingPost] = useState(false)
@@ -71,37 +73,43 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
     } catch {}
   }
 
-  // Upload image to Cloudinary via Next.js API route
-  const handleFileUpload = async (
-    file: File,
+  // Upload multiple images to Cloudinary via Next.js API route
+  const handleFilesUpload = async (
+    files: FileList | File[],
     type: "pre" | "post"
   ) => {
-    if (!file) return
+    if (!files || files.length === 0) return
 
     if (type === "pre") setIsUploadingPre(true)
     else setIsUploadingPost(true)
 
     setStatusMessage({ type: null, text: "" })
 
+    const uploadedUrls: string[] = []
+
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.append("file", file)
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
 
-      const data = await res.json()
+        const data = await res.json()
 
-      if (res.ok && data.url) {
-        if (type === "pre") {
-          setPreBookingUrl(data.url)
+        if (res.ok && data.url) {
+          uploadedUrls.push(data.url)
         } else {
-          setPostBookingUrl(data.url)
+          throw new Error(data.error || `Upload failed for ${file.name}`)
         }
+      }
+
+      if (type === "pre") {
+        setPreBookingUrls((prev) => [...prev, ...uploadedUrls])
       } else {
-        throw new Error(data.error || "Upload failed")
+        setPostBookingUrls((prev) => [...prev, ...uploadedUrls])
       }
     } catch (err: any) {
       console.error(err)
@@ -113,6 +121,14 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
       if (type === "pre") setIsUploadingPre(false)
       else setIsUploadingPost(false)
     }
+  }
+
+  const removePrePhoto = (idx: number) => {
+    setPreBookingUrls((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  const removePostPhoto = (idx: number) => {
+    setPostBookingUrls((prev) => prev.filter((_, i) => i !== idx))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,6 +155,10 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         }
       }
 
+      // Combine multiple photo URLs with comma or newline for the single cell
+      const preCombined = preBookingUrls.join("\n")
+      const postCombined = postBookingUrls.join("\n")
+
       const payload = {
         date: formattedDate,
         guestName: guestName.trim(),
@@ -149,8 +169,8 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         cash: cash.trim(),
         online: online.trim(),
         notes: notes.trim(),
-        preBookingScreenshot: preBookingUrl,
-        postBookingScreenshot: postBookingUrl,
+        preBookingScreenshot: preCombined,
+        postBookingScreenshot: postCombined,
         webhookUrl: webhookUrl.trim() || undefined,
       }
 
@@ -165,7 +185,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
       if (res.ok && (result.success || result.status === "success")) {
         setStatusMessage({
           type: "success",
-          text: "Synced to Google Sheet successfully!",
+          text: `Synced to Google Sheet! (${preBookingUrls.length + postBookingUrls.length} photos attached)`,
         })
 
         // Reset form fields
@@ -177,8 +197,8 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         setCash("")
         setOnline("")
         setNotes("")
-        setPreBookingUrl("")
-        setPostBookingUrl("")
+        setPreBookingUrls([])
+        setPostBookingUrls([])
       } else {
         throw new Error(result.error || "Failed to append to Google Sheet")
       }
@@ -207,7 +227,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             </h2>
           </div>
           <p className="text-xs text-white/50 mt-1 uppercase tracking-widest font-semibold">
-            One-tap Guest Record & Photo Intake
+            One-tap Guest Record & Multi-Photo Intake
           </p>
         </div>
 
@@ -408,18 +428,18 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
           </div>
         </div>
 
-        {/* Row 4: Screenshots (Pre-booking / Aadhaar & Post-booking) */}
+        {/* Row 4: Screenshots (Multi-Photo Support: Pre-booking / Aadhaar & Post-booking) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           {/* Pre-Booking Screenshot Card */}
           <div className="p-5 rounded-2xl bg-white/5 border border-white/10 relative">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
                 <Camera size={14} className="text-[var(--accent-primary)]" />
-                Pre-Booking / Aadhaar Screenshot
+                Pre-Booking / Aadhaar ({preBookingUrls.length} photos)
               </span>
-              {preBookingUrl && (
+              {preBookingUrls.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
-                  <CheckCircle2 size={10} /> Uploaded
+                  <CheckCircle2 size={10} /> {preBookingUrls.length} Ready
                 </span>
               )}
             </div>
@@ -427,61 +447,73 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             <input
               type="file"
               accept="image/*"
-              capture="environment"
+              multiple
               ref={preInputRef}
               onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) handleFileUpload(f, "pre")
+                if (e.target.files) handleFilesUpload(e.target.files, "pre")
+                e.target.value = ""
               }}
               className="hidden"
             />
 
-            {preBookingUrl ? (
-              <div className="relative group rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={preBookingUrl}
-                  alt="Pre-booking preview"
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <a
-                    href={preBookingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
+            {/* Thumbnail Grid */}
+            {preBookingUrls.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {preBookingUrls.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="relative group rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10"
                   >
-                    <ExternalLink size={16} />
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setPreBookingUrl("")}
-                    className="p-2 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`Pre-booking ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removePrePhoto(idx)}
+                        className="p-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => preInputRef.current?.click()}
-                disabled={isUploadingPre}
-                className="w-full py-8 border-2 border-dashed border-white/15 hover:border-[var(--accent-primary)]/50 rounded-xl flex flex-col items-center justify-center gap-2 bg-black/20 hover:bg-white/5 transition-all text-white/60 hover:text-white"
-              >
-                {isUploadingPre ? (
-                  <>
-                    <Loader2 size={24} className="animate-spin text-[var(--accent-primary)]" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Uploading to Cloudinary...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload size={22} className="text-[var(--accent-primary)]" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Tap to Snap Photo or Upload</span>
-                  </>
-                )}
-              </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => preInputRef.current?.click()}
+              disabled={isUploadingPre}
+              className={`w-full border-2 border-dashed border-white/15 hover:border-[var(--accent-primary)]/50 rounded-xl flex items-center justify-center gap-2 bg-black/20 hover:bg-white/5 transition-all text-white/60 hover:text-white ${
+                preBookingUrls.length > 0 ? "py-3 text-xs" : "py-8"
+              }`}
+            >
+              {isUploadingPre ? (
+                <>
+                  <Loader2 size={18} className="animate-spin text-[var(--accent-primary)]" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Uploading to Cloudinary...</span>
+                </>
+              ) : (
+                <>
+                  {preBookingUrls.length > 0 ? <Plus size={16} /> : <Upload size={22} className="text-[var(--accent-primary)]" />}
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    {preBookingUrls.length > 0 ? "+ Add Another Photo" : "Tap to Snap or Select Multiple Photos"}
+                  </span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Post-Booking Screenshot Card */}
@@ -489,11 +521,11 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold uppercase tracking-widest text-white/80 flex items-center gap-2">
                 <Camera size={14} className="text-cyan-400" />
-                Post-Booking / Payment Screenshot
+                Post-Booking / Payment ({postBookingUrls.length} photos)
               </span>
-              {postBookingUrl && (
+              {postBookingUrls.length > 0 && (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
-                  <CheckCircle2 size={10} /> Uploaded
+                  <CheckCircle2 size={10} /> {postBookingUrls.length} Ready
                 </span>
               )}
             </div>
@@ -501,61 +533,73 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             <input
               type="file"
               accept="image/*"
-              capture="environment"
+              multiple
               ref={postInputRef}
               onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) handleFileUpload(f, "post")
+                if (e.target.files) handleFilesUpload(e.target.files, "post")
+                e.target.value = ""
               }}
               className="hidden"
             />
 
-            {postBookingUrl ? (
-              <div className="relative group rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={postBookingUrl}
-                  alt="Post-booking preview"
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <a
-                    href={postBookingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
+            {/* Thumbnail Grid */}
+            {postBookingUrls.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {postBookingUrls.map((url, idx) => (
+                  <div
+                    key={idx}
+                    className="relative group rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10"
                   >
-                    <ExternalLink size={16} />
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setPostBookingUrl("")}
-                    className="p-2 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`Post-booking ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removePostPhoto(idx)}
+                        className="p-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => postInputRef.current?.click()}
-                disabled={isUploadingPost}
-                className="w-full py-8 border-2 border-dashed border-white/15 hover:border-cyan-400/50 rounded-xl flex flex-col items-center justify-center gap-2 bg-black/20 hover:bg-white/5 transition-all text-white/60 hover:text-white"
-              >
-                {isUploadingPost ? (
-                  <>
-                    <Loader2 size={24} className="animate-spin text-cyan-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Uploading to Cloudinary...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload size={22} className="text-cyan-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Tap to Snap Photo or Upload</span>
-                  </>
-                )}
-              </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => postInputRef.current?.click()}
+              disabled={isUploadingPost}
+              className={`w-full border-2 border-dashed border-white/15 hover:border-cyan-400/50 rounded-xl flex items-center justify-center gap-2 bg-black/20 hover:bg-white/5 transition-all text-white/60 hover:text-white ${
+                postBookingUrls.length > 0 ? "py-3 text-xs" : "py-8"
+              }`}
+            >
+              {isUploadingPost ? (
+                <>
+                  <Loader2 size={18} className="animate-spin text-cyan-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Uploading to Cloudinary...</span>
+                </>
+              ) : (
+                <>
+                  {postBookingUrls.length > 0 ? <Plus size={16} /> : <Upload size={22} className="text-cyan-400" />}
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    {postBookingUrls.length > 0 ? "+ Add Another Photo" : "Tap to Snap or Select Multiple Photos"}
+                  </span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -569,7 +613,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             {isSubmitting ? (
               <>
                 <Loader2 size={18} className="animate-spin" />
-                <span>Appending row to Google Sheet...</span>
+                <span>Appending row with photo links to Google Sheet...</span>
               </>
             ) : (
               <>

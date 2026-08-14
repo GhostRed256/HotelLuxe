@@ -1,17 +1,17 @@
 /**
  * StayNJoy Google Sheet KYC & Guest Record Webhook
+ * Supports multiple photo links in a single cell (e.g. Aadhaar Front, Back, Receipt)
  * 
  * Instructions to deploy:
  * 1. Open your Google Sheet
  * 2. Click 'Extensions' > 'Apps Script'
  * 3. Delete any code there, paste this entire file, and click Save (disk icon).
- * 4. Click 'Deploy' (top right) > 'New deployment'
+ * 4. Click 'Deploy' (top right) > 'New deployment' (or Manage deployments > edit > New version)
  * 5. Select type: 'Web app'
- *    - Description: 'StayNJoy Sync Webhook'
+ *    - Description: 'StayNJoy Multi-Photo Webhook'
  *    - Execute as: 'Me' (your email)
  *    - Who has access: 'Anyone'
  * 6. Click 'Deploy', authorize permissions, and copy the 'Web app URL'.
- * 7. Paste that Web App URL in your StayNJoy Admin Panel under "Sheet KYC Sync" > "Webhook Settings" (or into .env as SHEETS_WEBAPP_URL).
  */
 
 function doPost(e) {
@@ -19,13 +19,12 @@ function doPost(e) {
     var rawData = e.postData.contents;
     var payload = JSON.parse(rawData);
     
-    // Support either direct data object or payload.data
     var data = payload.data || payload;
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getActiveSheet();
     
-    // If sheet is totally empty, write headers automatically
+    // If sheet is empty, auto-write headers
     if (sheet.getLastRow() === 0) {
       sheet.appendRow([
         "Date",
@@ -53,14 +52,10 @@ function doPost(e) {
     var online = data.online || "";
     var notes = data.notes || "";
     
-    // Format image URLs as clickable hyperlinks if present
-    var preUrl = data.preBookingScreenshot || "";
-    var preCell = preUrl ? '=HYPERLINK("' + preUrl + '", "View Pre-Booking Photo")' : "";
-    
-    var postUrl = data.postBookingScreenshot || "";
-    var postCell = postUrl ? '=HYPERLINK("' + postUrl + '", "View Post-Booking Photo")' : "";
+    var preUrlRaw = data.preBookingScreenshot || "";
+    var postUrlRaw = data.postBookingScreenshot || "";
 
-    // Append the row
+    // Append base row first
     sheet.appendRow([
       date,
       guestName,
@@ -71,22 +66,18 @@ function doPost(e) {
       cash,
       online,
       notes,
-      preCell || preUrl,
-      postCell || postUrl
+      "", // Will format with clickable links
+      ""  // Will format with clickable links
     ]);
 
     var lastRow = sheet.getLastRow();
 
-    // Format hyperlinks blue and underlined
-    if (preCell) {
-      sheet.getRange(lastRow, 10).setFontColor("#1155cc").setFontLine("underline");
-    }
-    if (postCell) {
-      sheet.getRange(lastRow, 11).setFontColor("#1155cc").setFontLine("underline");
-    }
+    // Format single or multiple links in Column J (Pre-Booking) & Column K (Post-Booking)
+    formatMultiLinkCell(sheet.getRange(lastRow, 10), preUrlRaw, "Pre-Booking");
+    formatMultiLinkCell(sheet.getRange(lastRow, 11), postUrlRaw, "Post-Booking");
 
     return ContentService.createTextOutput(
-      JSON.stringify({ success: true, message: "Row added successfully", row: lastRow })
+      JSON.stringify({ success: true, message: "Row added successfully with photo links", row: lastRow })
     ).setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
@@ -96,8 +87,51 @@ function doPost(e) {
   }
 }
 
+/**
+ * Formats 1 or multiple URLs in a single cell with individual clickable links
+ */
+function formatMultiLinkCell(cellRange, rawText, labelPrefix) {
+  if (!rawText) return;
+  
+  var urls = String(rawText).split(/[\n,]+/).map(function(u) { return u.trim(); }).filter(Boolean);
+  if (urls.length === 0) return;
+  
+  if (urls.length === 1) {
+    cellRange.setFormula('=HYPERLINK("' + urls[0] + '", "' + labelPrefix + ' Photo")');
+    cellRange.setFontColor("#1155cc").setFontLine("underline");
+    return;
+  }
+  
+  // Multiple links in single cell: e.g. "Pre-Booking 1 | Pre-Booking 2 | Pre-Booking 3"
+  var richTextBuilder = SpreadsheetApp.newRichTextValue();
+  var textParts = [];
+  var linksInfo = [];
+  
+  for (var i = 0; i < urls.length; i++) {
+    var label = labelPrefix + " " + (i + 1);
+    var start = textParts.join(" | ").length + (textParts.length > 0 ? 3 : 0);
+    var end = start + label.length;
+    textParts.push(label);
+    linksInfo.push({ start: start, end: end, url: urls[i] });
+  }
+  
+  var fullText = textParts.join(" | ");
+  richTextBuilder.setText(fullText);
+  
+  for (var j = 0; j < linksInfo.length; j++) {
+    var linkStyle = SpreadsheetApp.newTextStyle()
+      .setForegroundColor("#1155cc")
+      .setUnderline(true)
+      .build();
+    richTextBuilder.setTextStyle(linksInfo[j].start, linksInfo[j].end, linkStyle);
+    richTextBuilder.setLinkUrl(linksInfo[j].start, linksInfo[j].end, linksInfo[j].url);
+  }
+  
+  cellRange.setRichTextValue(richTextBuilder.build());
+}
+
 function doGet(e) {
   return ContentService.createTextOutput(
-    JSON.stringify({ status: "online", message: "StayNJoy Google Sheet Webhook is ready." })
+    JSON.stringify({ status: "online", message: "StayNJoy Google Sheet Webhook is active." })
   ).setMimeType(ContentService.MimeType.JSON);
 }
