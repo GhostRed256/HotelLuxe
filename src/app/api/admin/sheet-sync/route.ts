@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
+      redirect: "follow",
     });
 
     const resText = await res.text();
@@ -62,6 +63,16 @@ export async function POST(req: NextRequest) {
       resJson = JSON.parse(resText);
     } catch {
       resJson = { raw: resText };
+    }
+
+    if (resJson?.error) {
+      return NextResponse.json(
+        {
+          error: `Google Sheets error: ${resJson.error}`,
+          details: resJson,
+        },
+        { status: 500 }
+      );
     }
 
     if (!res.ok && res.status !== 302 && res.status !== 200) {
