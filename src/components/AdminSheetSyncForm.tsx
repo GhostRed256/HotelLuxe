@@ -19,19 +19,35 @@ import {
   Settings,
   Sheet,
   Plus,
+  Lock,
 } from "lucide-react"
 
 interface AdminSheetSyncFormProps {
   rooms?: any[]
 }
 
-export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormProps) {
-  // Today's date in YYYY-MM-DD for input
-  const todayStr = new Date().toISOString().split("T")[0]
+const LOCATIONS = [
+  { id: "Chaliha Nagar", label: "Chaliha Nagar", sheetTab: "Chaliha Nagar" },
+  { id: "Bordoloi Nagar (Near Lake)", label: "Lake Bordoloi Nagar", sheetTab: "Lake Bordoloi Nagar" },
+  { id: "Bordoloi Nagar (Near Income Tax Office)", label: "IT office Bordoloi Nagar", sheetTab: "IT office Bordoloi Nagar" },
+]
 
-  const [date, setDate] = useState(todayStr)
-  const [guestName, setGuestName] = useState("")
+export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormProps) {
+  // Today's and tomorrow's date strings in YYYY-MM-DD
+  const today = new Date()
+  const todayStr = today.toISOString().split("T")[0]
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = tomorrow.toISOString().split("T")[0]
+
+  const [location, setLocation] = useState<string>("Chaliha Nagar")
+  const [checkIn, setCheckIn] = useState(todayStr)
+  const [checkOut, setCheckOut] = useState(tomorrowStr)
+
+  const [roomId, setRoomId] = useState("")
   const [roomNo, setRoomNo] = useState("")
+
+  const [guestName, setGuestName] = useState("")
   const [address, setAddress] = useState("")
   const [parentName, setParentName] = useState("")
   const [phone, setPhone] = useState("")
@@ -39,7 +55,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
   const [online, setOnline] = useState("")
   const [notes, setNotes] = useState("")
 
-  // Arrays to support multiple photos per field (e.g. 3 different links in single cell)
+  // Multi-photo URLs
   const [preBookingUrls, setPreBookingUrls] = useState<string[]>([])
   const [postBookingUrls, setPostBookingUrls] = useState<string[]>([])
 
@@ -65,6 +81,32 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
       if (saved) setWebhookUrl(saved)
     } catch {}
   }, [])
+
+  // Filter rooms by selected location
+  const filteredRooms = rooms.filter((r) => {
+    if (!r.location) return true
+    if (location === "Chaliha Nagar") return r.location.includes("Chaliha")
+    if (location.includes("Lake")) return r.location.includes("Lake")
+    if (location.includes("Income") || location.includes("IT")) return r.location.includes("Income") || r.location.includes("IT")
+    return true
+  })
+
+  const handleLocationChange = (newLoc: string) => {
+    setLocation(newLoc)
+    setRoomId("")
+    setRoomNo("")
+  }
+
+  const handleRoomSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value
+    setRoomId(selectedId)
+    const found = rooms.find((r) => r.id === selectedId)
+    if (found) {
+      setRoomNo(found.name || found.roomNumber || "")
+    } else {
+      setRoomNo("")
+    }
+  }
 
   const handleWebhookChange = (val: string) => {
     setWebhookUrl(val)
@@ -146,21 +188,29 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
     setStatusMessage({ type: null, text: "" })
 
     try {
-      // Format date to DD/MM/YYYY
-      let formattedDate = date
-      if (date) {
-        const parts = date.split("-")
+      // Format date to DD-MM-YYYY for the sheet
+      let formattedDate = checkIn
+      if (checkIn) {
+        const parts = checkIn.split("-")
         if (parts.length === 3) {
-          formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`
+          formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`
         }
       }
 
-      // Combine multiple photo URLs with comma or newline for the single cell
+      // Map to exact Google Sheet tab name
+      let sheetTabName = "Chaliha Nagar"
+      if (location.includes("Lake")) sheetTabName = "Lake Bordoloi Nagar"
+      else if (location.includes("Income") || location.includes("IT")) sheetTabName = "IT office Bordoloi Nagar"
+
       const preCombined = preBookingUrls.join("\n")
       const postCombined = postBookingUrls.join("\n")
 
       const payload = {
         date: formattedDate,
+        checkIn,
+        checkOut,
+        roomId: roomId || undefined,
+        location: sheetTabName,
         guestName: guestName.trim(),
         roomNo: roomNo.trim(),
         address: address.trim(),
@@ -182,14 +232,15 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
 
       const result = await res.json()
 
-      if (res.ok && (result.success || result.status === "success")) {
+      if (res.ok && result.success) {
         setStatusMessage({
           type: "success",
-          text: `Synced to Google Sheet! (${preBookingUrls.length + postBookingUrls.length} photos attached)`,
+          text: `Synced to [${sheetTabName}] tab & Room booked on website until ${checkOut}!`,
         })
 
-        // Reset form fields
+        // Reset form
         setGuestName("")
+        setRoomId("")
         setRoomNo("")
         setAddress("")
         setParentName("")
@@ -223,11 +274,12 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
               <Sheet size={20} />
             </span>
             <h2 className="text-2xl md:text-3xl font-heading font-black tracking-tight text-white">
-              Google Sheet <span className="text-[var(--accent-primary)]">Sync</span>
+              Google Sheet <span className="text-[var(--accent-primary)]">& Website Sync</span>
             </h2>
           </div>
-          <p className="text-xs text-white/50 mt-1 uppercase tracking-widest font-semibold">
-            One-tap Guest Record & Multi-Photo Intake
+          <p className="text-xs text-white/50 mt-1 uppercase tracking-widest font-semibold flex items-center gap-2">
+            <Lock size={12} className="text-emerald-400" />
+            Auto-books on website & Appends to location sheet tab
           </p>
         </div>
 
@@ -280,17 +332,41 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Row 1: Date, Guest Name, Room No */}
+        {/* Location Selector (3 Tabs corresponding to the 3 Sheet Tabs) */}
+        <div>
+          <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2.5 flex items-center gap-1.5 text-white">
+            <MapPin size={12} className="text-[var(--accent-primary)]" />
+            1. Select Branch / Sheet Tab
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10">
+            {LOCATIONS.map((loc) => (
+              <button
+                key={loc.id}
+                type="button"
+                onClick={() => handleLocationChange(loc.id)}
+                className={`py-3 px-4 rounded-xl text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2 ${
+                  location === loc.id
+                    ? "bg-[var(--accent-primary)] text-white shadow-lg shadow-[var(--accent-primary)]/20"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <span>{loc.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Row 1: Check-in, Check-out, Room Selector */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <Calendar size={12} className="text-[var(--accent-primary)]" />
-              Date
+              Check-In Date (Sheet Date)
             </label>
             <input
               type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
               required
               className="form-input w-full"
             />
@@ -298,12 +374,64 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
 
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
+              <Calendar size={12} className="text-cyan-400" />
+              Check-Out Date (Auto-frees room)
+            </label>
+            <input
+              type="date"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+              required
+              className="form-input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
+              <Home size={12} className="text-[var(--accent-primary)]" />
+              Select Room / Suite
+            </label>
+            <select
+              value={roomId}
+              onChange={handleRoomSelect}
+              className="form-select w-full"
+            >
+              <option value="">-- Choose Room (or type custom below) --</option>
+              {filteredRooms.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name} ({r.type || "Suite"})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Custom Room Name if not in list */}
+        {!roomId && (
+          <div>
+            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 block text-white">
+              Or Custom Room No. / Name
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Deluxe Room 102"
+              value={roomNo}
+              onChange={(e) => setRoomNo(e.target.value)}
+              className="form-input w-full"
+            />
+          </div>
+        )}
+
+        {/* Row 2: Guest Name, Phone, Parent's Name */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <User size={12} className="text-[var(--accent-primary)]" />
               Guest Name *
             </label>
             <input
               type="text"
-              placeholder="e.g. Panaypal Borah"
+              placeholder="e.g. Saurajyoti Gogoi, Dibashikha Baroh"
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
               required
@@ -313,41 +441,12 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
 
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
-              <Home size={12} className="text-[var(--accent-primary)]" />
-              Room No.
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                list="rooms-list"
-                placeholder="e.g. 101 / Cozy Pink"
-                value={roomNo}
-                onChange={(e) => setRoomNo(e.target.value)}
-                className="form-input w-full"
-              />
-              {rooms.length > 0 && (
-                <datalist id="rooms-list">
-                  {rooms.map((r, i) => (
-                    <option key={i} value={r.name || r.id}>
-                      {r.location ? `${r.name} (${r.location})` : r.name}
-                    </option>
-                  ))}
-                </datalist>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Row 2: Phone, Parent's Name, Address */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <div>
-            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <Phone size={12} className="text-[var(--accent-primary)]" />
               Phone No.
             </label>
             <input
               type="tel"
-              placeholder="e.g. 7638071519"
+              placeholder="e.g. 9107452684"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="form-input w-full"
@@ -361,13 +460,16 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             </label>
             <input
               type="text"
-              placeholder="e.g. Nirod Borah"
+              placeholder="e.g. Sunil Gogoi, Dharmeshwar"
               value={parentName}
               onChange={(e) => setParentName(e.target.value)}
               className="form-input w-full"
             />
           </div>
+        </div>
 
+        {/* Row 3: Address, Cash, Online */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <MapPin size={12} className="text-[var(--accent-primary)]" />
@@ -375,16 +477,13 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             </label>
             <input
               type="text"
-              placeholder="e.g. Paritali, Tinsukia"
+              placeholder="e.g. TSK, Dhemaji"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="form-input w-full"
             />
           </div>
-        </div>
 
-        {/* Row 3: Cash, Online, Notes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <DollarSign size={12} className="text-emerald-400" />
@@ -412,20 +511,21 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
               className="form-input w-full"
             />
           </div>
+        </div>
 
-          <div>
-            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
-              <FileText size={12} className="text-[var(--accent-primary)]" />
-              Notes / Remarks
-            </label>
-            <input
-              type="text"
-              placeholder="Any special remarks..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="form-input w-full"
-            />
-          </div>
+        {/* Notes */}
+        <div>
+          <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
+            <FileText size={12} className="text-[var(--accent-primary)]" />
+            Notes (e.g. Check-in time / Special requests)
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Check-in 9:30"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="form-input w-full"
+          />
         </div>
 
         {/* Row 4: Screenshots (Multi-Photo Support: Pre-booking / Aadhaar & Post-booking) */}
@@ -613,12 +713,12 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             {isSubmitting ? (
               <>
                 <Loader2 size={18} className="animate-spin" />
-                <span>Appending row with photo links to Google Sheet...</span>
+                <span>Syncing to Google Sheet & Booking on Website...</span>
               </>
             ) : (
               <>
                 <CheckCircle2 size={18} />
-                <span>Save & Sync to Google Sheet</span>
+                <span>Save, Sync to Google Sheet & Book Suite</span>
               </>
             )}
           </button>

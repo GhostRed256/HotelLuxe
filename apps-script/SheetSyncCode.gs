@@ -1,48 +1,38 @@
 /**
  * StayNJoy Google Sheet KYC & Guest Record Webhook
- * Supports multiple photo links in a single cell (e.g. Aadhaar Front, Back, Receipt)
  * 
- * Instructions to deploy:
- * 1. Open your Google Sheet
- * 2. Click 'Extensions' > 'Apps Script'
- * 3. Delete any code there, paste this entire file, and click Save (disk icon).
- * 4. Click 'Deploy' (top right) > 'New deployment' (or Manage deployments > edit > New version)
- * 5. Select type: 'Web app'
- *    - Description: 'StayNJoy Multi-Photo Webhook'
- *    - Execute as: 'Me' (your email)
- *    - Who has access: 'Anyone'
- * 6. Click 'Deploy', authorize permissions, and copy the 'Web app URL'.
+ * Supports:
+ * - 3 Branch Tabs: 'Chaliha Nagar', 'Lake Bordoloi Nagar', 'IT office Bordoloi Nagar'
+ * - Multi-photo links in a single cell
+ * - Smart insertion directly into Table rows
  */
 
 function doPost(e) {
   try {
     var rawData = e.postData.contents;
     var payload = JSON.parse(rawData);
-    
     var data = payload.data || payload;
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getActiveSheet();
     
-    // If sheet is empty, auto-write headers
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Date",
-        "Guest Name",
-        "Room No.",
-        "Address",
-        "Parent's Name",
-        "Phone No.",
-        "Cash",
-        "Online",
-        "Notes",
-        "Pre-Booking Screenshot",
-        "Post-Booking Screenshot"
-      ]);
-      sheet.getRange(1, 1, 1, 11).setFontWeight("bold").setBackground("#f3f3f3");
+    // 1. Pick the correct sheet tab based on location
+    var location = (data.location || "").toLowerCase();
+    var sheet = null;
+    
+    if (location.indexOf("chaliha") !== -1) {
+      sheet = ss.getSheetByName("Chaliha Nagar");
+    } else if (location.indexOf("lake") !== -1) {
+      sheet = ss.getSheetByName("Lake Bordoloi Nagar");
+    } else if (location.indexOf("it") !== -1 || location.indexOf("income") !== -1) {
+      sheet = ss.getSheetByName("IT office Bordoloi Nagar");
+    }
+    
+    // Fallback if not found by exact name
+    if (!sheet) {
+      sheet = ss.getSheetByName("Chaliha Nagar") || ss.getActiveSheet();
     }
 
-    var date = data.date || Utilities.formatDate(new Date(), "Asia/Kolkata", "dd/MM/yyyy");
+    var date = data.date || Utilities.formatDate(new Date(), "Asia/Kolkata", "dd-MM-yyyy");
     var guestName = data.guestName || "";
     var roomNo = data.roomNo || "";
     var address = data.address || "";
@@ -51,33 +41,41 @@ function doPost(e) {
     var cash = data.cash || "";
     var online = data.online || "";
     var notes = data.notes || "";
-    
     var preUrlRaw = data.preBookingScreenshot || "";
     var postUrlRaw = data.postBookingScreenshot || "";
 
-    // Append base row first
-    sheet.appendRow([
-      date,
-      guestName,
-      roomNo,
-      address,
-      parentName,
-      phone,
-      cash,
-      online,
-      notes,
-      "", // Will format with clickable links
-      ""  // Will format with clickable links
-    ]);
+    // 2. Find the first empty row in this tab (checking Date or Guest Name)
+    var dataRange = sheet.getDataRange();
+    var values = dataRange.getValues();
+    var targetRow = values.length + 1;
 
-    var lastRow = sheet.getLastRow();
+    for (var r = 1; r < values.length; r++) {
+      var rowDate = values[r][0];
+      var rowName = values[r][1];
+      if ((rowDate === "" || rowDate === null || rowDate === undefined) && 
+          (rowName === "" || rowName === null || rowName === undefined)) {
+        targetRow = r + 1; // 1-indexed row number
+        break;
+      }
+    }
 
-    // Format single or multiple links in Column J (Pre-Booking) & Column K (Post-Booking)
-    formatMultiLinkCell(sheet.getRange(lastRow, 10), preUrlRaw, "Pre-Booking");
-    formatMultiLinkCell(sheet.getRange(lastRow, 11), postUrlRaw, "Post-Booking");
+    // 3. Write data into the row
+    var rowValues = [
+      [date, guestName, roomNo, address, parentName, phone, cash, online, notes, "", ""]
+    ];
+    sheet.getRange(targetRow, 1, 1, 11).setValues(rowValues);
+
+    // 4. Format single or multiple links in Column J (Pre-Booking) & Column K (Post-Booking)
+    formatMultiLinkCell(sheet.getRange(targetRow, 10), preUrlRaw, "Pre-Booking");
+    formatMultiLinkCell(sheet.getRange(targetRow, 11), postUrlRaw, "Post-Booking");
 
     return ContentService.createTextOutput(
-      JSON.stringify({ success: true, message: "Row added successfully with photo links", row: lastRow })
+      JSON.stringify({
+        success: true,
+        message: "Successfully synced to sheet",
+        tab: sheet.getName(),
+        row: targetRow
+      })
     ).setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
@@ -102,7 +100,7 @@ function formatMultiLinkCell(cellRange, rawText, labelPrefix) {
     return;
   }
   
-  // Multiple links in single cell: e.g. "Pre-Booking 1 | Pre-Booking 2 | Pre-Booking 3"
+  // Multiple links in single cell: "Pre-Booking 1 | Pre-Booking 2 | Pre-Booking 3"
   var richTextBuilder = SpreadsheetApp.newRichTextValue();
   var textParts = [];
   var linksInfo = [];
@@ -132,6 +130,6 @@ function formatMultiLinkCell(cellRange, rawText, labelPrefix) {
 
 function doGet(e) {
   return ContentService.createTextOutput(
-    JSON.stringify({ status: "online", message: "StayNJoy Google Sheet Webhook is active." })
+    JSON.stringify({ status: "online", message: "StayNJoy Multi-Location Webhook is active." })
   ).setMimeType(ContentService.MimeType.JSON);
 }

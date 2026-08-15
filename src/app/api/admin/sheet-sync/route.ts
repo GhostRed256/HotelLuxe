@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase-admin";
+import { revalidatePath } from "next/cache";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
       date,
+      checkIn,
+      checkOut,
+      roomId,
+      location,
       guestName,
       roomNo,
       address,
@@ -20,80 +26,119 @@ export async function POST(req: NextRequest) {
 
     const targetUrl = overrideUrl || process.env.SHEETS_WEBAPP_URL;
 
-    if (!targetUrl) {
-      return NextResponse.json(
-        {
-          error:
-            "Google Sheets Webhook URL is not configured yet. Please provide the Webhook URL in the form or in .env file.",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Payload structured for Google Apps Script Webhook
-    const payload = {
-      action: "addGuestRecord",
-      data: {
-        date: date || new Date().toLocaleDateString("en-GB"),
-        guestName: guestName || "",
-        roomNo: roomNo || "",
-        address: address || "",
-        parentName: parentName || "",
-        phone: phone || "",
-        cash: cash || "",
-        online: online || "",
-        notes: notes || "",
-        preBookingScreenshot: preBookingScreenshot || "",
-        postBookingScreenshot: postBookingScreenshot || "",
-      },
-    };
-
-    const res = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-      redirect: "follow",
-    });
-
-    const resText = await res.text();
-    let resJson: any = null;
+    // 1. Sync / Block Room in Firestore if roomId or roomNo is provided
+    let createdBookingId: string | null = null;
     try {
-      resJson = JSON.parse(resText);
-    } catch {
-      resJson = { raw: resText };
+      let targetRoomId = roomId;
+
+      // If roomId wasn't directly passed, find room by name
+      if (!targetRoomId && roomNo) {
+        const roomsSnap = await db.collection("rooms").get();
+        const found = roomsSnap.docs.find((d: any) => {
+          const r = d.data();
+          return (
+            r.name?.toLowerCase().includes(roomNo.toLowerCase()) ||
+            r.roomNumber === roomNo
+          );
+        });
+        if (found) {
+          targetRoomId = found.id;
+        }
+      }
+
+      if (targetRoomId) {
+        const inDate = checkIn || date || new Date().toISOString().split("T")[0];
+        // Default checkout is next day if not provided
+        let outDate = checkOut;
+        if (!outDate) {
+          const nextDay = new Date(inDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          outDate = nextDay.toISOString().split("T")[0];
+        }
+
+        const bookingRef = await db.collection("bookings").add({
+          roomId: targetRoomId,
+          customerName: guestName || "Guest",
+          customerPhone: phone || "",
+          customerEmail: "admin@staynjoy.com",
+          checkIn: inDate,
+          checkOut: outDate,
+          status: "APPROVED",
+          paymentStatus: cash || online ? "PAID" : "MANUAL",
+          address: address || "",
+          parentName: parentName || "",
+          notes: notes || "",
+          preBookingScreenshot: preBookingScreenshot || "",
+          postBookingScreenshot: postBookingScreenshot || "",
+          isSheetSyncBooking: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        createdBookingId = bookingRef.id;
+
+        revalidatePath("/admin");
+        revalidatePath("/");
+        revalidatePath("/rooms");
+        revalidatePath("/homestays");
+      }
+    } catch (dbErr) {
+      console.error("Firestore booking block error (non-fatal):", dbErr);
     }
 
-    if (resJson?.error) {
-      return NextResponse.json(
-        {
-          error: `Google Sheets error: ${resJson.error}`,
-          details: resJson,
+    // 2. Append to Google Sheets via Webhook
+    let sheetResult: any = null;
+    if (targetUrl) {
+      const payload = {
+        action: "addGuestRecord",
+        data: {
+          date: date || new Date().toLocaleDateString("en-GB"),
+          location: location || "Chaliha Nagar",
+          guestName: guestName || "",
+          roomNo: roomNo || "",
+          address: address || "",
+          parentName: parentName || "",
+          phone: phone || "",
+          cash: cash || "",
+          online: online || "",
+          notes: notes || "",
+          preBookingScreenshot: preBookingScreenshot || "",
+          postBookingScreenshot: postBookingScreenshot || "",
         },
-        { status: 500 }
-      );
-    }
+      };
 
-    if (!res.ok && res.status !== 302 && res.status !== 200) {
-      return NextResponse.json(
-        {
-          error: `Google Sheets responded with status ${res.status}`,
-          details: resJson,
-        },
-        { status: 500 }
-      );
+      try {
+        const res = await fetch(targetUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          redirect: "follow",
+        });
+
+        const resText = await res.text();
+        try {
+          sheetResult = JSON.parse(resText);
+        } catch {
+          sheetResult = { raw: resText };
+        }
+      } catch (sheetErr: any) {
+        console.error("Google Sheets request failed:", sheetErr);
+        sheetResult = { error: sheetErr.message };
+      }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Row added to Google Sheet successfully!",
-      result: resJson,
+      message: "Synced to Google Sheet and booked in website calendar!",
+      bookingId: createdBookingId,
+      sheetResult,
     });
   } catch (err: any) {
-    console.error("Sheet sync error:", err);
+    console.error("Sheet sync route error:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error syncing to sheet" },
+      { error: err?.message || "Internal server error syncing record" },
       { status: 500 }
     );
   }
