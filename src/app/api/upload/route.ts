@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const base64Raw = buffer.toString("base64");
 
     let mimeType = file.type || "image/jpeg";
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = file.name ? file.name.split(".").pop()?.toLowerCase() : "jpg";
     if (!file.type || file.type === "application/octet-stream") {
       if (ext === "webp") mimeType = "image/webp";
       else if (ext === "png") mimeType = "image/png";
@@ -28,32 +28,24 @@ export async function POST(req: NextRequest) {
 
     if (!cloudName || !apiKey || !apiSecret) {
       return NextResponse.json(
-        { error: "Cloudinary credentials missing" },
+        {
+          error:
+            "Cloudinary credentials missing. Please verify CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET are set in environment variables.",
+        },
         { status: 500 }
       );
     }
 
     const base64Data = `data:${mimeType};base64,${base64Raw}`;
-    const cForm = new FormData();
-    cForm.append("file", base64Data);
-
     const timestamp = Math.floor(Date.now() / 1000).toString();
     const folder = "staynjoy_kyc";
 
-    let originalName = file.name ? file.name.split(".").slice(0, -1).join(".") : "";
-    if (originalName) {
-      originalName = originalName.replace(/[^a-zA-Z0-9_-]/g, "-");
-      cForm.append("public_id", `${originalName}-${Date.now()}`);
-    }
-
-    let strToSign = `folder=${folder}`;
-    if (originalName) {
-      strToSign += `&public_id=${originalName}-${timestamp}`;
-    }
-    // Simple signature
+    // Cloudinary signature must match alphabetical list of sent parameters: folder, timestamp
     const signString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto.createHash("sha1").update(signString).digest("hex");
 
+    const cForm = new FormData();
+    cForm.append("file", base64Data);
     cForm.append("api_key", apiKey);
     cForm.append("timestamp", timestamp);
     cForm.append("folder", folder);
@@ -75,15 +67,21 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    console.error("Cloudinary upload failed:", cData);
+    console.error("Cloudinary upload response error:", cData);
+    const errorMsg =
+      cData.error?.message ||
+      cData.message ||
+      JSON.stringify(cData) ||
+      "Cloudinary upload failed";
+
     return NextResponse.json(
-      { error: "Cloudinary upload failed", details: cData },
+      { error: errorMsg, details: cData },
       { status: 500 }
     );
   } catch (err: any) {
-    console.error("Upload error:", err);
+    console.error("Upload route error:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error" },
+      { error: err?.message || "Internal server error during upload" },
       { status: 500 }
     );
   }
