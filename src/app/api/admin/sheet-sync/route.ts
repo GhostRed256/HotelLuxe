@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         const res = await fetch(targetUrl, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "text/plain;charset=utf-8",
           },
           body: JSON.stringify(payload),
           redirect: "follow",
@@ -121,11 +121,24 @@ export async function POST(req: NextRequest) {
         try {
           sheetResult = JSON.parse(resText);
         } catch {
-          sheetResult = { raw: resText };
+          sheetResult = { raw: resText, status: res.status };
+        }
+
+        if (res.status === 401 || res.status === 403 || resText.includes("Page not found") || resText.includes("unable to open")) {
+          return NextResponse.json({
+            success: false,
+            error: "Google Sheets Webhook Permission Error (401): Please ensure 'Who has access' is set to 'Anyone' in Apps Script Deploy settings.",
+            sheetResult,
+          }, { status: 400 });
         }
       } catch (sheetErr: any) {
         console.error("Google Sheets request failed:", sheetErr);
         sheetResult = { error: sheetErr.message };
+        return NextResponse.json({
+          success: false,
+          error: `Google Sheets connection failed: ${sheetErr.message}`,
+          sheetResult,
+        }, { status: 500 });
       }
     }
 
