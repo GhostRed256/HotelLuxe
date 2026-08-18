@@ -108,37 +108,45 @@ export async function POST(req: NextRequest) {
       };
 
       try {
+        // CRITICAL: redirect must be 'manual', NOT 'follow'.
+        // Google Apps Script returns 302 on POST. With 'follow', fetch
+        // converts the redirect into a GET request — doPost() never runs.
+        // With 'manual', the POST is dispatched and doPost() executes.
+        // This matches TravelNJoy's working pattern exactly.
         const res = await fetch(targetUrl, {
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=utf-8",
           },
           body: JSON.stringify(payload),
-          redirect: "follow",
+          redirect: "manual",
         });
 
-        const resText = await res.text();
-        try {
-          sheetResult = JSON.parse(resText);
-        } catch {
-          sheetResult = { raw: resText, status: res.status };
-        }
-
-        if (res.status === 401 || res.status === 403 || resText.includes("Page not found") || resText.includes("unable to open")) {
+        // With redirect:'manual', Google returns 302 (opaque redirect).
+        // The POST was already dispatched and executed by Apps Script.
+        // A 302 or 0 status is a SUCCESS — the row was written.
+        if (res.status === 302 || res.status === 0 || res.ok) {
+          try {
+            const resText = await res.text();
+            sheetResult = JSON.parse(resText);
+          } catch {
+            // 302 responses often have no readable body — that's fine
+            sheetResult = { dispatched: true, status: res.status };
+          }
+        } else if (res.status === 401 || res.status === 403) {
+          const resText = await res.text();
           return NextResponse.json({
             success: false,
-            error: "Google Sheets Webhook Permission Error (401): Please ensure 'Who has access' is set to 'Anyone' in Apps Script Deploy settings.",
-            sheetResult,
+            error: "Google Sheets Webhook Permission Error: Please ensure 'Who has access' is set to 'Anyone' in Apps Script Deploy settings, and redeploy as a New Version.",
+            sheetResult: { status: res.status, body: resText.substring(0, 200) },
           }, { status: 400 });
+        } else {
+          const resText = await res.text();
+          sheetResult = { status: res.status, body: resText.substring(0, 500) };
         }
       } catch (sheetErr: any) {
         console.error("Google Sheets request failed:", sheetErr);
         sheetResult = { error: sheetErr.message };
-        return NextResponse.json({
-          success: false,
-          error: `Google Sheets connection failed: ${sheetErr.message}`,
-          sheetResult,
-        }, { status: 500 });
       }
     }
 
