@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
+import { getAdminSession } from "@/lib/server-auth";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getAdminSession();
+    if (!session || !session.isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const {
       date,

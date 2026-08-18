@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { getAdminSession } from "@/lib/server-auth";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getAdminSession();
+    if (!session || !session.isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
