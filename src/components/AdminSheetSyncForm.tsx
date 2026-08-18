@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { compressImage } from "@/lib/image-utils"
 import {
   Upload,
   CheckCircle2,
@@ -33,6 +35,7 @@ const LOCATIONS = [
 ]
 
 export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormProps) {
+  const router = useRouter()
   // Today's and tomorrow's date strings in YYYY-MM-DD
   const today = new Date()
   const todayStr = today.toISOString().split("T")[0]
@@ -131,8 +134,12 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
 
     try {
       for (const file of Array.from(files)) {
+        // CLIENT-SIDE COMPRESSION BEFORE UPLOAD
+        // Extremely important for mobile cameras (can be 5MB-15MB each)
+        const compressedFile = await compressImage(file, 1200, 1200, 0.7)
+        
         const formData = new FormData()
-        formData.append("file", file)
+        formData.append("file", compressedFile)
 
         const res = await fetch("/api/upload", {
           method: "POST",
@@ -250,6 +257,9 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         setNotes("")
         setPreBookingUrls([])
         setPostBookingUrls([])
+        
+        // Refresh server components to show new booking immediately
+        router.refresh()
       } else {
         throw new Error(result.error || "Failed to append to Google Sheet")
       }

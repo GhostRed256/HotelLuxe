@@ -16,6 +16,14 @@ export async function requestBooking(formData: FormData) {
   const upiTxnId = formData.get("upiTxnId") as string || ""
   const paymentScreenshot = formData.get("paymentScreenshot") as string || ""
 
+  // Security: Basic Anti-Bot and Payload Validation
+  if (!roomId || !name || !phone || !checkIn || !checkOut) {
+    return { error: "Missing required booking details. Please try again." }
+  }
+  if (name.length > 100 || phone.length > 20 || email.length > 150) {
+    return { error: "Input exceeds maximum allowed length." }
+  }
+
   try {
     const roomDoc = await db.collection("rooms").doc(roomId).get()
     const room = roomDoc.exists ? roomDoc.data()! : { name: "Unknown Suite", price: 0 }
