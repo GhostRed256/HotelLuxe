@@ -110,6 +110,7 @@ export async function POST(req: NextRequest) {
           notes: notes || "",
           preBookingScreenshot: preBookingScreenshot || "",
           postBookingScreenshot: postBookingScreenshot || "",
+          bookingId: createdBookingId || "", // Save this for deletion
         },
       };
 

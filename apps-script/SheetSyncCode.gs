@@ -11,10 +11,45 @@ function doPost(e) {
   try {
     var rawData = e.postData.contents;
     var payload = JSON.parse(rawData);
+    var action = payload.action;
     var data = payload.data || payload;
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // ==========================================
+    // ACTION: DELETE BOOKING
+    // ==========================================
+    if (action === "deleteBooking") {
+      var targetId = payload.bookingId;
+      if (!targetId) throw new Error("No bookingId provided for deletion.");
+      
+      var tabsToSearch = ["Chaliha Nagar", "Lake Bordoloi Nagar", "IT office Bordoloi Nagar"];
+      var deleted = false;
+      
+      for (var t = 0; t < tabsToSearch.length; t++) {
+        var sh = ss.getSheetByName(tabsToSearch[t]);
+        if (!sh) continue;
+        
+        var values = sh.getDataRange().getValues();
+        // Search Column L (index 11) for the bookingId
+        for (var r = 0; r < values.length; r++) {
+          if (values[r][11] === targetId) {
+            sh.deleteRow(r + 1); // 1-indexed
+            deleted = true;
+            break;
+          }
+        }
+        if (deleted) break;
+      }
+      
+      return ContentService.createTextOutput(
+        JSON.stringify({ success: true, message: deleted ? "Row deleted" : "Row not found" })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
     
+    // ==========================================
+    // ACTION: ADD GUEST RECORD
+    // ==========================================
     // 1. Pick the correct sheet tab based on location
     var location = (data.location || "").toLowerCase();
     var sheet = null;
@@ -43,6 +78,7 @@ function doPost(e) {
     var notes = data.notes || "";
     var preUrlRaw = data.preBookingScreenshot || "";
     var postUrlRaw = data.postBookingScreenshot || "";
+    var bookingId = data.bookingId || ""; // Get bookingId to save it
 
     // 2. Find the first empty row in this tab (checking Date or Guest Name)
     var dataRange = sheet.getDataRange();
@@ -59,11 +95,11 @@ function doPost(e) {
       }
     }
 
-    // 3. Write data into the row
+    // 3. Write data into the row (Now adding bookingId to Column L / index 11)
     var rowValues = [
-      [date, guestName, roomNo, address, parentName, phone, cash, online, notes, "", ""]
+      [date, guestName, roomNo, address, parentName, phone, cash, online, notes, "", "", bookingId]
     ];
-    sheet.getRange(targetRow, 1, 1, 11).setValues(rowValues);
+    sheet.getRange(targetRow, 1, 1, 12).setValues(rowValues);
 
     // 4. Format single or multiple links in Column J (Pre-Booking) & Column K (Post-Booking)
     formatMultiLinkCell(sheet.getRange(targetRow, 10), preUrlRaw, "Pre-Booking");

@@ -257,6 +257,20 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
 
 export async function deleteMultipleBookings(ids: string[], clientToken?: string) {
   await validateAdminSession(clientToken)
+  
+  // Try to delete from Google Sheets first (fire and forget for each)
+  const targetUrl = process.env.SHEETS_WEBAPP_URL;
+  if (targetUrl) {
+    Promise.all(ids.map(id => 
+      fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "deleteBooking", bookingId: id }),
+        redirect: "manual"
+      }).catch(e => console.error("Failed to sync deletion to sheet:", e))
+    ));
+  }
+
   const batch = db.batch()
   ids.forEach(id => {
     const ref = db.collection("bookings").doc(id)
@@ -289,6 +303,22 @@ export async function approveMultipleBookings(ids: string[], clientToken?: strin
 
 export async function deleteBooking(bookingId: string, clientToken?: string) {
   await validateAdminSession(clientToken)
+  
+  // Delete from Google Sheet
+  const targetUrl = process.env.SHEETS_WEBAPP_URL;
+  if (targetUrl) {
+    try {
+      await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "deleteBooking", bookingId }),
+        redirect: "manual"
+      });
+    } catch (e) {
+      console.error("Failed to sync deletion to sheet:", e);
+    }
+  }
+
   await db.collection("bookings").doc(bookingId).delete()
   revalidatePath("/admin")
 }
