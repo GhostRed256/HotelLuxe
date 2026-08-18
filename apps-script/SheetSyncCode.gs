@@ -23,14 +23,13 @@ function doPost(e) {
       var targetId = payload.bookingId;
       if (!targetId) throw new Error("No bookingId provided for deletion.");
       
-      var tabsToSearch = ["Chaliha Nagar", "Lake Bordoloi Nagar", "IT office Bordoloi Nagar"];
+      var sheetsToSearch = ss.getSheets();
       var deleted = false;
       
-      for (var t = 0; t < tabsToSearch.length; t++) {
-        var sh = ss.getSheetByName(tabsToSearch[t]);
-        if (!sh) continue;
-        
+      for (var t = 0; t < sheetsToSearch.length; t++) {
+        var sh = sheetsToSearch[t];
         var values = sh.getDataRange().getValues();
+        
         // Search Column L (index 11) for the bookingId
         for (var r = 0; r < values.length; r++) {
           if (values[r][11] === targetId) {
