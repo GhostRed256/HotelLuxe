@@ -147,20 +147,20 @@ function formatMultiLinkCell(cellRange, rawText, labelPrefix) {
     return;
   }
   
-  // Multiple links in single cell: "Pre-Booking 1 | Pre-Booking 2 | Pre-Booking 3"
+  // Multiple links in single cell (stacked vertically)
   var richTextBuilder = SpreadsheetApp.newRichTextValue();
   var textParts = [];
   var linksInfo = [];
   
   for (var i = 0; i < urls.length; i++) {
     var label = labelPrefix + " " + (i + 1);
-    var start = textParts.join(" | ").length + (textParts.length > 0 ? 3 : 0);
+    var start = textParts.join("\n").length + (textParts.length > 0 ? 1 : 0);
     var end = start + label.length;
     textParts.push(label);
     linksInfo.push({ start: start, end: end, url: urls[i] });
   }
   
-  var fullText = textParts.join(" | ");
+  var fullText = textParts.join("\n");
   richTextBuilder.setText(fullText);
   
   for (var j = 0; j < linksInfo.length; j++) {
@@ -173,6 +173,7 @@ function formatMultiLinkCell(cellRange, rawText, labelPrefix) {
   }
   
   cellRange.setRichTextValue(richTextBuilder.build());
+  cellRange.setWrap(true); // Force cell to wrap text so \n works vertically
 }
 
 function doGet(e) {

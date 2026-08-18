@@ -36,13 +36,20 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
     if (optimisticOverrides[roomId] !== undefined) {
       return optimisticOverrides[roomId]
     }
-    const today = new Date()
+    // Get today in local time YYYY-MM-DD format
+    const today = new Date();
+    // Offset for local timezone (IST is +5:30)
+    const localTodayStr = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+    
     return bookings.some(b => {
       if (b.roomId !== roomId) return false
       if (b.status && b.status !== "APPROVED") return false
-      const checkInDate = new Date(b.checkIn)
-      const checkOutDate = new Date(b.checkOut)
-      return checkInDate <= today && checkOutDate >= today
+      
+      const inDate = b.checkIn?.split("T")[0] || "";
+      const outDate = b.checkOut?.split("T")[0] || "";
+      
+      // Compare string dates "2026-08-18"
+      return inDate <= localTodayStr && outDate >= localTodayStr;
     })
   }
 
