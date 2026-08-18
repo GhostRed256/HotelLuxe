@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { addRoom, logoutAdmin } from "./actions"
 import { compressImage } from "@/lib/image-utils"
-import ManualBookingForm from "@/components/ManualBookingForm"
 import AdminRoomList from "@/components/AdminRoomList"
 import AdminBookingsTable from "./AdminBookingsTable"
 import InventoryMatrixWidget from "@/components/InventoryMatrixWidget"
@@ -15,9 +14,9 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[], bookings: any[] }) {
   const searchParams = useSearchParams()
-  const initialTab = (searchParams.get("tab") as "bookings" | "manual" | "rooms" | "sheetsync") || "bookings"
+  const initialTab = (searchParams.get("tab") as "bookings" | "rooms" | "sheetsync") || "bookings"
   const [showAddRoom, setShowAddRoom] = useState(false)
-  const [activeTab, setActiveTab] = useState<"bookings" | "manual" | "rooms" | "sheetsync">(initialTab)
+  const [activeTab, setActiveTab] = useState<"bookings" | "rooms" | "sheetsync">(initialTab)
   const [showCsvExport, setShowCsvExport] = useState(false)
 
   const [csvStartDate, setCsvStartDate] = useState("")
@@ -209,11 +208,10 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
       )}
 
       {/* Tabs Selection */}
-      <div className="flex flex-wrap md:grid md:grid-cols-4 gap-4 md:gap-2 mb-8 backdrop-blur-md bg-white/5 p-2 rounded-2xl border border-white/5 w-fit md:w-full md:max-w-4xl">
+      <div className="flex flex-wrap md:grid md:grid-cols-3 gap-4 md:gap-2 mb-8 backdrop-blur-md bg-white/5 p-2 rounded-2xl border border-white/5 w-fit md:w-full md:max-w-4xl">
         {[
           { id: "bookings", label: "Guest Registry", icon: Calendar },
-          { id: "sheetsync", label: "Sheet KYC Sync", icon: Sheet },
-          { id: "manual", label: "Manual Intake", icon: Plus },
+          { id: "sheetsync", label: "Manual Intake / KYC Sync", icon: Sheet },
           { id: "rooms", label: "Suite Inventory", icon: Home },
         ].map((tab) => (
           <button
@@ -286,12 +284,6 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
         {activeTab === "sheetsync" && (
           <div className="animate-in fade-in duration-500">
             <AdminSheetSyncForm rooms={rooms} />
-          </div>
-        )}
-
-        {activeTab === "manual" && (
-          <div className="animate-in fade-in duration-500">
-            <ManualBookingForm rooms={rooms} />
           </div>
         )}
 

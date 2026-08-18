@@ -29,6 +29,14 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
   const [isOpen, setIsOpen] = useState(false)
   const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, boolean>>({})
   const [loadingRoomId, setLoadingRoomId] = useState<string | null>(null)
+  
+  // Get today's local date string on init
+  const initialTodayStr = useMemo(() => {
+    const today = new Date();
+    return new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+  }, []);
+  
+  const [selectedDate, setSelectedDate] = useState<string>(initialTodayStr)
   const [, startTransition] = useTransition()
 
   // Helper to check if room is currently booked
@@ -36,10 +44,6 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
     if (optimisticOverrides[roomId] !== undefined) {
       return optimisticOverrides[roomId]
     }
-    // Get today in local time YYYY-MM-DD format
-    const today = new Date();
-    // Offset for local timezone (IST is +5:30)
-    const localTodayStr = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
     
     return bookings.some(b => {
       if (b.roomId !== roomId) return false
@@ -49,7 +53,7 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
       const outDate = b.checkOut?.split("T")[0] || "";
       
       // Compare string dates "2026-08-18"
-      return inDate <= localTodayStr && outDate >= localTodayStr;
+      return inDate <= selectedDate && outDate >= selectedDate;
     })
   }
 
@@ -90,7 +94,7 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
     })
 
     return { totalAvail, totalBooked, total: rooms.length }
-  }, [rooms, optimisticOverrides, bookings])
+  }, [rooms, optimisticOverrides, bookings, selectedDate])
 
   const handleToggle = async (roomId: string, setBooked: boolean) => {
     setOptimisticOverrides(prev => ({ ...prev, [roomId]: setBooked }))
@@ -98,7 +102,7 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
 
     startTransition(async () => {
       try {
-        await toggleRoomInventoryStatus(roomId, setBooked)
+        await toggleRoomInventoryStatus(roomId, setBooked, selectedDate)
       } catch (e) {
         console.error("Error toggling inventory status:", e)
         // Revert optimistic override on failure
@@ -148,7 +152,7 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
             className="fixed inset-4 md:inset-auto md:bottom-24 md:right-6 md:w-[750px] md:max-h-[85vh] bg-[#1A0811]/95 dark:bg-[#0A0307]/98 text-white rounded-3xl border border-[#B88F54]/30 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl z-[130] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="p-6 border-b border-[#B88F54]/20 flex items-center justify-between bg-black/40">
+            <div className="p-4 md:p-6 border-b border-[#B88F54]/20 flex flex-col md:flex-row md:items-center justify-between bg-black/40 gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-2xl bg-[#B88F54]/15 border border-[#B88F54]/30 text-[#B88F54]">
                   <Building2 size={22} />
@@ -162,13 +166,24 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                aria-label="Close inventory manager"
-                className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
-              >
-                <X size={20} />
-              </button>
+              
+              <div className="flex items-center gap-3 self-end md:self-auto">
+                {/* Calendar Date Picker Mode */}
+                <input 
+                  type="date" 
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-black/40 border border-[#B88F54]/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#B88F54] transition-colors cursor-pointer"
+                />
+                
+                <button
+                  onClick={() => setIsOpen(false)}
+                  aria-label="Close inventory manager"
+                  className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Content Body */}

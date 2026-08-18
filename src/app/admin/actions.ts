@@ -356,10 +356,10 @@ export async function createManualBooking(formData: FormData) {
   }
 }
 
-export async function toggleRoomInventoryStatus(roomId: string, setBooked: boolean, clientToken?: string) {
+export async function toggleRoomInventoryStatus(roomId: string, setBooked: boolean, targetDateStr?: string, clientToken?: string) {
   try {
     await validateAdminSession(clientToken)
-    const todayStr = new Date().toISOString().split('T')[0]
+    const activeDateStr = targetDateStr || new Date().toISOString().split('T')[0]
 
     if (setBooked) {
       const existingBookings = await db.collection("bookings")
@@ -369,7 +369,7 @@ export async function toggleRoomInventoryStatus(roomId: string, setBooked: boole
 
       const isAlreadyBooked = existingBookings.docs.some((doc: any) => {
         const b = doc.data()
-        return new Date(b.checkIn) <= new Date() && new Date(b.checkOut) >= new Date()
+        return b.checkIn <= activeDateStr && b.checkOut >= activeDateStr
       })
 
       if (!isAlreadyBooked) {
@@ -378,8 +378,8 @@ export async function toggleRoomInventoryStatus(roomId: string, setBooked: boole
           customerName: "Admin Quick Block",
           customerEmail: "admin@staynjoy.com",
           customerPhone: "+918133819414",
-          checkIn: todayStr,
-          checkOut: "2099-12-31",
+          checkIn: activeDateStr,
+          checkOut: "2099-12-31", // Keeps it blocked indefinitely starting from this date
           status: "APPROVED",
           paymentStatus: "MANUAL",
           isQuickBlock: true,
@@ -394,8 +394,12 @@ export async function toggleRoomInventoryStatus(roomId: string, setBooked: boole
         .get()
 
       const batch = db.batch()
+      // Reject any quick blocks or bookings that overlap with this date
       existingBookings.docs.forEach((doc: any) => {
-        batch.update(doc.ref, { status: "REJECTED", updatedAt: new Date() })
+        const b = doc.data()
+        if (b.checkIn <= activeDateStr && b.checkOut >= activeDateStr) {
+           batch.update(doc.ref, { status: "REJECTED", updatedAt: new Date() })
+        }
       })
       await batch.commit()
     }
