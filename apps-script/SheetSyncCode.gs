@@ -50,21 +50,28 @@ function doPost(e) {
     // ==========================================
     // ACTION: ADD GUEST RECORD
     // ==========================================
-    // 1. Pick the correct sheet tab based on location
     var location = (data.location || "").toLowerCase();
     var sheet = null;
+    var sheets = ss.getSheets();
     
-    if (location.indexOf("chaliha") !== -1) {
-      sheet = ss.getSheetByName("Chaliha Nagar");
-    } else if (location.indexOf("lake") !== -1) {
-      sheet = ss.getSheetByName("Lake Bordoloi Nagar");
-    } else if (location.indexOf("it") !== -1 || location.indexOf("income") !== -1) {
-      sheet = ss.getSheetByName("IT office Bordoloi Nagar");
+    // Fuzzy match tab names to prevent trailing space errors
+    for (var i = 0; i < sheets.length; i++) {
+      var sName = sheets[i].getName().toLowerCase();
+      if (location.indexOf("chaliha") !== -1 && sName.indexOf("chaliha") !== -1) {
+        sheet = sheets[i]; break;
+      }
+      if (location.indexOf("lake") !== -1 && sName.indexOf("lake") !== -1) {
+        sheet = sheets[i]; break;
+      }
+      if ((location.indexOf("it") !== -1 || location.indexOf("income") !== -1) && 
+          (sName.indexOf("it") !== -1 || sName.indexOf("income") !== -1)) {
+        sheet = sheets[i]; break;
+      }
     }
     
     // Fallback if not found by exact name
     if (!sheet) {
-      sheet = ss.getSheetByName("Chaliha Nagar") || ss.getActiveSheet();
+      sheet = ss.getActiveSheet(); // Just use the active sheet as a last resort
     }
 
     var date = data.date || Utilities.formatDate(new Date(), "Asia/Kolkata", "dd-MM-yyyy");
@@ -95,11 +102,15 @@ function doPost(e) {
       }
     }
 
-    // 3. Write data into the row (Now adding bookingId to Column L / index 11)
+    // 3. Write data into the row
     var rowValues = [
       [date, guestName, roomNo, address, parentName, phone, cash, online, notes, "", "", bookingId]
     ];
-    sheet.getRange(targetRow, 1, 1, 12).setValues(rowValues);
+    var targetRange = sheet.getRange(targetRow, 1, 1, 12);
+    targetRange.setValues(rowValues);
+    
+    // Force text color to black for columns A-I to prevent ugly auto-formatting inheritance
+    sheet.getRange(targetRow, 1, 1, 9).setFontColor("#000000").setFontLine("none");
 
     // 4. Format single or multiple links in Column J (Pre-Booking) & Column K (Post-Booking)
     formatMultiLinkCell(sheet.getRange(targetRow, 10), preUrlRaw, "Pre-Booking");

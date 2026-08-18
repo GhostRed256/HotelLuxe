@@ -258,6 +258,9 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         setPreBookingUrls([])
         setPostBookingUrls([])
         
+        // Ensure user sees the success message on mobile
+        window.scrollTo({ top: 0, behavior: "smooth" })
+
         // Refresh server components to show new booking immediately
         router.refresh()
       } else {
@@ -269,6 +272,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         type: "error",
         text: `Sync Error: ${err.message || "Failed to update Google Sheet"}`,
       })
+      window.scrollTo({ top: 0, behavior: "smooth" })
     } finally {
       setIsSubmitting(false)
     }
