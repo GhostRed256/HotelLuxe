@@ -58,7 +58,7 @@ export default function AdminDashboardClient({ rooms, bookings }: { rooms: any[]
 
   useEffect(() => {
     const tab = searchParams.get("tab")
-    if (tab === "manual" || tab === "bookings" || tab === "rooms" || tab === "sheetsync") {
+    if (tab === "bookings" || tab === "rooms" || tab === "sheetsync") {
       setActiveTab(tab)
     }
   }, [searchParams])

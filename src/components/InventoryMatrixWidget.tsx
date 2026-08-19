@@ -49,10 +49,26 @@ export default function InventoryMatrixWidget({ rooms = [], bookings = [] }: Inv
       if (b.roomId !== roomId) return false
       if (b.status && b.status !== "APPROVED") return false
       
-      const inDate = b.checkIn?.split("T")[0] || "";
-      const outDate = b.checkOut?.split("T")[0] || "";
+      const inDateStr = b.checkIn || "";
+      const outDateStr = b.checkOut || "";
       
-      // Compare string dates "2026-08-18"
+      const inDate = inDateStr.split("T")[0];
+      const outDate = outDateStr.split("T")[0];
+
+      // If viewing today's calendar, do precise time checks for hourly bookings
+      if (selectedDate === initialTodayStr) {
+        if (inDateStr.includes("T") && outDateStr.includes("T")) {
+           const now = new Date();
+           const checkOutTime = new Date(outDateStr);
+           
+           // If the current time is past the hourly checkout time, it's auto-freed!
+           if (now > checkOutTime) {
+             return false;
+           }
+        }
+      }
+      
+      // Fallback to day-level comparisons
       return inDate <= selectedDate && outDate >= selectedDate;
     })
   }

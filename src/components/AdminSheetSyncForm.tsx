@@ -46,6 +46,8 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
   const [location, setLocation] = useState<string>("Chaliha Nagar")
   const [checkIn, setCheckIn] = useState(todayStr)
   const [checkOut, setCheckOut] = useState(tomorrowStr)
+  const [isHourly, setIsHourly] = useState(false)
+  const [hourlyDuration, setHourlyDuration] = useState<number>(2)
 
   const [roomId, setRoomId] = useState("")
   const [roomNo, setRoomNo] = useState("")
@@ -212,10 +214,22 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
       const preCombined = preBookingUrls.join("\n")
       const postCombined = postBookingUrls.join("\n")
 
+      let finalCheckIn = checkIn;
+      let finalCheckOut = checkOut;
+      let finalNotes = notes.trim();
+
+      if (isHourly) {
+        const now = new Date();
+        finalCheckIn = now.toISOString();
+        const outTime = new Date(now.getTime() + hourlyDuration * 60 * 60 * 1000);
+        finalCheckOut = outTime.toISOString();
+        finalNotes = finalNotes ? `${finalNotes} (Hourly Booking: ${hourlyDuration} hrs)` : `Hourly Booking: ${hourlyDuration} hrs`;
+      }
+
       const payload = {
         date: formattedDate,
-        checkIn,
-        checkOut,
+        checkIn: finalCheckIn,
+        checkOut: finalCheckOut,
         roomId: roomId || undefined,
         location: sheetTabName,
         guestName: guestName.trim(),
@@ -225,7 +239,7 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
         phone: phone.trim(),
         cash: cash.trim(),
         online: online.trim(),
-        notes: notes.trim(),
+        notes: finalNotes,
         preBookingScreenshot: preCombined,
         postBookingScreenshot: postCombined,
         webhookUrl: webhookUrl.trim() || undefined,
@@ -370,12 +384,30 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
           </div>
         </div>
 
-        {/* Row 1: Check-in, Check-out, Room Selector */}
+        {/* Booking Type Toggle */}
+        <div className="flex items-center gap-4 mb-4 p-1.5 rounded-xl bg-white/5 border border-white/10 w-fit">
+          <button
+            type="button"
+            onClick={() => setIsHourly(false)}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${!isHourly ? "bg-[var(--accent-primary)] text-white" : "text-white/50 hover:text-white"}`}
+          >
+            Nightly Booking
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsHourly(true)}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${isHourly ? "bg-cyan-500 text-white" : "text-white/50 hover:text-white"}`}
+          >
+            Hourly Booking
+          </button>
+        </div>
+
+        {/* Row 1: Check-in, Check-out/Duration, Room Selector */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
               <Calendar size={12} className="text-[var(--accent-primary)]" />
-              Check-In Date (Sheet Date)
+              Check-In Date
             </label>
             <input
               type="date"
@@ -386,19 +418,37 @@ export default function AdminSheetSyncForm({ rooms = [] }: AdminSheetSyncFormPro
             />
           </div>
 
-          <div>
-            <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
-              <Calendar size={12} className="text-cyan-400" />
-              Check-Out Date (Auto-frees room)
-            </label>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              required
-              className="form-input w-full"
-            />
-          </div>
+          {!isHourly ? (
+            <div>
+              <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
+                <Calendar size={12} className="text-cyan-400" />
+                Check-Out Date
+              </label>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                required
+                className="form-input w-full"
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
+                <Calendar size={12} className="text-cyan-400" />
+                Duration (Hours)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="24"
+                value={hourlyDuration}
+                onChange={(e) => setHourlyDuration(parseInt(e.target.value) || 1)}
+                required
+                className="form-input w-full"
+              />
+            </div>
+          )}
 
           <div>
             <label className="text-[10px] font-bold tracking-widest uppercase opacity-60 mb-2 flex items-center gap-1.5 text-white">
