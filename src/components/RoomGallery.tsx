@@ -175,9 +175,18 @@ export default function RoomGallery({ rooms = [], bookings = [] }: { rooms?: any
     try {
       await navigator.clipboard.writeText(UPI_ID)
       setCopiedUpi(true)
-      setTimeout(() => setCopiedUpi(false), 2000)
     } catch { /* fallback */ }
   }
+
+  useEffect(() => {
+    let timerId: NodeJS.Timeout
+    if (copiedUpi) {
+      timerId = setTimeout(() => setCopiedUpi(false), 2000)
+    }
+    return () => {
+      if (timerId) clearTimeout(timerId)
+    }
+  }, [copiedUpi])
 
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=StayNJoy&am=${DEPOSIT_AMOUNT}&cu=INR&tn=BookingDeposit`
   const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiDeepLink)}`

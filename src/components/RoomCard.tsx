@@ -44,8 +44,26 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
         setCurrentImageIndex((prev) => (prev + 1) % images.length)
       }, 3000)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
   }, [isInView, images.length])
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    if (localLoading) {
+      timeoutId = setTimeout(() => {
+        setLocalLoading(false)
+      }, 800)
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [localLoading])
 
   return (
     <motion.div
@@ -114,7 +132,6 @@ export default function RoomCard({ room, onBook, isBooked, hideBookButton = fals
                 onClick={() => {
                   setLocalLoading(true)
                   onBook()
-                  setTimeout(() => setLocalLoading(false), 800)
                 }}
                 disabled={localLoading}
               >

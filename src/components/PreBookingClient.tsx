@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import dynamic from "next/dynamic"
 import ProgressiveImage from "./ProgressiveImage"
@@ -33,14 +33,22 @@ export default function PreBookingClient({
   const [selectedCat, setSelectedCat] = useState<Category | null>(null)
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
+  useEffect(() => {
+    let timerId: NodeJS.Timeout
+    if (loadingId !== null) {
+      timerId = setTimeout(() => {
+        setIsOpen(true)
+        setLoadingId(null)
+      }, 100)
+    }
+    return () => {
+      if (timerId) clearTimeout(timerId)
+    }
+  }, [loadingId])
+
   const handleBookNow = (cat: Category) => {
     setLoadingId(`${cat.type}-${cat.price}`)
     setSelectedCat(cat)
-    // Small delay to ensure the UI updates before the heavy modal or navigation logic hits the main thread
-    setTimeout(() => {
-      setIsOpen(true)
-      setLoadingId(null)
-    }, 100)
   }
 
   return (

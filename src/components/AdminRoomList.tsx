@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useTransition } from "react"
+import { useState, useRef, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { uploadRoomImages, removeRoomImage, updateBookingStatus, deleteRoom } from "@/app/admin/actions"
 import { ImagePlus, Eye, XCircle, CheckCircle, ChevronDown, ChevronUp, Trash2, Upload, Loader2 } from "lucide-react"
@@ -65,6 +65,16 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string, name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  useEffect(() => {
+    let timerId: NodeJS.Timeout
+    if (uploadStatus) {
+      timerId = setTimeout(() => setUploadStatus(""), 3000)
+    }
+    return () => {
+      if (timerId) clearTimeout(timerId)
+    }
+  }, [uploadStatus])
+
   const handleFilesSelected = (roomId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
@@ -113,8 +123,6 @@ export default function AdminRoomList({ rooms, bookings = [] }: { rooms: any[], 
       setPreviewFiles(prev => { const n = { ...prev }; delete n[roomId]; return n })
       if (fileInputRefs.current[roomId]) fileInputRefs.current[roomId]!.value = ""
       setUploadingId(null)
-      
-      setTimeout(() => setUploadStatus(""), 3000)
     })
   }
 
