@@ -221,7 +221,7 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
       updatedAt: new Date()
     })
 
-    // We await this to ensure reliability, but for bulk we could potentially fire and forget
+    // Send notifications (non-fatal — booking is already updated)
     try {
       await notifyBookingStatusChange(
         {
@@ -242,10 +242,15 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
       console.error("Non-fatal failure to send notification for booking", bookingId, e)
     }
 
+    // Revalidate pages (non-fatal — booking is already updated)
     if (!skipRevalidate) {
-      revalidatePath("/admin")
-      revalidatePath("/")
-      revalidatePath("/rooms")
+      try {
+        revalidatePath("/admin")
+        revalidatePath("/")
+        revalidatePath("/rooms")
+      } catch (e) {
+        console.error("Non-fatal revalidation error:", e)
+      }
     }
 
     return { success: true }
@@ -256,71 +261,90 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
 }
 
 export async function deleteMultipleBookings(ids: string[], clientToken?: string) {
-  await validateAdminSession(clientToken)
-  
-  // Try to delete from Google Sheets first (fire and forget for each)
-  const targetUrl = process.env.SHEETS_WEBAPP_URL;
-  if (targetUrl) {
-    Promise.all(ids.map(id => 
-      fetch(targetUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "deleteBooking", bookingId: id }),
-        redirect: "manual"
-      }).catch(e => console.error("Failed to sync deletion to sheet:", e))
-    ));
-  }
+  try {
+    await validateAdminSession(clientToken)
+    
+    // Try to delete from Google Sheets first (fire and forget for each)
+    const targetUrl = process.env.SHEETS_WEBAPP_URL;
+    if (targetUrl) {
+      Promise.all(ids.map(id => 
+        fetch(targetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "deleteBooking", bookingId: id }),
+          redirect: "manual"
+        }).catch(e => console.error("Failed to sync deletion to sheet:", e))
+      ));
+    }
 
-  const batch = db.batch()
-  ids.forEach(id => {
-    const ref = db.collection("bookings").doc(id)
-    batch.delete(ref)
-  })
-  await batch.commit()
-  revalidatePath("/admin")
+    const batch = db.batch()
+    ids.forEach(id => {
+      const ref = db.collection("bookings").doc(id)
+      batch.delete(ref)
+    })
+    await batch.commit()
+    
+    try { revalidatePath("/admin") } catch (e) { console.error("Non-fatal revalidation error:", e) }
+    return { success: true }
+  } catch (error: any) {
+    console.error("CRITICAL [deleteMultipleBookings]:", error.message);
+    return { success: false, error: error.message || "Failed to delete bookings" }
+  }
 }
 
 export async function approveMultipleBookings(ids: string[], clientToken?: string) {
-  await validateAdminSession(clientToken)
+  try {
+    await validateAdminSession(clientToken)
 
-  // Update status in batch first for speed
-  const batch = db.batch()
-  ids.forEach(id => {
-    const ref = db.collection("bookings").doc(id)
-    batch.update(ref, {
-      status: "APPROVED",
-      updatedAt: new Date()
+    // Update status in batch first for speed
+    const batch = db.batch()
+    ids.forEach(id => {
+      const ref = db.collection("bookings").doc(id)
+      batch.update(ref, {
+        status: "APPROVED",
+        updatedAt: new Date()
+      })
     })
-  })
-  await batch.commit()
+    await batch.commit()
 
-  // Then send notifications in parallel
-  // This is safer than awaiting one-by-one in a loop
-  await Promise.allSettled(ids.map(id => updateBookingStatus(id, "APPROVED", true, clientToken)))
+    // Then send notifications in parallel
+    await Promise.allSettled(ids.map(id => updateBookingStatus(id, "APPROVED", true, clientToken)))
 
-  revalidatePath("/admin")
+    try { revalidatePath("/admin") } catch (e) { console.error("Non-fatal revalidation error:", e) }
+    return { success: true }
+  } catch (error: any) {
+    console.error("CRITICAL [approveMultipleBookings]:", error.message);
+    return { success: false, error: error.message || "Failed to approve bookings" }
+  }
 }
 
 export async function deleteBooking(bookingId: string, clientToken?: string) {
-  await validateAdminSession(clientToken)
-  
-  // Delete from Google Sheet
-  const targetUrl = process.env.SHEETS_WEBAPP_URL;
-  if (targetUrl) {
-    try {
-      await fetch(targetUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "deleteBooking", bookingId }),
-        redirect: "manual"
-      });
-    } catch (e) {
-      console.error("Failed to sync deletion to sheet:", e);
+  try {
+    await validateAdminSession(clientToken)
+    
+    // Delete from Google Sheet
+    const targetUrl = process.env.SHEETS_WEBAPP_URL;
+    if (targetUrl) {
+      try {
+        await fetch(targetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "deleteBooking", bookingId }),
+          redirect: "manual"
+        });
+      } catch (e) {
+        console.error("Failed to sync deletion to sheet:", e);
+      }
     }
-  }
 
-  await db.collection("bookings").doc(bookingId).delete()
-  revalidatePath("/admin")
+    await db.collection("bookings").doc(bookingId).delete()
+    
+    try { revalidatePath("/admin") } catch (e) { console.error("Non-fatal revalidation error:", e) }
+    return { success: true }
+  } catch (error: any) {
+    console.error("CRITICAL [deleteBooking]:", error.message);
+    return { success: false, error: error.message || "Failed to delete booking" }
+  }
 }
 
 
@@ -404,10 +428,14 @@ export async function toggleRoomInventoryStatus(roomId: string, setBooked: boole
       await batch.commit()
     }
 
-    revalidatePath("/admin")
-    revalidatePath("/")
-    revalidatePath("/rooms")
-    revalidatePath("/homestays")
+    try {
+      revalidatePath("/admin")
+      revalidatePath("/")
+      revalidatePath("/rooms")
+      revalidatePath("/homestays")
+    } catch (e) {
+      console.error("Non-fatal revalidation error:", e)
+    }
     return { success: true }
   } catch (error: any) {
     console.error("Failed to toggle room status:", error)

@@ -103,7 +103,9 @@ function AdminBookingsTableInner({ bookings, setGlobalLoading }: { bookings: Boo
         router.refresh()
       } catch (e: any) {
         console.error("UI Action Error:", e)
-        alert(`SECURITY_ERROR: The action could not be completed. ${e.message || ""}`)
+        // The action may have actually succeeded but revalidation failed — refresh anyway
+        alert(`There was a temporary error, but the action may have gone through. The page will refresh now.`)
+        router.refresh()
       } finally {
         setGlobalLoading?.(false)
       }
