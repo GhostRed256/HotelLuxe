@@ -213,12 +213,12 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
     const booking = bookingDoc.data()!
     const roomId = booking.roomId;
 
-    let room = { name: "Unknown Suite", price: 0 };
+    let room: any = { name: "Unknown Suite", price: 0 };
     if (roomId) {
       try {
         const roomDoc = await db.collection("rooms").doc(roomId).get()
         if (roomDoc.exists) {
-          room = roomDoc.data() as { name: string, price: number };
+          room = roomDoc.data();
         }
       } catch (e) {
         console.error("Non-fatal error fetching room for booking status update:", e);
@@ -231,10 +231,6 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
     })
 
     // Send notifications (fire-and-forget — booking is already updated in DB)
-    // We intentionally do NOT await this. On Vercel, the SMTP + Telegram + SMS
-    // chain can exceed the serverless function timeout, which would cause the
-    // entire action to crash with "temporary error" even though the DB write
-    // already succeeded. By not awaiting, we return { success: true } immediately.
     notifyBookingStatusChange(
       {
         id: bookingId,
@@ -250,6 +246,38 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
       },
       status
     ).catch(e => console.error("Non-fatal notification failure for booking", bookingId, e))
+
+    // Automatically sync APPROVED website bookings to Google Sheet (fire-and-forget)
+    if (status === "APPROVED") {
+      const targetUrl = process.env.SHEETS_WEBAPP_URL;
+      if (targetUrl) {
+        const payload = {
+          action: "addGuestRecord",
+          data: {
+            date: new Date().toLocaleDateString("en-GB"),
+            location: room.location || "Chaliha Nagar",
+            guestName: booking.customerName || "Guest",
+            roomNo: room.roomNumber || room.name || "",
+            address: "",
+            parentName: "",
+            phone: booking.customerPhone || "",
+            cash: "",
+            online: room.price ? room.price.toString() : "",
+            notes: `Website Booking | Check-in: ${booking.checkIn} | Check-out: ${booking.checkOut}`,
+            preBookingScreenshot: booking.paymentScreenshot || "",
+            postBookingScreenshot: "",
+            bookingId: bookingId,
+          },
+        };
+        
+        fetch(targetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+          redirect: "manual",
+        }).catch(e => console.error("Non-fatal sheet sync failure for booking", bookingId, e));
+      }
+    }
 
     // Revalidate pages (non-fatal — booking is already updated)
     if (!skipRevalidate) {
