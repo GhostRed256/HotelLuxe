@@ -221,26 +221,26 @@ export async function updateBookingStatus(bookingId: string, status: "APPROVED" 
       updatedAt: new Date()
     })
 
-    // Send notifications (non-fatal — booking is already updated)
-    try {
-      await notifyBookingStatusChange(
-        {
-          id: bookingId,
-          customerName: booking.customerName || "Guest",
-          customerEmail: booking.customerEmail,
-          customerPhone: booking.customerPhone,
-          checkIn: booking.checkIn,
-          checkOut: booking.checkOut,
-        },
-        {
-          name: room.name || "Unknown Suite",
-          price: room.price || 0,
-        },
-        status
-      )
-    } catch (e) {
-      console.error("Non-fatal failure to send notification for booking", bookingId, e)
-    }
+    // Send notifications (fire-and-forget — booking is already updated in DB)
+    // We intentionally do NOT await this. On Vercel, the SMTP + Telegram + SMS
+    // chain can exceed the serverless function timeout, which would cause the
+    // entire action to crash with "temporary error" even though the DB write
+    // already succeeded. By not awaiting, we return { success: true } immediately.
+    notifyBookingStatusChange(
+      {
+        id: bookingId,
+        customerName: booking.customerName || "Guest",
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+      },
+      {
+        name: room.name || "Unknown Suite",
+        price: room.price || 0,
+      },
+      status
+    ).catch(e => console.error("Non-fatal notification failure for booking", bookingId, e))
 
     // Revalidate pages (non-fatal — booking is already updated)
     if (!skipRevalidate) {
