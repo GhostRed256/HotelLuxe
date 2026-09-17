@@ -48,20 +48,29 @@ export async function logoutAdmin() {
   redirect("/staff-login")
 }
 
-import sharp from "sharp"
-
 // Convert file to base64 data URI for Firestore storage, compressing it first
 async function fileToDataUri(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
   
-  // Compress the image to a highly efficient WebP format, max 1200x1200 px
-  const compressedBuffer = await sharp(buffer)
-    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 75 })
-    .toBuffer()
+  try {
+    // Dynamic import: sharp is a native binary module that can fail to load
+    // on some Vercel runtimes. By importing it dynamically here, a sharp failure
+    // only affects image uploads — not approve/reject/delete actions.
+    const sharp = (await import('sharp')).default
+    const compressedBuffer = await sharp(buffer)
+      .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 75 })
+      .toBuffer()
 
-  const base64 = compressedBuffer.toString('base64')
-  return `data:image/webp;base64,${base64}`
+    const base64 = compressedBuffer.toString('base64')
+    return `data:image/webp;base64,${base64}`
+  } catch (e) {
+    // Fallback: if sharp is unavailable, store the image as-is
+    console.error("Sharp unavailable, storing original image:", e)
+    const base64 = buffer.toString('base64')
+    const mimeType = file.type || 'image/jpeg'
+    return `data:${mimeType};base64,${base64}`
+  }
 }
 
 export async function addRoom(formData: FormData, clientToken?: string) {
