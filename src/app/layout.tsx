@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
+import GlobalLoader from "@/components/GlobalLoader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://stay-n-joy.vercel.app'), // Using a safe fallback or env
@@ -69,6 +70,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <GlobalLoader />
           <div className="royal-frame" />
           <Navbar />
           <main className="pt-[80px]" style={{ minHeight: "calc(100vh - 160px)" }}>
