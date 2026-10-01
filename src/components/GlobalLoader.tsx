@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -23,10 +23,10 @@ export default function GlobalLoader() {
   return (
     <>
       <noscript>
-        <style dangerouslySetInnerHTML={{ __html: \
+        <style dangerouslySetInnerHTML={{ __html: `
           #global-loader-container { display: none !important; }
           * { opacity: 1 !important; transform: none !important; filter: none !important; }
-        \ }} />
+        ` }} />
       </noscript>
       <div id="global-loader-container" className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#E5B8AD] dark:bg-[#0A0307] transition-opacity duration-500">
         <div className="animate-pulse flex flex-col items-center">
